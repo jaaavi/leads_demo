@@ -126,7 +126,7 @@
     gap: 9px;
     font-size: 18px;
     font-weight: 700;
-    min-width: 0;
+    flex: 0 0 auto;
     margin-right: 10px;
     color: #172033;
   }
@@ -144,12 +144,14 @@
   }
 
   .brand-text {
-    min-width: 0;
+    white-space: nowrap;
   }
 
   .main-nav {
     align-items: center;
+    flex-wrap: wrap;
     gap: 2px;
+    min-width: 0;
   }
 
   .main-nav .nav-link {
@@ -188,6 +190,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    flex: 0 0 auto;
     gap: 10px;
     min-width: 0;
   }
@@ -204,6 +207,7 @@
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
+    flex: 0 0 auto;
   }
 
   .demo-badge i {

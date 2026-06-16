@@ -1,0 +1,36 @@
+[Unit]
+Description=WLD Dashboard Service
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/home/your-user/wld-dashboard/dashboard/server
+ExecStart=/usr/bin/node app.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables
+Environment="NODE_ENV=production"
+Environment="PORT=7090"
+Environment="MYSQL_HOST=localhost"
+Environment="MYSQL_PORT=3306"
+Environment="MYSQL_USER=tu_usuario_mysql"
+Environment="MYSQL_PASSWORD=tu_password_mysql"
+Environment="MYSQL_DATABASE=wld_leads"
+Environment="MYSQL_SOCKET=/var/run/mysqld/mysqld.sock"
+Environment="SESSION_SECRET=your-super-secure-random-key-here-min-32-chars"
+
+# Resource limits
+LimitNOFILE=65535
+LimitNPROC=65535
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

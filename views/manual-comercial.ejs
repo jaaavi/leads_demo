@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Comercial - Guiones de Llamada</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .manual-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .manual-sidebar {
+      width: 280px;
+      background: #f6f8fa;
+      border-right: 1px solid #e1e4e8;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 24px 16px;
+    }
+
+    .manual-content {
+      flex: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    .manual-sidebar h5 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #586069;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      margin-top: 24px;
+      padding: 0 8px;
+    }
+
+    .manual-sidebar h5:first-child {
+      margin-top: 0;
+    }
+
+    .manual-sidebar a {
+      display: block;
+      padding: 8px 12px;
+      margin-bottom: 4px;
+      color: #586069;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .manual-sidebar a:hover {
+      background: #e1e4e8;
+      color: #24292e;
+      border-left-color: #0366d6;
+    }
+
+    .manual-sidebar a.active {
+      background: #e1e4e8;
+      color: #0366d6;
+      font-weight: 600;
+      border-left-color: #0366d6;
+    }
+
+    .manual-header {
+      margin-bottom: 40px;
+      border-bottom: 2px solid #e1e4e8;
+      padding-bottom: 32px;
+    }
+
+    .manual-header h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: #24292e;
+      margin: 0 0 16px;
+      letter-spacing: -1px;
+    }
+
+    .manual-header p {
+      font-size: 18px;
+      color: #586069;
+      margin: 0;
+    }
+
+    .manual-content h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #24292e;
+      margin: 48px 0 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e1e4e8;
+    }
+
+    .manual-content h2:first-of-type {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .manual-content h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #24292e;
+      margin: 32px 0 16px;
+    }
+
+    .manual-content h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #24292e;
+      margin: 24px 0 12px;
+    }
+
+    .manual-content p {
+      font-size: 15px;
+      color: #24292e;
+      line-height: 1.6;
+      margin: 0 0 16px;
+    }
+
+    .manual-content ul, .manual-content ol {
+      font-size: 15px;
+      color: #24292e;
+      line-height: 1.8;
+      margin: 16px 0 16px 24px;
+      padding: 0;
+    }
+
+    .manual-content li {
+      margin-bottom: 8px;
+    }
+
+    .manual-content a {
+      color: #0366d6;
+      text-decoration: none;
+    }
+
+    .manual-content a:hover {
+      text-decoration: underline;
+    }
+
+    .script-box {
+      background: #f6f8fa;
+      border-left: 4px solid #0366d6;
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+      font-family: "Monaco", "Menlo", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .script-line {
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 3px;
+    }
+
+    .script-line.you {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-left: 3px solid #1976d2;
+    }
+
+    .script-line.lead {
+      background: #f3e5f5;
+      color: #6a1b9a;
+      border-left: 3px solid #7b1fa2;
+    }
+
+    .script-line.wait {
+      background: #fff3e0;
+      color: #e65100;
+      border-left: 3px solid #ff6f00;
+      font-style: italic;
+    }
+
+    .script-line.note {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 3px solid #388e3c;
+      font-size: 12px;
+    }
+
+    .feature-box {
+      background: #f6f8fa;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .feature-box h4 {
+      margin-top: 0;
+      color: #0366d6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-box h4 i {
+      font-size: 20px;
+    }
+
+    .info-banner {
+      background: #e7f2ff;
+      border: 1px solid #c8d9e8;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 24px 0;
+      color: #0366d6;
+    }
+
+    .info-banner i {
+      margin-right: 8px;
+    }
+
+    .highlight {
+      background: #fff3cd;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .success-badge {
+      display: inline-block;
+      background: #28a745;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      background: #0366d6;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+    }
+
+    .back-to-top:hover {
+      background: #0256c7;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .back-to-top.visible {
+      display: flex;
+    }
+
+    @media (max-width: 1200px) {
+      .manual-sidebar {
+        width: 250px;
+      }
+
+      .manual-content {
+        padding: 40px 24px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .manual-container {
+        flex-direction: column;
+      }
+
+      .manual-sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e1e4e8;
+        padding: 16px;
+      }
+
+      .manual-content {
+        padding: 32px 16px;
+      }
+
+      .manual-header h1 {
+        font-size: 32px;
+      }
+
+      .manual-content h2 {
+        font-size: 24px;
+      }
+
+      .manual-content h3 {
+        font-size: 18px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f6f8fa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5da;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #959da5;
+    }
+  </style>
+</head>
+<body>
+<%- include('navbar') %>
+
+<div class="manual-container">
+  <aside class="manual-sidebar">
+    <h5>Introducción</h5>
+    <a href="#inicio" class="nav-link">Inicio rápido</a>
+    <a href="#que-es" class="nav-link">Tu rol como comercial</a>
+
+    <h5>Guiones de Llamada</h5>
+    <a href="#guion-fase1" class="nav-link">Fase 1: Apertura</a>
+    <a href="#guion-fase2" class="nav-link">Fase 2: Recopilación</a>
+    <a href="#guion-cierre" class="nav-link">Cierre y propuesta</a>
+
+    <h5>Flujo de Trabajo</h5>
+    <a href="#flujo" class="nav-link">Tu flujo diario</a>
+    <a href="#checklist" class="nav-link">Checklist de llamada</a>
+
+    <h5>Recursos</h5>
+    <a href="#preguntas" class="nav-link">Preguntas frecuentes</a>
+  </aside>
+
+  <main class="manual-content">
+    <header class="manual-header" id="inicio">
+      <h1>Guiones de Llamadas</h1>
+      <p>Tu guía para contactar clientes y cerrar la previsualización gratuita.</p>
+    </header>
+
+    <section id="que-es">
+      <h2>Tu rol como comercial</h2>
+      <p>
+        Tu trabajo es <span class="highlight">contactar clientes potenciales y ofrecerles una previsualización gratuita</span> de su página web.
+      </p>
+
+      <div class="feature-box">
+        <h4><i class="fa-solid fa-phone me-2" style="color: #0366d6;"></i> Llamadas de prospección</h4>
+        <p>
+          Tu herramienta principal es el teléfono. Contactarás negocios locales y les ofrecerás algo valioso: una previsualización profesional de cómo quedaría su web, sin costo y sin compromiso.
+        </p>
+      </div>
+
+      <div class="feature-box">
+        <h4><i class="fa-solid fa-chart-line me-2" style="color: #0366d6;"></i> Generador de prospectos</h4>
+        <p>
+          Tienes acceso a un generador de contactos que te da cientos de leads (negocios sin web) en la zona que elijas. Tu trabajo es contactarlos y avanzarlos en el funnel.
+        </p>
+      </div>
+
+      <div class="info-banner">
+        <i class="fa-solid fa-lightbulb"></i>
+        <strong>Clave:</strong> No vendes directamente. Vendes la idea de que vean cómo quedaría su web primero. Es mucho más fácil cerrar cuando ya lo ven.
+      </div>
+    </section>
+
+    <section id="guion-fase1">
+      <h2>Fase 1: El Mensaje de Apertura</h2>
+      <p>
+        Este es tu primer contacto. La meta es simple: <strong>que digan "sí" a recibir una previsualización gratuita</strong>.
+      </p>
+
+      <h3>Opción 1: Approachnatural (Recomendado para primeras llamadas)</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "¡Hola! Soy Javier. ¿Es buen momento?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta inicial. Si dice "no", pide horario mejor. Si dice "sí", continúa.
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Estoy montando una pequeña agencia de diseño de páginas web y estamos ofreciendo a los negocios de la zona la posibilidad de crear una previsualización gratuita de cómo quedaría su web antes de decidir nada. ¿Os gustaría que os preparemos una propuesta visual sin compromiso?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta del negocio.
+        </div>
+        <div class="script-line note">
+          <strong>✓ SI DICE "SÍ":</strong> Avanza a Fase 2 (recopilación de información). Si no puedes hacer la llamada completa, dile cuándo vuelves a llamar.
+        </div>
+        <div class="script-line note">
+          <strong>✗ SI DICE "NO":</strong> "Perfecto, si en algún momento queréis explorar la opción, me llamáis. Un abrazo." (Guarda el contacto por si luego se animan)
+        </div>
+      </div>
+
+      <h3>Opción 2: Más directo (Para contactos recurrentes)</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "¡Hola! Soy Javier, diseñador web de aquí del barrio. Hemos visto que vuestro negocio no tiene web y nos gustaría ofreceros una previsualización gratuita para que veáis cómo podría quedar. ¿Queréis que os la preparemos sin compromiso?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta.
+        </div>
+      </div>
+
+      <h3>Opción 3: Más profesional (Para negocios grandes)</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "¡Hola! Soy Javier. En nuestra agencia estamos ofreciendo a los negocios de la zona la oportunidad de ver cómo quedaría su web profesional, sin compromiso ni costo. ¿Os parece bien que os preparemos una propuesta visual?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta.
+        </div>
+      </div>
+
+      <h3>Opción 4: Más personal (Si conoces el nombre)</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "¡Hola! Soy Javier, soy diseñador web y vivo por aquí cerca. He visto que ahora mismo no tenéis página web, y me encantaría enseñárosla de forma personalizada, creando una previsualización gratuita. Si preferís, puedo pasarme un minuto y enseñárosla en persona, así lo veis sin compromiso. ¿Os parece bien que os la preparemos?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta.
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <i class="fa-solid fa-key"></i>
+        <strong>Secreto:</strong> Repite el nombre de la empresa o persona. Ejemplo: "¿Vosotros en [nombre empresa], queréis...?" Las personas responden mejor cuando escuchan su nombre.
+      </div>
+    </section>
+
+    <section id="guion-fase2">
+      <h2>Fase 2: Recopilación de Información</h2>
+      <p>
+        Dijeron "sí". Ahora necesitas <strong>información sobre su negocio</strong> para que el diseño sea realista y atractivo.
+      </p>
+
+      <h3>Estructura de la llamada</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "¡Genial! Me alegra que os interese. Lo único que necesitamos para poder preparar la previsualización y que refleje bien vuestro estilo y contenido es lo siguiente:"
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Primero, una frase que defina lo que ofrecéis o lo que os diferencia. ¿Cuál sería?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta y anota.
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Perfecto. Ahora, ¿cuáles serían vuestros servicios o productos principales?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta y anota.
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Vale, esto es muy útil. ¿Tenéis redes sociales o alguna foto que os represente? Si no, no hay problema, podemos usar imágenes de ejemplo."
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta y anota.
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Última cosa: ¿qué estilo os gustaría para la web? ¿Algo moderna y limpia, acogedora, profesional, elegante? ¿O tenéis alguna web o diseño de referencia que os guste?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Respuesta y anota.
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Excelente. Con esto, os preparamos la previsualización personalizada y en unos 3 días os la podemos enseñar sin compromiso. ¿Mejor por WhatsApp, por email, o prefieres que me pase en persona?"
+        </div>
+        <div class="script-line note">
+          <strong>✓ CIERRE:</strong> Acuerda la forma de entrega. Guarda el contacto. Tú pasarás a preparar la previsualización.
+        </div>
+      </div>
+
+      <div class="feature-box">
+        <h4><i class="fa-solid fa-notes-medical me-2" style="color: #0366d6;"></i> Consejos prácticos</h4>
+        <ul style="margin: 0;">
+          <li><strong>Escucha más que hablas.</strong> Deja que el cliente hable y anota todo lo que dice.</li>
+          <li><strong>Si no entienden, repite.</strong> "Es decir, algo como [ejemplo]. ¿Entendido?"</li>
+          <li><strong>Si no tienen respuesta,</strong> no importa. Dile "sin problema, usaremos algo estándar y luego lo cambias si quieres."</li>
+          <li><strong>Sé genuino.</strong> No parezcas vendedor. Eres alguien que quiere hacer una buena web para ellos.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="guion-cierre">
+      <h2>Fase 4: Cierre y Propuesta</h2>
+      <p>
+        Ya tienes la previsualización lista. Ahora necesitas <strong>venderla y cerrar el trato</strong>.
+      </p>
+
+      <h3>Momento de la entrega</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Buenas, ya tenemos lista la previsualización de vuestra web😄"
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Si queréis, puedo enviárosla por aquí para que la veáis tranquilos, o si preferís, puedo pasarme un momento y enseñárosla en persona, así os explico cómo funcionaría (sin ningún compromiso). ¿Qué os viene mejor?"
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Opción del cliente (por WhatsApp o en persona).
+        </div>
+      </div>
+
+      <h3>Si dicen que la vean por WhatsApp</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>💬 ENVÍA:</strong> El enlace de la previsualización + un mensaje: "Aquí está la previsualización de vuestra web. Decid qué os parece. Cualquier cambio que queráis, me lo decís."
+        </div>
+        <div class="script-line wait">
+          <strong>⏳ ESPERA:</strong> Feedback del cliente (24-48 horas típicamente).
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES (en su respuesta):</strong> "Qué os parece, ¿os gusta? ¿Qué cambiarías?"
+        </div>
+      </div>
+
+      <h3>Si dicen que quieren que te pases</h3>
+      <div class="script-box">
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Perfecto, me paso mañana a tal hora. ¿Os viene bien? Llevo el portátil y os lo enseño en persona."
+        </div>
+        <div class="script-line note">
+          <strong>✓ EN PERSONA:</strong> Lleva portátil. Enseña la previsualización. Pregunta: "¿Qué os parece? ¿Qué os gusta? ¿Qué cambiarías?" Escucha feedback.
+        </div>
+        <div class="script-line you">
+          <strong>📞 TÚ DICES:</strong> "Genial, esto se puede hacer en una o dos semanas. El precio sería entre X y Y euros, dependiendo de lo que añadas. ¿Te interesa avanzar?"
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <i class="fa-solid fa-target"></i>
+        <strong>Objetivo final:</strong> Conseguir que digan "sí" a hacer la web completa, O al menos que quede para una segunda llamada.
+      </div>
+    </section>
+
+    <section id="flujo">
+      <h2>Tu flujo de trabajo diario</h2>
+      <p>
+        Este es el flujo que deberías seguir cada día de prospección:
+      </p>
+
+      <div style="margin: 24px 0;">
+        <div class="script-box" style="background: #e3f2fd; border-left: 4px solid #1976d2;">
+          <strong style="color: #1565c0;">Paso 1: Prepara tu lista</strong><br>
+          Abre el dashboard, ve a "Leads" y revisa los contactos que tienes hoy. Si necesitas más, usa el generador de lugares.
+        </div>
+
+        <div class="script-box" style="background: #e3f2fd; border-left: 4px solid #1976d2;">
+          <strong style="color: #1565c0;">Paso 2: Llama (Fase 1)</strong><br>
+          Contacta el negocio. Usa uno de los guiones de apertura. Anota si dijeron "sí" o "no".
+        </div>
+
+        <div class="script-box" style="background: #fff3e0; border-left: 4px solid #ff6f00;">
+          <strong style="color: #e65100;">Paso 3: Recopila info (Fase 2)</strong><br>
+          Si dijeron "sí", haz las preguntas sobre su negocio. Guarda toda la información en el dashboard.
+        </div>
+
+        <div class="script-box" style="background: #f3e5f5; border-left: 4px solid #7b1fa2;">
+          <strong style="color: #6a1b9a;">Paso 4: Pasa al diseñador (Fase 3)</strong><br>
+          El sistema genera automáticamente la información. El diseñador/administrador prepara la previsualización en 2-3 días.
+        </div>
+
+        <div class="script-box" style="background: #e8f5e9; border-left: 4px solid #388e3c;">
+          <strong style="color: #2e7d32;">Paso 5: Cierra (Fase 4)</strong><br>
+          Cuando la previsualización esté lista, contacta el lead de nuevo. Ofrece enviarla o visitarlos. Intenta cerrar el presupuesto.
+        </div>
+      </div>
+
+      <h3>KPIs para medir tu éxito</h3>
+      <ul>
+        <li><strong>Llamadas realizadas:</strong> Mínimo 20-30 por día</li>
+        <li><strong>Tasa de aceptación:</strong> Objetivo 10-15% aceptan fase 2</li>
+        <li><strong>Conversión:</strong> De los que ven previsualización, 30-50% contratan</li>
+        <li><strong>Ingresos:</strong> Un lead convertido = 250-1800€</li>
+      </ul>
+    </section>
+
+    <section id="checklist">
+      <h2>Checklist de cada llamada</h2>
+      <p>
+        Imprime o mantén esta lista a mano durante tus llamadas:
+      </p>
+
+      <div style="background: #f6f8fa; padding: 20px; border-radius: 6px; border: 1px solid #e1e4e8;">
+        <h4 style="margin-top: 0;">✓ Antes de llamar</h4>
+        <ul style="margin: 0;">
+          <li>☐ Revisa el nombre de la empresa</li>
+          <li>☐ Revisa el número de teléfono (con prefijo)</li>
+          <li>☐ Elige qué guión de apertura usarás</li>
+          <li>☐ Ten lápiz y papel (o documento abierto para anotar)</li>
+        </ul>
+
+        <h4 style="margin-top: 24px;">✓ Durante la llamada (Fase 1)</h4>
+        <ul style="margin: 0;">
+          <li>☐ Presenta con el guión elegido</li>
+          <li>☐ Pregunta si es buen momento</li>
+          <li>☐ Explica la oferta (previsualización gratuita)</li>
+          <li>☐ Anota la respuesta (sí/no/después)</li>
+        </ul>
+
+        <h4 style="margin-top: 24px;">✓ Durante la llamada (Fase 2, si dijo sí)</h4>
+        <ul style="margin: 0;">
+          <li>☐ Pregunta: "¿Qué ofrecéis?" (Servicios)</li>
+          <li>☐ Pregunta: "¿Una frase que os defina?"</li>
+          <li>☐ Pregunta: "¿Redes sociales o fotos?"</li>
+          <li>☐ Pregunta: "¿Estilo: moderno, profesional, acogedor?"</li>
+          <li>☐ Confirma: "¿En 3 días te mostramos la previsualización?"</li>
+          <li>☐ Cierra: "¿Mejor por WhatsApp, email o en persona?"</li>
+        </ul>
+
+        <h4 style="margin-top: 24px;">✓ Después de la llamada</h4>
+        <ul style="margin: 0;">
+          <li>☐ Actualiza el dashboard con la información recopilada</li>
+          <li>☐ Marca la fase como completada</li>
+          <li>☐ Añade notas personales si son relevantes</li>
+          <li>☐ Establece un recordatorio para hacer seguimiento en 3 días</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="preguntas">
+      <h2>Preguntas frecuentes</h2>
+
+      <h4>¿Qué digo si me dicen que ya tienen web?</h4>
+      <p>
+        "Perfecto, me gustaría verla. ¿Me pasas el enlace? Quizás podamos hacerla más moderna o optimizarla." (Guarda el contacto, puede ser un cliente para futuro)
+      </p>
+
+      <h4>¿Qué digo si me dicen que no tienen presupuesto?</h4>
+      <p>
+        "Sin problema. Primero ve la previsualización, así sabes exactamente qué vale. Luego hablamos de precio. ¿Vale?"
+      </p>
+
+      <h4>¿Cuántas veces debo llamar si no contestan?</h4>
+      <p>
+        Llama máximo 3 veces (días diferentes). Si siguen sin contestar, envía un SMS o un email. Después, dejalos para más adelante.
+      </p>
+
+      <h4>¿Qué hago si dicen que es "muy caro"?</h4>
+      <p>
+        "¿Cuánto gastas ahora en marketing sin resultados? Una web profesional cuesta menos que una campaña de Google Ads de un mes, y los resultados duran años." (Convence sin presionar)
+      </p>
+
+      <h4>¿Puedo ofrecer un descuento?</h4>
+      <p>
+        Mejor no. Si presionan, dile: "Miramos opciones más económicas, pero primero ves la previsualización, ¿vale?" La previsualización suele vender sola.
+      </p>
+
+      <h4>¿Qué digo si me cuelgan o son groseros?</h4>
+      <p>
+        No lo tomes personal. Dile: "Perfecto, cuando os interese, me llamáis." Y cuelga con educación. Algunos se arrepienten y llaman después.
+      </p>
+    </section>
+  </main>
+</div>
+
+<button class="back-to-top" id="backToTop">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<script>
+  // Navigation and styles
+  document.addEventListener('DOMContentLoaded', () => {
+    const links = document.querySelectorAll('.manual-sidebar a');
+    const sections = document.querySelectorAll('main > section');
+    const backToTop = document.getElementById('backToTop');
+
+    function updateActiveLink() {
+      const current = window.location.hash.slice(1) || 'inicio';
+      links.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').slice(1) === current) link.classList.add('active');
+      });
+    }
+
+    links.forEach(link => {
+      link.addEventListener('click', updateActiveLink);
+    });
+
+    window.addEventListener('scroll', () => {
+      backToTop.classList.toggle('visible', window.scrollY > 300);
+    });
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    updateActiveLink();
+  });
+</script>
+</body>
+</html>

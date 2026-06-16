@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stats - Dashboard</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body { background: #f7f9fc; }
+    .page { max-width: 1400px; margin: 28px auto; padding: 0 15px; }
+    .metric-card { border: none; border-top: 4px solid; padding: 20px; border-radius: 8px; }
+    .metric-card.primary { border-color: #1976d2; }
+    .metric-card.success { border-color: #388e3c; }
+    .metric-card.warning { border-color: #f57c00; }
+    .metric-card.danger { border-color: #d32f2f; }
+    .metric-value { font-size: 28px; font-weight: bold; margin: 8px 0; }
+    .metric-label { font-size: 12px; color: #999; text-transform: uppercase; }
+    .metric-subtitle { font-size: 13px; color: #666; margin-top: 4px; }
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    .chart-container { position: relative; height: 300px; margin: 20px 0; }
+    .funnel-item { display: flex; align-items: center; margin-bottom: 12px; }
+    .funnel-bar { height: 32px; background: linear-gradient(90deg, #1976d2, #42a5f5); border-radius: 4px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; color: white; font-weight: 600; font-size: 13px; }
+    .funnel-label { width: 100px; font-size: 13px; margin-right: 12px; }
+    .table-wrapper { overflow-x: auto; }
+    .table th { font-weight: 600; background: #f8f9fa; }
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-high { background: #c8e6c9; color: #1b5e20; }
+    .badge-medium { background: #fff9c4; color: #f57f17; }
+    .badge-low { background: #ffccbc; color: #d84315; }
+    .filter-section { padding: 16px; background: #f5f5f5; border-radius: 8px; margin-bottom: 20px; }
+    @media (max-width: 768px) {
+      .page { padding: 0 10px; margin: 15px auto; }
+      .metric-card { padding: 15px; margin-bottom: 12px; }
+      .metric-value { font-size: 22px; }
+      .metric-label { font-size: 11px; }
+      .chart-container { height: 250px; margin: 15px 0; }
+      .funnel-bar { height: 28px; font-size: 12px; padding: 0 8px; }
+      .funnel-label { width: 80px; font-size: 12px; margin-right: 8px; }
+      .table { font-size: 12px; }
+      .table th, .table td { padding: 0.5rem 0.25rem; }
+      h1 { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 576px) {
+      .page { padding: 0 8px; margin: 10px auto; }
+      .metric-card { padding: 12px; margin-bottom: 10px; }
+      .metric-value { font-size: 20px; }
+      .metric-label { font-size: 10px; }
+      .metric-subtitle { font-size: 12px; }
+      .chart-container { height: 200px; margin: 10px 0; }
+      .funnel-item { margin-bottom: 8px; }
+      .funnel-bar { height: 24px; font-size: 11px; padding: 0 6px; }
+      .funnel-label { width: 70px; font-size: 11px; margin-right: 6px; }
+      .table { font-size: 11px; }
+      .table th { font-size: 10px; }
+      .table th, .table td { padding: 0.35rem 0.15rem; }
+      .filter-section { padding: 12px; margin-bottom: 15px; }
+      .btn { padding: 0.35rem 0.5rem; font-size: 12px; }
+      h1 { font-size: 1.1rem; }
+      .col-md-3, .col-md-6 { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="page container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4 mb-0">Estadísticas y Análisis</h1>
+      <button id="refreshBtn" class="btn btn-outline-secondary"><i class="fa-solid fa-arrows-rotate"></i></button>
+    </div>
+
+    <div class="filter-section">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small">Fecha inicio</label>
+          <input type="date" id="fromDate" class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small">Fecha fin</label>
+          <input type="date" id="toDate" class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-6">
+          <button id="applyFilterBtn" class="btn btn-primary btn-sm"><i class="fa-solid fa-filter me-1"></i> Aplicar filtro</button>
+          <button id="clearFilterBtn" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-times me-1"></i> Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="card card-shadow metric-card primary">
+          <div class="metric-label">Total de Leads</div>
+          <div class="metric-value" id="totalLeads">0</div>
+          <div class="metric-subtitle">Captados en el período</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card card-shadow metric-card success">
+          <div class="metric-label">Leads Cerrados</div>
+          <div class="metric-value" id="closedLeads">0</div>
+          <div class="metric-subtitle" id="conversionRate">0%</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card card-shadow metric-card warning">
+          <div class="metric-label">Ingresos Totales</div>
+          <div class="metric-value" id="totalRevenue">€0</div>
+          <div class="metric-subtitle" id="avgPerLead">€0 por lead</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card card-shadow metric-card danger">
+          <div class="metric-label">Días para Cerrar</div>
+          <div class="metric-value" id="avgClosingDays">0</div>
+          <div class="metric-subtitle">Promedio</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-funnel me-2"></i> Embudo de Conversión</h5>
+            <div id="funnelContainer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-chart-pie me-2"></i> Leads por Estado</h5>
+            <div class="chart-container">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-chart-line me-2"></i> Evolución Mensual</h5>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="monthlyChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-network-wired me-2"></i> Rendimiento por Fuente</h5>
+            <div class="table-wrapper">
+              <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Fuente</th>
+                    <th style="text-align: center;">Leads</th>
+                    <th style="text-align: center;">Cerrados</th>
+                    <th style="text-align: center;">Tasa</th>
+                    <th style="text-align: right;">Ingresos</th>
+                  </tr>
+                </thead>
+                <tbody id="sourceTableBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-users me-2"></i> Rendimiento por Comercial</h5>
+            <div class="table-wrapper">
+              <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Comercial</th>
+                    <th style="text-align: center;">Leads</th>
+                    <th style="text-align: center;">Cerrados</th>
+                    <th style="text-align: center;">Éxito</th>
+                    <th style="text-align: right;">Ingresos</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const base = '';
+    const apiJson = async (p, opt = {}) => fetch(p, Object.assign({ headers: { Accept: 'application/json' } }, opt)).then(r=>r.json());
+
+    let charts = {};
+
+    function formatMoney(value) {
+      return `€${parseFloat(value).toFixed(2)}`;
+    }
+
+    function getConversionBadge(rate) {
+      if (rate >= 30) return `<span class="status-badge badge-high">${rate}%</span>`;
+      if (rate >= 15) return `<span class="status-badge badge-medium">${rate}%</span>`;
+      return `<span class="status-badge badge-low">${rate}%</span>`;
+    }
+
+    async function loadStats() {
+      try {
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        let statsUrl = `${base}/stats`;
+        if (fromDate && toDate) {
+          statsUrl += `?from_date=${fromDate}&to_date=${toDate}`;
+        }
+
+        const statsData = await apiJson(statsUrl);
+        
+        // Update key metrics
+        document.getElementById('totalLeads').textContent = statsData.summary.totalLeads;
+        document.getElementById('closedLeads').textContent = statsData.summary.closed;
+        document.getElementById('conversionRate').textContent = `${statsData.summary.conversionRate}% conversión`;
+        document.getElementById('totalRevenue').textContent = formatMoney(statsData.summary.totalValue);
+        document.getElementById('avgPerLead').textContent = formatMoney(statsData.summary.costPerLead);
+        document.getElementById('avgClosingDays').textContent = statsData.summary.avgClosingDays;
+
+        // Load funnel
+        const funnelUrl = fromDate && toDate ? `${base}/stats/funnel?from_date=${fromDate}&to_date=${toDate}` : `${base}/stats/funnel`;
+        const funnelData = await apiJson(funnelUrl);
+        loadFunnel(funnelData.funnel);
+
+        // Load status chart
+        loadStatusChart(statsData.statusBreakdown);
+
+        // Load monthly chart
+        const monthlyUrl = `${base}/stats/monthly`;
+        const monthlyData = await apiJson(monthlyUrl);
+        loadMonthlyChart(monthlyData.monthly);
+
+        // Load source performance
+        const sourceUrl = `${base}/stats/source-performance`;
+        const sourceData = await apiJson(sourceUrl);
+        loadSourceTable(sourceData.performance);
+
+        // Load user performance
+        const userUrl = `${base}/stats/user-performance`;
+        const userData = await apiJson(userUrl);
+        loadUserTable(userData.performance);
+
+      } catch (e) {
+        console.error('Error loading stats:', e);
+      }
+    }
+
+    function loadFunnel(funnel) {
+      const container = document.getElementById('funnelContainer');
+      const total = Object.values(funnel).reduce((a, b) => a + b, 0);
+      
+      const stages = [
+        { key: 'new', label: 'Nuevos' },
+        { key: 'contacted', label: 'Contactados' },
+        { key: 'interested', label: 'Interesados' },
+        { key: 'negotiation', label: 'Negociación' },
+        { key: 'closed', label: 'Cerrados' }
+      ];
+
+      const maxWidth = 100;
+      container.innerHTML = stages.map(stage => {
+        const count = funnel[stage.key] || 0;
+        const width = total > 0 ? (count / total) * maxWidth : 0;
+        const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+        return `
+          <div class="funnel-item">
+            <div class="funnel-label">${stage.label}</div>
+            <div style="flex: 1; position: relative;">
+              <div class="funnel-bar" style="width: ${width}%;">
+                <span>${count}</span>
+                <span>${percentage}%</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function loadStatusChart(statusBreakdown) {
+      const ctx = document.getElementById('statusChart');
+      if (charts.status) charts.status.destroy();
+      
+      const labels = Object.keys(statusBreakdown);
+      const data = Object.values(statusBreakdown);
+      const colors = ['#1976d2', '#f57c00', '#7b1fa2', '#d32f2f', '#388e3c', '#5e35b1'];
+
+      charts.status = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    function loadMonthlyChart(monthlyData) {
+      const ctx = document.getElementById('monthlyChart');
+      if (charts.monthly) charts.monthly.destroy();
+      
+      const labels = monthlyData.map(d => d.month);
+      const created = monthlyData.map(d => d.leads_created || 0);
+      const closed = monthlyData.map(d => d.leads_closed || 0);
+
+      charts.monthly = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Leads Creados',
+              data: created,
+              borderColor: '#1976d2',
+              backgroundColor: 'rgba(25, 118, 210, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Leads Cerrados',
+              data: closed,
+              borderColor: '#388e3c',
+              backgroundColor: 'rgba(56, 142, 60, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function loadSourceTable(performance) {
+      const tbody = document.getElementById('sourceTableBody');
+      tbody.innerHTML = performance.map(row => `
+        <tr>
+          <td><strong>${row.source}</strong></td>
+          <td style="text-align: center;">${row.totalLeads}</td>
+          <td style="text-align: center;">${row.closedLeads}</td>
+          <td style="text-align: center;">${getConversionBadge(row.conversionRate)}</td>
+          <td style="text-align: right;">${formatMoney(row.totalRevenue)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function loadUserTable(performance) {
+      const tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = performance.map(row => `
+        <tr>
+          <td><strong>${row.username}</strong></td>
+          <td style="text-align: center;">${row.leadsManaged}</td>
+          <td style="text-align: center;">${row.leadsClosed}</td>
+          <td style="text-align: center;">${getConversionBadge(row.successRate)}</td>
+          <td style="text-align: right;">${formatMoney(row.totalRevenue)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Set default dates (last 30 days)
+    function setDefaultDates() {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      document.getElementById('fromDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+      document.getElementById('toDate').value = today.toISOString().split('T')[0];
+    }
+
+    document.getElementById('applyFilterBtn').onclick = loadStats;
+    document.getElementById('clearFilterBtn').onclick = () => {
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = '';
+      loadStats();
+    };
+    document.getElementById('refreshBtn').onclick = loadStats;
+
+    setDefaultDates();
+    loadStats();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

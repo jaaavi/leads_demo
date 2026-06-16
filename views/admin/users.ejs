@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Usuarios - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body { background: #f7f9fc; }
+    .page { max-width: 1200px; margin: 28px auto; }
+    .table-wrapper { overflow: auto; }
+    .btn-icon { padding: 8px 12px; min-width: 40px; min-height: 40px; display: inline-flex !important; align-items: center; justify-content: center; }
+    .btn-icon i { font-size: 16px; line-height: 1; display: inline; }
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #1976d2; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+    .modal-backdrop { z-index: 1040; }
+    .modal { z-index: 1050; }
+    .modal-body { max-height: 70vh; overflow-y: auto; }
+    .create-user-form { max-width: 400px; }
+    .role-badge { font-size: 13px; font-weight: 500; }
+    .role-admin { background: #e8f5e9; color: #2e7d32; }
+    .role-comercial { background: #fff3e0; color: #e65100; }
+    .text-muted-small { font-size: 12px; color: #999; }
+    .status-loading { opacity: 0.6; pointer-events: none; }
+
+    @media (max-width: 768px) {
+      .page { padding: 0 15px; margin: 15px auto; }
+      .table { font-size: 12px; }
+      .btn-icon { padding: 6px 8px; min-width: 36px; min-height: 36px; }
+      h1 { font-size: 1.3rem; }
+      .create-user-form { max-width: 100%; }
+    }
+
+    @media (max-width: 576px) {
+      .page { padding: 0 8px; margin: 10px auto; }
+      .table { font-size: 11px; }
+      .table th { font-size: 10px; }
+      .table th, .table td { padding: 0.35rem 0.15rem; }
+      .btn { padding: 0.35rem 0.5rem; font-size: 12px; }
+      .btn-sm { padding: 0.25rem 0.4rem; font-size: 11px; }
+      .btn-icon { padding: 5px 6px; min-width: 32px; min-height: 32px; }
+      h1 { font-size: 1.1rem; }
+      .form-control, .form-select { font-size: 13px; padding: 0.35rem 0.5rem; }
+      .card { margin-bottom: 0.75rem; }
+      .user-avatar { width: 28px; height: 28px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../navbar') %>
+
+  <div class="page container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4">Gestión de Usuarios</h1>
+      <div>
+        <button id="newUserBtn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
+          <i class="fa-solid fa-plus me-1"></i> Nuevo Usuario
+        </button>
+        <button id="refreshBtn" class="btn btn-outline-secondary ms-2" onclick="loadUsers()">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="card card-shadow">
+      <div class="table-wrapper p-3">
+        <table class="table table-striped table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 40px;"></th>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Creado</th>
+              <th style="width: 100px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">Cargando usuarios...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create User Modal -->
+  <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createUserModalLabel">Crear Nuevo Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="createUserForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="newUsername" class="form-label">Usuario</label>
+              <input type="text" class="form-control" id="newUsername" placeholder="nombre_usuario" required>
+              <small class="text-muted">Entre 3 y 50 caracteres</small>
+            </div>
+            <div class="mb-3">
+              <label for="newEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="newEmail" placeholder="usuario@ejemplo.com" required>
+            </div>
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">Contraseña</label>
+              <input type="password" class="form-control" id="newPassword" placeholder="Mínimo 6 caracteres" required>
+              <small class="text-muted">Mínimo 6 caracteres</small>
+            </div>
+            <div class="mb-3">
+              <label for="newRole" class="form-label">Rol</label>
+              <select class="form-select" id="newRole" required>
+                <option value="comercial">Comercial</option>
+                <option value="comercial_pro">Comercial PRO</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div id="createUserError" class="alert alert-danger d-none" role="alert"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">
+              <i class="fa-solid fa-check me-1"></i> Crear Usuario
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Role Modal -->
+  <div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editRoleModalLabel">Cambiar Rol de Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="editRoleForm">
+          <div class="modal-body">
+            <div class="mb-3">
+              <p class="text-muted"><strong id="editUserName"></strong></p>
+            </div>
+            <div class="mb-3">
+              <label for="editRole" class="form-label">Nuevo Rol</label>
+              <select class="form-select" id="editRole" required>
+                <option value="comercial">Comercial</option>
+                <option value="comercial_pro">Comercial PRO</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div id="editRoleError" class="alert alert-danger d-none" role="alert"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check me-1"></i> Actualizar Rol
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePasswordModalLabel">Cambiar Contraseña</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="changePasswordForm">
+          <div class="modal-body">
+            <p class="text-muted"><strong id="changePasswordUserName"></strong></p>
+            <div class="mb-3">
+              <label for="newPasswordInput" class="form-label">Nueva contraseña</label>
+              <input type="password" class="form-control" id="newPasswordInput" placeholder="Mínimo 6 caracteres" required>
+            </div>
+            <div id="changePasswordError" class="alert alert-danger d-none" role="alert"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Cambiar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let allUsers = [];
+    let currentEditingUserId = null;
+    let currentPasswordUserId = null;
+
+    const createUserModal = new bootstrap.Modal(document.getElementById('createUserModal'));
+    const editRoleModal = new bootstrap.Modal(document.getElementById('editRoleModal'));
+    const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+
+    async function loadUsers() {
+      try {
+        const response = await fetch('/api/admin/users', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load users');
+        }
+
+        const result = await response.json();
+        allUsers = result.data || [];
+        renderUsersTable();
+      } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('usersTableBody').innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center text-danger py-4">
+              <i class="fa-solid fa-exclamation-circle me-2"></i>Error al cargar usuarios
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('usersTableBody');
+      
+      if (allUsers.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              <i class="fa-solid fa-users me-2"></i>No hay usuarios registrados
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = allUsers.map(user => {
+        const initials = user.username.substring(0, 2).toUpperCase();
+        const createdDate = new Date(user.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+        const roleClass = user.role === 'admin' ? 'role-admin' : 'role-comercial';
+        const roleName = user.role === 'admin' ? 'Admin' : 'Comercial';
+
+        return `
+          <tr>
+            <td>
+              <div class="user-avatar">${initials}</div>
+            </td>
+            <td>
+              <div><strong>${escapeHtml(user.username)}</strong></div>
+              <div class="text-muted-small">#${user.id}</div>
+            </td>
+            <td>
+              <span class="text-muted-small">${escapeHtml(user.email)}</span>
+            </td>
+            <td>
+              <span class="badge role-badge ${roleClass}">${roleName}</span>
+            </td>
+            <td>
+              <span class="text-muted-small">${createdDate}</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary btn-icon"
+                      onclick="openEditRoleModal(${user.id}, '${escapeHtml(user.username)}', '${user.role}')"
+                      title="Editar rol">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-secondary btn-icon"
+                      onclick="openChangePasswordModal(${user.id}, '${escapeHtml(user.username)}')"
+                      title="Cambiar contraseña">
+                <i class="fa-solid fa-key"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger btn-icon"
+                      onclick="confirmDeleteUser(${user.id}, '${escapeHtml(user.username)}')"
+                      title="Eliminar usuario">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openEditRoleModal(userId, username, currentRole) {
+      currentEditingUserId = userId;
+      document.getElementById('editUserName').textContent = username;
+      document.getElementById('editRole').value = currentRole;
+      document.getElementById('editRoleError').classList.add('d-none');
+      editRoleModal.show();
+    }
+
+    function confirmDeleteUser(userId, username) {
+      if (confirm(`¿Está seguro que desea eliminar el usuario "${username}"? Esta acción no se puede deshacer.`)) {
+        deleteUserAction(userId);
+      }
+    }
+
+    function openChangePasswordModal(userId, username) {
+      currentPasswordUserId = userId;
+      document.getElementById('changePasswordUserName').textContent = username;
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('changePasswordError').classList.add('d-none');
+      changePasswordModal.show();
+    }
+
+    async function deleteUserAction(userId) {
+      try {
+        const response = await fetch(`/api/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Error al eliminar usuario');
+        }
+
+        await loadUsers();
+        showSuccessMessage('Usuario eliminado exitosamente');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('newUsername').value.trim();
+      const email = document.getElementById('newEmail').value.trim();
+      const password = document.getElementById('newPassword').value;
+      const role = document.getElementById('newRole').value;
+      const errorDiv = document.getElementById('createUserError');
+
+      if (username.length < 3 || username.length > 50) {
+        errorDiv.textContent = 'El usuario debe tener entre 3 y 50 caracteres';
+        errorDiv.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password, role })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Error al crear usuario');
+        }
+
+        createUserModal.hide();
+        document.getElementById('createUserForm').reset();
+        await loadUsers();
+        showSuccessMessage('Usuario creado exitosamente');
+      } catch (error) {
+        console.error('Error creating user:', error);
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('d-none');
+      }
+    });
+
+    document.getElementById('editRoleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const role = document.getElementById('editRole').value;
+      const errorDiv = document.getElementById('editRoleError');
+
+      try {
+        const response = await fetch(`/api/admin/users/${currentEditingUserId}/role`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentEditingUserId, role })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Error al actualizar rol');
+        }
+
+        editRoleModal.hide();
+        await loadUsers();
+        showSuccessMessage('Rol actualizado exitosamente');
+      } catch (error) {
+        console.error('Error updating role:', error);
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('d-none');
+      }
+    });
+
+    // Change password form handler
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPassword = document.getElementById('newPasswordInput').value || '';
+      const errorDiv = document.getElementById('changePasswordError');
+      if (newPassword.length < 6) {
+        errorDiv.textContent = 'La contraseña debe tener al menos 6 caracteres';
+        errorDiv.classList.remove('d-none');
+        return;
+      }
+
+      try {
+        const resp = await fetch(`/api/admin/users/${currentPasswordUserId}/password`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newPassword })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Error al cambiar la contraseña');
+        changePasswordModal.hide();
+        showSuccessMessage('Contraseña actualizada correctamente');
+      } catch (err) {
+        console.error('Error changing password:', err);
+        errorDiv.textContent = err.message;
+        errorDiv.classList.remove('d-none');
+      }
+    });
+
+    function showSuccessMessage(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+      alertDiv.style.zIndex = '2000';
+      alertDiv.innerHTML = `
+        <i class="fa-solid fa-check-circle me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.body.appendChild(alertDiv);
+
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

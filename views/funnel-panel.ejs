@@ -1,0 +1,1829 @@
+<!-- Funnel Panel Modal -->
+<div class="modal fade" id="funnelModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-funnel me-2" style="color: #1976d2;"></i>
+          <span id="funnelLeadName">Sales Funnel</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- Funnel Progress Bar -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-2">
+            <small class="fw-bold">Progreso del funnel</small>
+            <small id="funnelPhaseLabel" class="text-muted">Fase 1/4</small>
+          </div>
+          <div class="progress" style="height: 24px;">
+            <div id="funnelProgressBar" class="progress-bar bg-primary" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+
+        <!-- Phase 1: Mensaje de Apertura -->
+        <div id="phase1Container" class="phase-container mb-4 p-3 border rounded-2 bg-light">
+          <h6 class="mb-3">
+            <i class="fa-solid fa-envelope me-2" style="color: #4caf50;"></i>
+            Fase 1: Mensaje de Apertura
+            <span id="phase1Status" class="badge bg-warning ms-2">Pendiente</span>
+            <div class="form-check form-check-inline ms-3">
+              <input class="form-check-input" type="checkbox" id="phase1Check">
+              <label class="form-check-label" for="phase1Check">Marcado</label>
+            </div>
+          </h6>
+          
+          <div class="mb-3">
+            <label class="form-label fw-600">Selecciona el tipo de mensaje:</label>
+            <div class="btn-group d-grid gap-2" role="group">
+              <input type="radio" class="btn-check" name="openingMessageType" id="msgNatural" value="NATURAL">
+              <label class="btn btn-outline-primary text-start" for="msgNatural">
+                <strong>Opción 1 - Natural</strong><br>
+                <small class="text-muted">Agencia pequeña del barrio</small>
+              </label>
+
+              <input type="radio" class="btn-check" name="openingMessageType" id="msgCorta" value="CORTA">
+              <label class="btn btn-outline-primary text-start" for="msgCorta">
+                <strong>Opción 2 - Corta</strong><br>
+                <small class="text-muted">Directo y simple</small>
+              </label>
+
+              <input type="radio" class="btn-check" name="openingMessageType" id="msgAgencia" value="AGENCIA">
+              <label class="btn btn-outline-primary text-start" for="msgAgencia">
+                <strong>Opción 3 - Agencia</strong><br>
+                <small class="text-muted">Enfoque profesional</small>
+              </label>
+
+              <input type="radio" class="btn-check" name="openingMessageType" id="msgPersonal" value="PERSONAL">
+              <label class="btn btn-outline-primary text-start" for="msgPersonal">
+                <strong>Opción 4 - Personal</strong><br>
+                <small class="text-muted">Más cercano y detallado</small>
+              </label>
+            </div>
+          </div>
+
+          <div id="messagePreview" class="alert alert-info d-none">
+            <div class="d-flex align-items-start justify-content-between mb-2">
+              <small class="fw-bold">Vista previa del mensaje:</small>
+              <div>
+                <button id="phase1EditBtn" class="btn btn-sm btn-outline-secondary me-1">Editar</button>
+                <button id="phase1ResetEditBtn" class="btn btn-sm btn-outline-secondary d-none">Cancelar</button>
+              </div>
+            </div>
+            <p id="messagePreviewText" style="white-space: pre-wrap; margin: 0;"></p>
+
+            <div id="phase1EditArea" class="d-none mt-2">
+              <textarea id="phase1EditTextarea" class="form-control" rows="5"></textarea>
+              <div class="d-flex gap-2 mt-2">
+                <button id="phase1SaveEditBtn" class="btn btn-primary btn-sm">Guardar</button>
+                <button id="phase1CancelEditBtn" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 1 - Responses panel -->
+          <div id="phase1Responses" class="mb-3">
+            <small class="fw-bold d-block mb-1">Respuestas al mensaje de apertura:</small>
+            <div id="phase1ResponsesList" style="max-height:180px; overflow-y:auto; border:1px solid #eee; padding:8px; border-radius:6px; background:#fff;">
+              <div class="text-muted">Aquí aparecerán las respuestas en tiempo real</div>
+            </div>
+          </div>
+
+          <div class="mb-2 d-flex align-items-center gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="sendInPartsCheck">
+              <label class="form-check-label" for="sendInPartsCheck">Enviar por partes</label>
+            </div>
+            <small class="text-muted">Si activas, podrás enviar el mensaje de apertura parte a parte.</small>
+          </div>
+
+          <div id="partsContainer" style="display:none; margin-bottom:12px;">
+            <small class="fw-bold d-block mb-1">Partes del mensaje:</small>
+            <div id="partsList" style="max-height:140px; overflow-y:auto; padding:6px; background:#fff; border:1px solid #dee2e6; border-radius:6px;"></div>
+            <div class="d-flex gap-2 mt-2">
+              <button id="sendNextPartBtn" class="btn btn-outline-success btn-sm">Enviar siguiente parte</button>
+              <button id="sendAllPartsBtn" class="btn btn-success btn-sm">Enviar todo seguido</button>
+            </div>
+          </div>
+
+          <button id="phase1SendBtn" class="btn btn-success w-100" disabled>
+            <i class="fa-solid fa-paper-plane me-2"></i> Enviar Mensaje de Apertura
+          </button>
+        </div>
+
+        <!-- Phase 2: Recopilación de Información -->
+        <div id="phase2Container" class="phase-container mb-4 p-3 border rounded-2 bg-light" style="display:none;">
+          <h6 class="mb-3">
+            <i class="fa-solid fa-clipboard me-2" style="color: #ff9800;"></i>
+            Fase 2: Recopilación de Información
+            <span id="phase2Status" class="badge bg-warning ms-2">Pendiente</span>
+            <div class="form-check form-check-inline ms-3">
+              <input class="form-check-input" type="checkbox" id="phase2Check">
+              <label class="form-check-label" for="phase2Check">Marcado</label>
+            </div>
+          </h6>
+
+          <!-- Incoming replies to opening message -->
+          <div id="phase2Messages" class="mb-3">
+            <small class="fw-bold d-block mb-1">Respuestas recibidas:</small>
+            <div id="phase2MessagesList" style="max-height:200px; overflow-y:auto;">
+              <div class="text-muted" style="padding:12px;">Sin respuestas aún</div>
+            </div>
+          </div>
+
+          <div class="mb-3 d-flex gap-2 align-items-center">
+            <button id="sendPhase2CollectBtn" class="btn btn-primary btn-sm"><i class="fa-solid fa-paper-plane me-1"></i> Enviar mensaje de recopilación</button>
+            <button id="parsePhase2Btn" class="btn btn-outline-primary btn-sm" disabled>Parsear respuestas</button>
+            <button id="phase2PreviewBtn" class="btn btn-outline-secondary btn-sm">Previsualizar / Editar</button>
+            <div class="form-check form-check-inline ms-2">
+              <input class="form-check-input" type="checkbox" id="phase2SendParts">
+              <label class="form-check-label small" for="phase2SendParts">Enviar en partes</label>
+            </div>
+            <div class="text-muted small ms-auto">Después de parsear, los valores se cargarán en la tabla editable abajo.</div>
+          </div>
+
+          <div id="phase2MessagePreviewBox" class="alert alert-info d-none">
+            <div class="d-flex align-items-start justify-content-between mb-2">
+              <small class="fw-bold">Vista previa del mensaje de recopilación:</small>
+              <div>
+                <button id="phase2EditBtn" class="btn btn-sm btn-outline-secondary me-1">Editar</button>
+                <button id="phase2ResetEditBtn" class="btn btn-sm btn-outline-secondary d-none">Cancelar</button>
+              </div>
+            </div>
+            <p id="phase2MessagePreviewText" class="mb-2" style="white-space:pre-wrap"></p>
+
+            <div id="phase2PartsContainer" class="mt-2" style="display:none;">
+              <small class="fw-bold d-block mb-1">Partes a enviar:</small>
+              <div id="phase2PartsList" style="max-height:180px; overflow-y:auto; padding:8px; background:#fff; border:1px solid #dee2e6; border-radius:6px;"></div>
+              <div class="d-flex gap-2 mt-2">
+                <button id="phase2SendNextPartBtn" class="btn btn-outline-success btn-sm">Enviar siguiente parte</button>
+                <button id="phase2SendAllPartsBtn" class="btn btn-success btn-sm">Enviar todo seguido</button>
+              </div>
+            </div>
+
+            <div id="phase2EditArea" class="d-none">
+              <textarea id="phase2EditTextarea" class="form-control" rows="5"></textarea>
+              <div class="d-flex gap-2 mt-2">
+                <button id="phase2SaveEditBtn" class="btn btn-primary btn-sm">Guardar</button>
+                <button id="phase2CancelEditBtn" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data table for manual editing / parsed values -->
+          <div class="table-responsive mb-3">
+            <table class="table table-sm" id="phase2DataTable">
+              <tbody>
+                <tr><th style="width:260px">Sector / Industria</th><td><input class="form-control" name="sector" /></td></tr>
+                <tr><th>Descripción</th><td><input class="form-control" name="descripcion" /></td></tr>
+                <tr><th>Servicios / Productos</th><td><textarea class="form-control" name="servicios" rows="2"></textarea></td></tr>
+                <tr><th>Estilo web</th><td><input class="form-control" name="estilo_web" /></td></tr>
+                <tr><th>Teléfono contacto</th><td><input class="form-control" name="telefofo_contacto" /></td></tr>
+                <tr><th>Redes sociales / Web</th><td><input class="form-control" name="redes_sociales" /></td></tr>
+                <tr><th>Dirección</th><td><input class="form-control" name="direccion" /></td></tr>
+                <tr><th>Referencias visuales</th><td><textarea class="form-control" name="referencias_visuales" rows="2"></textarea></td></tr>
+                <tr><th>Fotos representativas</th><td><textarea class="form-control" name="fotos_representativas" rows="2"></textarea></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button id="savePhase2Btn" class="btn btn-warning flex-grow-1"><i class="fa-solid fa-arrow-right me-2"></i> Guardar y Continuar a Fase 3</button>
+            <button id="cancelPhase2Btn" class="btn btn-outline-secondary">Cancelar</button>
+          </div>
+        </div>
+
+        <!-- Phase 3: Generar Prompt con OpenAI -->
+        <div id="phase3Container" class="phase-container mb-4 p-3 border rounded-2 bg-light" style="display:none;">
+          <h6 class="mb-3">
+            <i class="fa-solid fa-brain me-2" style="color: #9c27b0;"></i>
+            Fase 3: Generar Prompt para Diseñador
+            <span id="phase3Status" class="badge bg-warning ms-2">Pendiente</span>
+            <div class="form-check form-check-inline ms-3">
+              <input class="form-check-input" type="checkbox" id="phase3Check">
+              <label class="form-check-label" for="phase3Check">Marcado</label>
+            </div>
+          </h6>
+
+          <p class="text-muted small mb-3">Se generará automáticamente un prompt detallado usando OpenAI basado en la información recopilada en Fase 2.</p>
+
+          <div class="mb-3">
+            <small class="fw-bold d-block mb-1">Datos parseados (para copiar):</small>
+            <div id="phase3DataContainer" class="alert alert-light p-2" style="background:#fff; border:1px solid #dee2e6;">
+              <pre id="phase3DataContent" style="margin:0; white-space:pre-wrap; word-wrap:break-word;"></pre>
+            </div>
+            <div class="d-flex gap-2 mb-3">
+              <button id="phase3CopyDataBtn" class="btn btn-sm btn-outline-secondary">
+                <i class="fa-solid fa-copy me-1"></i> Copiar datos
+              </button>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 mb-3">
+            <button id="phase3GenerateBtn" class="btn btn-primary w-100">
+              <i class="fa-solid fa-sparkles me-2"></i> Generar plantilla (GPT)
+            </button>
+            <button id="phase3RegenerateBtn" class="btn btn-outline-primary w-100" style="display:none;">
+              <i class="fa-solid fa-rotate me-2"></i> Regenerar plantilla
+            </button>
+          </div>
+
+          <div id="phase3LoadingSpinner" style="display:none;" class="text-center mb-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Generando...</span>
+            </div>
+            <p class="small text-muted mt-2">Generando plantilla con OpenAI...</p>
+          </div>
+
+          <div id="phase3PromptContainer" style="display:none;">
+            <div class="alert alert-info">
+              <div class="d-flex align-items-start justify-content-between mb-2">
+                <small class="fw-bold">Plantilla generada:</small>
+                <div>
+                  <button id="phase3EditBtn" class="btn btn-sm btn-outline-secondary me-1">Editar</button>
+                  <button id="phase3ResetEditBtn" class="btn btn-sm btn-outline-secondary d-none">Cancelar</button>
+                </div>
+              </div>
+              <div id="phase3PromptContent" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap; background: white; padding: 12px; border-radius: 4px; border: 1px solid #dee2e6;"></div>
+            </div>
+
+            <div id="phase3EditArea" class="d-none mb-2">
+              <textarea id="phase3EditTextarea" class="form-control" rows="6"></textarea>
+              <div class="d-flex gap-2 mt-2">
+                <button id="phase3SaveEditBtn" class="btn btn-primary btn-sm">Guardar</button>
+                <button id="phase3CancelEditBtn" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-2 align-items-center">
+              <button id="phase3CopyBtn" class="btn btn-sm btn-outline-primary">
+                <i class="fa-solid fa-copy me-1"></i> Copiar Plantilla
+              </button>
+              <button id="phase3SendBtn" class="btn btn-sm btn-danger">Enviar al lead</button>
+              <div class="form-check form-check-inline ms-auto">
+                <input class="form-check-input" type="checkbox" id="phase3SendParts">
+                <label class="form-check-label small" for="phase3SendParts">Enviar en partes</label>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button id="phase3NextBtn" class="btn btn-sm btn-primary flex-grow-1">
+                <i class="fa-solid fa-arrow-right me-1"></i> Continuar a Fase 4
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 4: Propuesta y Cierre -->
+        <div id="phase4Container" class="phase-container p-3 border rounded-2 bg-light" style="display:none;">
+          <h6 class="mb-3">
+            <i class="fa-solid fa-gift me-2" style="color: #e91e63;"></i>
+            Fase 4: Propuesta y Cierre
+            <span id="phase4Status" class="badge bg-warning ms-2">Pendiente</span>
+            <div class="form-check form-check-inline ms-3">
+              <input class="form-check-input" type="checkbox" id="phase4Check">
+              <label class="form-check-label" for="phase4Check">Marcado</label>
+            </div>
+          </h6>
+
+          <div class="mb-3">
+            <label class="form-label fw-600">URL de la previsualización:</label>
+            <input type="url" id="phase4PreviewUrl" class="form-control mb-2" placeholder="https://ejemplo.com/preview">
+            <button id="phase4UpdateUrlBtn" class="btn btn-sm btn-outline-secondary w-100">
+              <i class="fa-solid fa-check me-1"></i> Guardar URL
+            </button>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-600">Asignar fecha de entrega en calendario:</label>
+            <div class="d-flex gap-2">
+              <input type="datetime-local" id="phase4AssignDate" class="form-control" />
+              <button id="phase4AssignDateBtn" class="btn btn-primary">Asignar</button>
+            </div>
+            <small class="text-muted d-block mt-2">Si asignas una fecha, aparecerá en tu Calendario y en la lista de leads con esa fecha prevista.</small>
+          </div>
+
+          <div class="mb-3">
+            <small class="fw-bold d-block mb-1">Selecciona el mensaje a enviar:</small>
+            <div id="phase4MessageButtons" class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary btn-sm" data-message-type="ENTREGA_PREVIEW">Entrega Previsualización</button>
+              <button class="btn btn-outline-primary btn-sm" data-message-type="PREVISUALIZACION">Previsualización</button>
+              <button class="btn btn-outline-primary btn-sm" data-message-type="CLIENTE_BASICO">Cliente Básico</button>
+              <button class="btn btn-outline-primary btn-sm" data-message-type="CLIENTE_INTERESADO">Cliente Interesado</button>
+              <button class="btn btn-outline-primary btn-sm" data-message-type="CLIENTE_AMBICIOSO">Cliente Ambicioso</button>
+            </div>
+          </div>
+
+          <div id="phase4MessagePreviewBox" class="alert alert-info d-none phase4-preview-box">
+            <div class="d-flex align-items-start justify-content-between mb-2">
+              <small class="fw-bold">Vista previa del mensaje:</small>
+              <div>
+                <button id="phase4EditBtn" class="btn btn-sm btn-outline-secondary me-1">Editar</button>
+                <button id="phase4ResetEditBtn" class="btn btn-sm btn-outline-secondary d-none">Cancelar</button>
+              </div>
+            </div>
+
+            <p id="phase4MessagePreviewText" class="mb-2 phase4-preview-text"></p>
+
+            <div id="phase4EditArea" class="d-none">
+              <textarea id="phase4EditTextarea" class="form-control phase4-edit-area" rows="6"></textarea>
+              <div class="d-flex gap-2 mt-2">
+                <button id="phase4SaveEditBtn" class="btn btn-primary btn-sm">Guardar</button>
+                <button id="phase4CancelEditBtn" class="btn btn-outline-secondary btn-sm">Cancelar</button>
+              </div>
+            </div>
+
+            <div id="phase4PartsContainer" class="mt-3" style="display:none;">
+              <small class="fw-bold d-block mb-2">Partes a enviar:</small>
+              <div id="phase4PartsList" style="max-height:200px; overflow-y:auto; padding:8px; background:#fff; border:1px solid #dee2e6; border-radius:6px;"></div>
+              <div class="d-flex gap-2 mt-2">
+                <button id="phase4SendNextPartBtn" class="btn btn-outline-success btn-sm">Enviar siguiente parte</button>
+                <button id="phase4SendAllPartsBtn" class="btn btn-success btn-sm">Enviar todo seguido</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3 d-flex align-items-center gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="phase4SendPartsCheck">
+              <label class="form-check-label" for="phase4SendPartsCheck">Enviar por partes</label>
+            </div>
+            <small class="text-muted">Si activas, podrás enviar el mensaje por partes.</small>
+          </div>
+
+          <button id="phase4SendBtn" class="btn btn-danger w-100" disabled>
+            <i class="fa-solid fa-paper-plane me-2"></i> Enviar Mensaje Seleccionado
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer border-top">
+        <small class="text-muted me-auto">
+          Lead: <strong id="funnelLeadPhone">-</strong> | Email: <strong id="funnelLeadEmail">-</strong>
+        </small>
+        <div class="btn-group me-2" role="group">
+          <button id="funnelPrevBtn" type="button" class="btn btn-outline-secondary">&larr; Anterior</button>
+          <button id="funnelNextBtn" type="button" class="btn btn-outline-primary">Siguiente &rarr;</button>
+        </div>
+        <div class="btn-group me-2" role="group">
+          <button id="markDiscardedBtn" type="button" class="btn btn-outline-danger">Descartar</button>
+          <button id="markClosedBtn" type="button" class="btn btn-success">Marcar como cerrado</button>
+        </div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .phase4-preview-box { padding: 12px; }
+  .phase4-preview-text { white-space: pre-wrap; font-size: 0.95rem; margin: 0; }
+  .phase4-edit-area { margin-top: 8px; font-family: inherit; }
+
+  .phase-container { transition: all 0.3s ease; }
+
+  @media (max-width: 768px) {
+    .modal-xl { max-width: 95vw !important; }
+    .phase-container { padding: 1.5rem 1rem !important; margin-bottom: 0.75rem !important; }
+    .btn-group { flex-wrap: wrap; }
+    .btn-group .btn { min-width: 0; }
+    .progress { height: 20px; }
+    .table-responsive { font-size: 12px; }
+    .table th, .table td { padding: 0.5rem 0.25rem; }
+    textarea { font-size: 13px; }
+    .alert { padding: 0.75rem; }
+  }
+
+  @media (max-width: 576px) {
+    .modal-dialog { margin: 0.5rem; }
+    .modal-header { padding: 0.75rem; }
+    .modal-body { padding: 0.75rem; max-height: 70vh; overflow-y: auto; }
+    .modal-footer { padding: 0.75rem; flex-wrap: wrap; }
+    .modal-dialog-scrollable { max-height: 95vh; }
+    .phase-container { padding: 1rem 0.75rem !important; margin-bottom: 0.5rem !important; }
+    h6 { font-size: 0.95rem; }
+    .btn { padding: 0.35rem 0.5rem; font-size: 12px; }
+    .btn-sm { padding: 0.25rem 0.4rem; font-size: 11px; }
+    .form-control, .form-select, textarea { font-size: 13px; padding: 0.35rem 0.5rem; }
+    .form-label { font-size: 12px; }
+    .progress { height: 18px; }
+    .table { font-size: 11px; }
+    .table th, .table td { padding: 0.35rem 0.15rem; }
+    .alert { padding: 0.5rem; font-size: 12px; }
+    .badge { font-size: 10px; padding: 0.3rem 0.5rem; }
+    .btn-group-vertical { width: 100%; }
+    .btn-group-vertical .btn { width: 100%; text-align: left; }
+  }
+</style>
+
+<script>
+  const funnelModal = new bootstrap.Modal(document.getElementById('funnelModal'));
+  let currentFunnelLead = null;
+  let currentFunnelStatus = null;
+  let editedOpeningText = null;
+  let currentStrategy = null;
+  let currentStrategyMessages = {};
+
+  // Para comercial_pro, ocultar fase 3 desde el principio (van directo a fase 4)
+  document.addEventListener('DOMContentLoaded', () => {
+    if (userRole === 'comercial_pro') {
+      const phase3Container = document.getElementById('phase3Container');
+      if (phase3Container) {
+        phase3Container.style.display = 'none !important';
+        // Cambiar etiqueta de progreso
+        const phaseLabel = document.getElementById('funnelPhaseLabel');
+        if (phaseLabel) {
+          phaseLabel.textContent = 'Fase 1/3';
+        }
+      }
+    }
+  });
+
+  function appendInboundToPhase2(p) {
+    try {
+      const list = document.getElementById('phase2MessagesList');
+      if (!list) return;
+      const node = document.createElement('div');
+      node.className = 'message-item message-received';
+      node.style.padding = '8px';
+      node.style.marginBottom = '8px';
+      node.style.borderRadius = '6px';
+      node.style.background = '#f5f5f5';
+      const timestamp = new Date().toLocaleString('es-ES');
+      node.innerHTML = `<div style="font-size:12px;color:#666;margin-bottom:6px;">${timestamp}</div><div style="white-space:pre-wrap;color:#333;">${(p.text||p.message||'').replace(/</g,'&lt;')}</div>`;
+      // Remove placeholder
+      if (list.children.length === 1 && list.children[0].classList.contains('text-muted')) list.innerHTML = '';
+      list.insertBefore(node, list.firstChild);
+      const parseBtn = document.getElementById('parsePhase2Btn');
+      if (parseBtn) parseBtn.disabled = false;
+    } catch (e) { console.warn('appendInboundToPhase2 error', e); }
+  }
+
+  function appendInboundToPhase1(p) {
+    try {
+      const list = document.getElementById('phase1ResponsesList');
+      if (!list) return;
+      const node = document.createElement('div');
+      node.className = 'message-item message-received';
+      node.style.padding = '8px';
+      node.style.marginBottom = '8px';
+      node.style.borderRadius = '6px';
+      node.style.background = '#f1f8ff';
+      const timestamp = new Date().toLocaleString('es-ES');
+      node.innerHTML = `<div style="font-size:12px;color:#666;margin-bottom:6px;">${timestamp}</div><div style="white-space:pre-wrap;color:#333;">${(p.text||p.message||'').replace(/</g,'&lt;')}</div>`;
+      if (list.children.length === 1 && list.children[0].classList.contains('text-muted')) list.innerHTML = '';
+      list.insertBefore(node, list.firstChild);
+    } catch (e) { console.warn('appendInboundToPhase1 error', e); }
+  }
+
+  // Opening message templates
+  const OPENING_MESSAGES = {
+    NATURAL: `¡Hola! Soy Javier
+
+Estoy montando una pequeña agencia de diseño de páginas web y estamos ofreciendo a los negocios de la zona la posibilidad de crear una previsualización gratuita de cómo quedaría su web antes de decidir nada.
+
+¿Os gustaría que os preparemos una propuesta visual sin compromiso?`,
+    CORTA: `¡Hola! Soy Javier, diseñador web de aquí del barrio.
+
+Hemos visto que vuestro negocio no tiene web y nos gustaría ofreceros una previsualización gratuita para que veáis cómo podría quedar.
+
+¿Queréis que os la preparemos sin compromiso?`,
+    AGENCIA: `¡Hola! Soy Javier
+
+En nuestra agencia estamos ofreciendo a los negocios de la zona la oportunidad de ver cómo quedaría su web profesional, sin compromiso ni coste.
+
+¿Os parece bien que os preparemos una propuesta visual?`,
+    PERSONAL: `¡Hola! Soy Javier, soy diseñador web y vivo por aquí cerca.
+He visto que ahora mismo no tenéis página web, y me encantaría enseñaros cómo podría quedar creando una previsualización gratuita.
+Si preferís, puedo pasarme un minuto y enseñárosla en persona, así lo veis sin compromiso.
+¿Os parece bien que os la preparemos?`,
+  };
+
+  // Reset funnel modal state
+  function resetFunnelModalState() {
+    // Clear edited text
+    editedOpeningText = null;
+
+    // Reset all checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+    });
+
+    // Reset all radio buttons and textarea inputs
+    document.querySelectorAll('input[name="openingMessageType"]').forEach(radio => {
+      radio.checked = false;
+    });
+
+    // Clear all textareas and text inputs
+    document.querySelectorAll('textarea').forEach(ta => {
+      ta.value = '';
+    });
+    document.querySelectorAll('input[type="text"], input[type="url"], input[type="email"], input[type="datetime-local"]').forEach(input => {
+      input.value = '';
+    });
+
+    // Hide all edit areas
+    document.querySelectorAll('.d-none').forEach(el => {
+      if (el.id && (el.id.includes('EditArea') || el.id.includes('PartsContainer') || el.id.includes('PreviewBox'))) {
+        // Already hidden
+      }
+    });
+    document.querySelectorAll('[id*="EditArea"]').forEach(el => {
+      el.classList.add('d-none');
+    });
+    document.querySelectorAll('[id*="PreviewBox"]').forEach(el => {
+      el.classList.add('d-none');
+    });
+    document.querySelectorAll('[id*="PartsContainer"]').forEach(el => {
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('[id*="Container"]').forEach(el => {
+      if (el.id && el.id.includes('Parts')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // Reset button states
+    document.querySelectorAll('[id*="EditBtn"]').forEach(btn => {
+      btn.classList.remove('d-none');
+    });
+    document.querySelectorAll('[id*="ResetEditBtn"]').forEach(btn => {
+      btn.classList.add('d-none');
+    });
+
+    // Clear message lists
+    const phase1List = document.getElementById('phase1ResponsesList');
+    if (phase1List) {
+      phase1List.innerHTML = '<div class="text-muted">Aquí aparecerán las respuestas en tiempo real</div>';
+    }
+    const phase2List = document.getElementById('phase2MessagesList');
+    if (phase2List) {
+      phase2List.innerHTML = '<div class="text-muted" style="padding:12px;">Sin respuestas aún</div>';
+    }
+
+    // Clear history/notes area
+    const notesHistory = document.getElementById('notesHistory');
+    if (notesHistory) notesHistory.innerHTML = '';
+
+    // Reset send buttons state
+    document.querySelectorAll('button[id*="SendBtn"], button[id*="SendNextPartBtn"], button[id*="SendAllPartsBtn"]').forEach(btn => {
+      btn.disabled = false;
+    });
+
+    // Clear any part list displays
+    const partsList = document.getElementById('partsList');
+    if (partsList) partsList.innerHTML = '';
+    const phase2PartsList = document.getElementById('phase2PartsList');
+    if (phase2PartsList) phase2PartsList.innerHTML = '';
+    const phase4PartsList = document.getElementById('phase4PartsList');
+    if (phase4PartsList) phase4PartsList.innerHTML = '';
+
+    // Clear phase data table values
+    const phase2Table = document.getElementById('phase2DataTable');
+    if (phase2Table) {
+      phase2Table.querySelectorAll('input, textarea').forEach(field => {
+        field.value = '';
+      });
+    }
+
+    // Clear phase 3 content
+    const phase3DataContent = document.getElementById('phase3DataContent');
+    if (phase3DataContent) phase3DataContent.innerHTML = '';
+    const phase3PromptContent = document.getElementById('phase3PromptContent');
+    if (phase3PromptContent) phase3PromptContent.innerHTML = '';
+  }
+
+  // Open funnel panel
+  async function openFunnelPanel(leadId) {
+    try {
+      // Reset modal state before loading new lead data
+      resetFunnelModalState();
+
+      const res = await fetch(`${base}/leads/${leadId}/funnel`);
+      const data = await res.json();
+
+      if (!data.ok) {
+        showToast('Error: ' + data.error);
+        return;
+      }
+
+      currentFunnelLead = data.lead;
+      currentFunnelStatus = data.status;
+      currentStrategy = data.strategy || null;
+      currentStrategyMessages = data.strategyMessages || {};
+
+      document.getElementById('funnelLeadName').textContent = data.lead.full_name;
+      document.getElementById('funnelLeadPhone').textContent = data.lead.phone || '-';
+      document.getElementById('funnelLeadEmail').textContent = data.lead.email || '-';
+
+      updateFunnelUI();
+      funnelModal.show();
+    } catch (e) {
+      showToast('Error al abrir el funnel: ' + e.message);
+    }
+  }
+
+  // Update funnel UI based on current phase
+  function updateFunnelUI() {
+    let phase = currentFunnelStatus.phase.current_phase;
+
+    // Para comercial_pro: skip phase 3, ir directo de 2 a 4
+    const isCommercialPro = userRole === 'comercial_pro';
+    if (isCommercialPro && phase === 3) {
+      phase = 4; // Mostrar fase 4 en lugar de 3
+    }
+
+    // Calcular progreso (4 fases normales o 3 para comercial_pro sin prompt)
+    const totalPhases = isCommercialPro ? 3 : 4;
+    const progressPercent = (phase / 4) * 100;
+
+    document.getElementById('funnelProgressBar').style.width = progressPercent + '%';
+    document.getElementById('funnelPhaseLabel').textContent = `Fase ${phase}/${totalPhases}`;
+
+    // Hide all phase containers
+    document.getElementById('phase1Container').style.display = 'none';
+    document.getElementById('phase2Container').style.display = 'none';
+    document.getElementById('phase3Container').style.display = 'none';
+    document.getElementById('phase4Container').style.display = 'none';
+
+    // Show current phase (skip phase 3 for comercial_pro)
+    if (isCommercialPro && phase === 4) {
+      document.getElementById('phase4Container').style.display = 'block';
+    } else {
+      document.getElementById(`phase${phase}Container`).style.display = 'block';
+    }
+
+    // Update status badges
+    updateStatusBadges();
+
+    // Update previews based on phase
+    if (phase === 1) {
+      setupPhase1();
+    } else if (phase === 2) {
+      setupPhase2();
+    } else if (phase === 3 && !isCommercialPro) {
+      setupPhase3();
+    } else if (phase === 4) {
+      setupPhase4();
+    }
+  }
+
+  function updateStatusBadges() {
+    const phase = currentFunnelStatus.phase;
+    
+    document.getElementById('phase1Status').textContent = phase.opening_message_sent ? '✓ Enviado' : 'Pendiente';
+    document.getElementById('phase1Status').className = phase.opening_message_sent ? 'badge bg-success' : 'badge bg-warning';
+
+    document.getElementById('phase2Status').textContent = phase.phase_2_completed ? '✓ Completado' : 'Pendiente';
+    document.getElementById('phase2Status').className = phase.phase_2_completed ? 'badge bg-success' : 'badge bg-warning';
+
+    document.getElementById('phase3Status').textContent = phase.phase_3_prompt_generated ? '✓ Generado' : 'Pendiente';
+    document.getElementById('phase3Status').className = phase.phase_3_prompt_generated ? 'badge bg-success' : 'badge bg-warning';
+
+    document.getElementById('phase4Status').textContent = phase.phase_4_message_sent ? '✓ Enviado' : 'Pendiente';
+    document.getElementById('phase4Status').className = phase.phase_4_message_sent ? 'badge bg-success' : 'badge bg-warning';
+  }
+
+  // Mark lead status (discarded or closed) via API
+  async function markLeadStatus(newStatus) {
+    if (!currentFunnelLead || !currentFunnelLead.id) return;
+    if (!confirm(`¿Confirmas marcar el lead como ${newStatus === 'discarded' ? 'DESCARTADO' : 'CERRADO'}?`)) return;
+
+    try {
+      const res = await fetch(`${base}/leads/${currentFunnelLead.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('Estado actualizado');
+        // close modal and reload to reflect changes
+        funnelModal.hide();
+        setTimeout(() => location.reload(), 200);
+      } else {
+        showToast('Error: ' + (data.error || 'No se pudo actualizar'));
+      }
+    } catch (e) {
+      showToast('Error: ' + e.message);
+    }
+  }
+
+  // Wire discard/close buttons
+  document.addEventListener('DOMContentLoaded', () => {
+    const discardBtn = document.getElementById('markDiscardedBtn');
+    const closeBtn = document.getElementById('markClosedBtn');
+    if (discardBtn) discardBtn.onclick = () => markLeadStatus('discarded');
+
+    // Setup SSE for real-time message updates inside funnel panel
+    try {
+      const es = new EventSource(`${base}/events`);
+      es.addEventListener('message.inbound', (e) => {
+        try {
+          const p = JSON.parse(e.data);
+          if (!currentFunnelLead) return;
+          // match by leadId or phone
+          if (p.leadId && currentFunnelLead.id && Number(p.leadId) === Number(currentFunnelLead.id)) {
+            if (currentFunnelStatus && currentFunnelStatus.phase && currentFunnelStatus.phase.current_phase === 1) appendInboundToPhase1(p);
+            else appendInboundToPhase2(p);
+          } else if (p.phone && currentFunnelLead.phone && p.phone.replace(/\D/g,'').endsWith(String(currentFunnelLead.phone).replace(/\D/g,'').slice(-8))) {
+            if (currentFunnelStatus && currentFunnelStatus.phase && currentFunnelStatus.phase.current_phase === 1) appendInboundToPhase1(p);
+            else appendInboundToPhase2(p);
+          }
+        } catch (err) { console.warn('SSE funnel inbound error', err); }
+      });
+
+      es.addEventListener('funnel.update', (e) => {
+        try {
+          const p = JSON.parse(e.data);
+          if (currentFunnelLead && p.leadId && Number(p.leadId) === Number(currentFunnelLead.id)) {
+            currentFunnelStatus = p.status || currentFunnelStatus;
+            updateFunnelUI();
+          }
+        } catch (err) { console.warn('SSE funnel.update error', err); }
+      });
+
+      es.onerror = (err) => { console.warn('SSE error', err); };
+    } catch (e) { console.warn('Could not init SSE in funnel panel', e.message); }
+
+    if (closeBtn) closeBtn.onclick = () => markLeadStatus('closed');
+  });
+
+  // Phase 1 Setup
+  function setupPhase1() {
+    // Parts UI state (declare early to avoid TDZ when initPartsUI is called)
+    let parts = [];
+    let currentPartIndex = 0;
+
+    const messageType = currentFunnelStatus.phase.opening_message_type;
+
+    if (messageType) {
+      // Prefer selecting radio by name+value (value is stored in funnel as 'NATURAL','CORTA',...).
+      const radio = document.querySelector(`input[name="openingMessageType"][value="${messageType}"]`);
+      if (radio) {
+        radio.checked = true;
+        showMessagePreview(messageType);
+        document.getElementById('phase1SendBtn').disabled = false;
+        initPartsUI(messageType);
+      } else {
+        // Fallback: try case-insensitive match against radio values
+        const radios = Array.from(document.querySelectorAll('input[name="openingMessageType"]'));
+        const found = radios.find(r => String(r.value).toLowerCase() === String(messageType).toLowerCase());
+        if (found) {
+          found.checked = true;
+          showMessagePreview(found.value);
+          document.getElementById('phase1SendBtn').disabled = false;
+          initPartsUI(found.value);
+        }
+      }
+    }
+
+    document.querySelectorAll('input[name="openingMessageType"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        showMessagePreview(e.target.value);
+        document.getElementById('phase1SendBtn').disabled = false;
+        // reset parts UI when type changes
+        initPartsUI(e.target.value);
+      });
+    });
+
+    // Phase 1 edit controls
+    const phase1EditBtn = document.getElementById('phase1EditBtn');
+    const phase1ResetEditBtn = document.getElementById('phase1ResetEditBtn');
+    const phase1EditArea = document.getElementById('phase1EditArea');
+    const phase1EditTextarea = document.getElementById('phase1EditTextarea');
+    const phase1SaveEditBtn = document.getElementById('phase1SaveEditBtn');
+    const phase1CancelEditBtn = document.getElementById('phase1CancelEditBtn');
+
+    phase1EditBtn && phase1EditBtn.addEventListener('click', () => {
+      const current = document.getElementById('messagePreviewText').textContent || '';
+      phase1EditTextarea.value = current;
+      phase1EditArea.classList.remove('d-none');
+      phase1EditBtn.classList.add('d-none');
+      phase1ResetEditBtn.classList.remove('d-none');
+    });
+
+    phase1ResetEditBtn && phase1ResetEditBtn.addEventListener('click', () => {
+      editedOpeningText = null;
+      phase1EditArea.classList.add('d-none');
+      phase1EditBtn.classList.remove('d-none');
+      phase1ResetEditBtn.classList.add('d-none');
+      // re-render preview based on selected type
+      const sel = document.querySelector('input[name="openingMessageType"]:checked');
+      if (sel) showMessagePreview(sel.value);
+      initPartsUI(sel ? sel.value : (Object.keys(OPENING_MESSAGES)[0]));
+    });
+
+    phase1SaveEditBtn && phase1SaveEditBtn.addEventListener('click', () => {
+      editedOpeningText = phase1EditTextarea.value || '';
+      phase1EditArea.classList.add('d-none');
+      phase1EditBtn.classList.remove('d-none');
+      phase1ResetEditBtn.classList.remove('d-none');
+      const sel = document.querySelector('input[name="openingMessageType"]:checked');
+      if (sel) showMessagePreview(sel.value);
+      initPartsUI(sel ? sel.value : (Object.keys(OPENING_MESSAGES)[0]));
+    });
+
+    phase1CancelEditBtn && phase1CancelEditBtn.addEventListener('click', () => {
+      phase1EditArea.classList.add('d-none');
+      phase1EditBtn.classList.remove('d-none');
+    });
+
+    // Load replies for phase 1 (show responses to opening message)
+    (async () => {
+      try {
+        const res = await fetch(`${base}/whatsapp/messages/${currentFunnelLead.id}`);
+        const data = await res.json();
+        const list = document.getElementById('phase1ResponsesList');
+        if (!data.ok) {
+          if (list) list.innerHTML = '<div class="text-muted">No se pudieron cargar las respuestas</div>';
+          return;
+        }
+        const all = data.messages || [];
+        const openingAt = currentFunnelStatus.phase.opening_message_sent_at || currentFunnelStatus.phase.opening_message_sent || null;
+        const inbound = all.filter(m => (m.direction && m.direction !== 'outbound') || (m.delivery_status && m.delivery_status === 'received'))
+          .filter(m => {
+            if (!openingAt) return true;
+            const mDate = new Date(m.created_at || m.createdAt);
+            const oDate = new Date(openingAt);
+            return mDate >= oDate;
+          });
+        if (!inbound.length) {
+          if (list) list.innerHTML = '<div class="text-muted">Sin respuestas aún</div>';
+        } else {
+          if (list) list.innerHTML = inbound.map(msg => `<div style="padding:8px;margin-bottom:8px;border-radius:6px;background:#fff; border:1px solid #eee;"><div style="font-size:12px;color:#666;margin-bottom:6px;">${new Date(msg.created_at).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap;color:#333;">${(msg.message_text||msg.message||'')}</div></div>`).join('');
+        }
+      } catch (e) { console.warn('Error loading phase1 replies', e); }
+    })();
+
+    function splitIntoParts(text) {
+      if (!text) return [];
+      // Prefer splitting by double newlines (paragraphs)
+      const byParagraphs = text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+      if (byParagraphs.length > 1) return byParagraphs;
+      // Fallback: split by single newline
+      const byLines = text.split(/\n/).map(s => s.trim()).filter(Boolean);
+      if (byLines.length > 1) return byLines;
+      // Last resort: split by sentences (periods)
+      const sentences = text.match(/[^\.\!\?]+[\.\!\?]+(?:\s|$)/g);
+      if (sentences && sentences.length > 1) return sentences.map(s=>s.trim()).filter(Boolean);
+      return [text.trim()];
+    }
+
+    function renderParts() {
+      const list = document.getElementById('partsList');
+      list.innerHTML = parts.map((p, i) => `<div style="padding:6px;border-radius:4px;margin-bottom:6px;background:${i<currentPartIndex?"#e9f7ef":"#f8f9fa"};border:1px solid #eee;"><small style="font-weight:600">Parte ${i+1}</small><div style="white-space:pre-wrap;margin-top:6px">${p}</div></div>`).join('');
+      document.getElementById('sendNextPartBtn').disabled = currentPartIndex >= parts.length;
+    }
+
+    function initPartsUI(messageType) {
+      // Use strategy message if available, otherwise fallback to hardcoded messages
+      const strategyMsg = currentStrategyMessages && currentStrategyMessages[messageType];
+      const defaultMsg = OPENING_MESSAGES[messageType] || '';
+      const previewText = (editedOpeningText && String(editedOpeningText).trim()) ? editedOpeningText : (strategyMsg || defaultMsg || '');
+      parts = splitIntoParts(previewText);
+      currentPartIndex = 0;
+      renderParts();
+    }
+
+    // Toggle show parts container
+    document.getElementById('sendInPartsCheck').addEventListener('change', (ev) => {
+      const checked = ev.target.checked;
+      document.getElementById('partsContainer').style.display = checked ? 'block' : 'none';
+    });
+
+    document.getElementById('sendNextPartBtn').onclick = async () => {
+      if (!parts.length) return;
+      const sendNextPartBtn = document.getElementById('sendNextPartBtn');
+      sendNextPartBtn.disabled = true;
+      const idx = currentPartIndex;
+      const text = parts[idx];
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase1/send`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageType: document.querySelector('input[name="openingMessageType"]:checked').value, partText: text, partIndex: idx, isLastPart: idx === parts.length - 1 })
+        });
+        const data = await res.json();
+        sendNextPartBtn.disabled = false;
+        if (data.ok) {
+          currentPartIndex = Math.min(parts.length, currentPartIndex + 1);
+          renderParts();
+          if (data.status) currentFunnelStatus = data.status;
+          showToast('Parte enviada');
+          if (idx === parts.length -1) updateFunnelUI();
+        } else {
+          showToast('Error: ' + (data.error || 'No se pudo enviar la parte'));
+        }
+      } catch (e) {
+        sendNextPartBtn.disabled = false;
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('sendAllPartsBtn').onclick = async () => {
+      if (!parts.length) return;
+      const sendAllPartsBtn = document.getElementById('sendAllPartsBtn');
+      sendAllPartsBtn.disabled = true;
+      const originalText = sendAllPartsBtn.innerHTML;
+      sendAllPartsBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Enviando...</span></span>Enviando...';
+      try {
+        // Send all parts sequentially
+        for (let i = 0; i < parts.length; i++) {
+          const isLast = i === parts.length - 1;
+          const text = parts[i];
+          const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase1/send`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messageType: document.querySelector('input[name="openingMessageType"]:checked').value, partText: text, partIndex: i, isLastPart: isLast, sendAll: isLast })
+          });
+          const data = await res.json();
+          if (!data.ok) { showToast('Error enviando parte ' + (i+1)); break; }
+          currentPartIndex = i + 1;
+          renderParts();
+        }
+        showToast('Todas las partes enviadas');
+        currentFunnelStatus = (await (await fetch(`${base}/leads/${currentFunnelLead.id}/funnel`)).json()).status;
+        updateFunnelUI();
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      } finally {
+        sendAllPartsBtn.disabled = false;
+        sendAllPartsBtn.innerHTML = originalText;
+      }
+    };
+
+    document.getElementById('phase1SendBtn').onclick = async () => {
+      const messageType = document.querySelector('input[name="openingMessageType"]:checked').value;
+      if (!messageType) {
+        showToast('Por favor selecciona un tipo de mensaje');
+        return;
+      }
+
+      // Validate phone has prefix
+      const leadPhone = currentFunnelLead?.phone || '';
+      if (!leadPhone || (!leadPhone.startsWith('+') && !leadPhone.startsWith('00'))) {
+        showToast('El número del lead no incluye prefijo internacional. Añade el prefijo (ej: +34) al teléfono del lead antes de enviar.');
+        return;
+      }
+
+      const phase1SendBtn = document.getElementById('phase1SendBtn');
+      phase1SendBtn.disabled = true;
+      const originalText = phase1SendBtn.innerHTML;
+      phase1SendBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Enviando...';
+
+      try {
+        const payload = { messageType };
+        if (editedOpeningText && editedOpeningText.trim()) payload.partText = editedOpeningText;
+        const sendInParts = document.getElementById('sendInPartsCheck').checked;
+        if (sendInParts) payload.sendAll = true;
+
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase1/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        phase1SendBtn.disabled = false;
+        phase1SendBtn.innerHTML = originalText;
+
+        if (data.ok) {
+          showToast('Mensaje de apertura enviado');
+          currentFunnelStatus = data.status;
+          updateFunnelUI();
+        } else {
+          showToast('Error: ' + data.error);
+        }
+      } catch (e) {
+        phase1SendBtn.disabled = false;
+        phase1SendBtn.innerHTML = originalText;
+        showToast('Error: ' + e.message);
+      }
+    };
+  }
+
+  function showMessagePreview(messageType) {
+    const preview = document.getElementById('messagePreview');
+    const text = document.getElementById('messagePreviewText');
+    // Use strategy message if available, otherwise fallback to hardcoded messages
+    const strategyMsg = currentStrategyMessages && currentStrategyMessages[messageType];
+    const defaultMsg = OPENING_MESSAGES[messageType] || '';
+    const content = (editedOpeningText && String(editedOpeningText).trim()) ? editedOpeningText : (strategyMsg || defaultMsg || '');
+    text.textContent = content;
+    preview.classList.remove('d-none');
+  }
+
+  // Phase 2 Setup
+  function setupPhase2() {
+    const messagesList = document.getElementById('phase2MessagesList');
+    const parseBtn = document.getElementById('parsePhase2Btn');
+    const sendCollectBtn = document.getElementById('sendPhase2CollectBtn');
+    const saveBtn = document.getElementById('savePhase2Btn');
+    const cancelBtn = document.getElementById('cancelPhase2Btn');
+    const table = document.getElementById('phase2DataTable');
+
+    // Parts UI state for Phase 2
+    let p2Parts = [];
+    let p2Index = 0;
+
+    // Pre-fill table inputs with existing data from multiple sources
+    async function prefillPhase2Form() {
+      try {
+        // Start with stored data
+        const dataToFill = Object.assign({}, currentFunnelStatus.data || {});
+
+        // Fetch lead details to get place-related information
+        const leadRes = await fetch(`${base}/leads/${currentFunnelLead.id}`);
+        const lead = await leadRes.json();
+
+        // Map lead/place fields to form fields
+        if (lead) {
+          if (!dataToFill.nombre_negocio && lead.full_name) dataToFill.nombre_negocio = lead.full_name;
+          if (!dataToFill.telefofo_contacto && lead.phone) dataToFill.telefofo_contacto = lead.phone;
+          if (!dataToFill.direccion && lead.city) dataToFill.direccion = lead.city;
+          if (!dataToFill.email && lead.email) dataToFill.email = lead.email;
+          if (!dataToFill.redes_sociales && lead.source) dataToFill.redes_sociales = lead.source;
+          if (!dataToFill.notas && lead.notes) dataToFill.notas = lead.notes;
+        }
+
+        // Populate form fields
+        Object.keys(dataToFill).forEach(key => {
+          const input = table.querySelector(`[name="${key}"]`);
+          if (input && dataToFill[key]) input.value = dataToFill[key];
+        });
+      } catch (e) {
+        console.warn('Error prefilling phase 2 form:', e);
+      }
+    }
+
+    prefillPhase2Form();
+
+    // Load inbound messages and show replies to the opening message
+    (async () => {
+      try {
+        const res = await fetch(`${base}/whatsapp/messages/${currentFunnelLead.id}`);
+        const data = await res.json();
+        if (!data.ok) {
+          messagesList.innerHTML = '<div class="text-muted" style="padding:12px;">No se pudieron cargar los mensajes</div>';
+          return;
+        }
+
+        const all = data.messages || [];
+        const openingAt = currentFunnelStatus.phase.opening_message_sent_at || currentFunnelStatus.phase.opening_message_sent || null;
+        const inbound = all.filter(m => (m.direction && m.direction !== 'outbound') || (m.delivery_status && m.delivery_status === 'received'))
+          .filter(m => {
+            if (!openingAt) return true;
+            const mDate = new Date(m.created_at || m.createdAt);
+            const oDate = new Date(openingAt);
+            return mDate >= oDate;
+          });
+
+        if (!inbound.length) {
+          messagesList.innerHTML = '<div class="text-muted" style="padding:12px;">Sin respuestas aún</div>';
+        } else {
+          messagesList.innerHTML = inbound.map(msg => `
+            <div class="message-item message-received" style="padding:8px;margin-bottom:8px;border-radius:6px;background:#f5f5f5;">
+              <div style="font-size:12px;color:#666;margin-bottom:6px;">${new Date(msg.created_at).toLocaleString('es-ES')}</div>
+              <div style="white-space:pre-wrap;color:#333;">${(msg.message_text || msg.message || msg.message_text) || ''}</div>
+            </div>
+          `).join('');
+
+          // enable parse button if there are inbound replies
+          parseBtn.disabled = false;
+        }
+      } catch (e) {
+        messagesList.innerHTML = '<div class="text-danger" style="padding:12px;">Error cargando mensajes</div>';
+      }
+    })();
+
+    // Setup preview/edit controls for Phase 2 message
+    const phase2PreviewBtn = document.getElementById('phase2PreviewBtn');
+    const phase2PreviewBox = document.getElementById('phase2MessagePreviewBox');
+    const phase2PreviewText = document.getElementById('phase2MessagePreviewText');
+    const phase2EditBtn = document.getElementById('phase2EditBtn');
+    const phase2ResetEditBtn = document.getElementById('phase2ResetEditBtn');
+    const phase2EditArea = document.getElementById('phase2EditArea');
+    const phase2EditTextarea = document.getElementById('phase2EditTextarea');
+    const phase2SaveEditBtn = document.getElementById('phase2SaveEditBtn');
+    const phase2CancelEditBtn = document.getElementById('phase2CancelEditBtn');
+    const phase2SendPartsCheckbox = document.getElementById('phase2SendParts');
+    const phase2PartsContainer = document.getElementById('phase2PartsContainer');
+    const phase2PartsList = document.getElementById('phase2PartsList');
+    const phase2SendNextPartBtn = document.getElementById('phase2SendNextPartBtn');
+    const phase2SendAllPartsBtn = document.getElementById('phase2SendAllPartsBtn');
+
+    let editedPhase2Text = null;
+
+    function p2SplitIntoParts(text) {
+      if (!text) return [];
+      const byParagraphs = text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+      if (byParagraphs.length > 1) return byParagraphs;
+      const byLines = text.split(/\n/).map(s => s.trim()).filter(Boolean);
+      if (byLines.length > 1) return byLines;
+      const sentences = text.match(/[^\.\!\?]+[\.\!\?]+(?:\s|$)/g);
+      if (sentences && sentences.length > 1) return sentences.map(s=>s.trim()).filter(Boolean);
+      return [text.trim()];
+    }
+
+    function p2RenderParts() {
+      phase2PartsList.innerHTML = p2Parts.map((p, i) => `<div style=\"padding:6px;border-radius:4px;margin-bottom:6px;background:${i<p2Index?"#e9f7ef":"#f8f9fa"};border:1px solid #eee;\"><small style=\"font-weight:600\">Parte ${i+1}</small><div style=\"white-space:pre-wrap;margin-top:6px\">${p.replace(/</g,'&lt;')}</div></div>`).join('');
+      phase2SendNextPartBtn.disabled = p2Index >= p2Parts.length;
+    }
+
+    function renderPhase2Preview() {
+      const combined = Object.assign({}, currentFunnelLead || {}, currentFunnelStatus?.data || {});
+      const lista = `• Una frase que defina lo que ofrecéis o lo que os diferencia\n• Vuestros servicios o productos principales\n• Redes sociales o alguna foto que os represente (si tenéis)\n• Estilo que os gustaría para la web: moderna, limpia, acogedora, profesional, elegante.. Si tenéis alguna web o diseño de referencia también nos sirve.`;
+      const rawTemplate = `¡Genial!  Me alegra que os interese.\n\nLo único que necesitamos para poder preparar la previsualización y que refleje bien vuestro estilo y contenido es lo siguiente:\n\n{lista_requisitos}\n\nCon eso, os preparamos la previsualización personalizada y en unos 3 días os la podemos enseñar sin compromiso.\n`;
+      const raw = rawTemplate.replace('{lista_requisitos}', lista);
+      const interpolated = (editedPhase2Text && editedPhase2Text.trim()) ? editedPhase2Text : raw;
+      const temp = interpolated.replace(/\{nombre\}/g, combined.full_name || '').replace(/\{telefono\}/g, combined.phone || '');
+      phase2PreviewText.textContent = temp;
+      phase2PreviewBox.classList.remove('d-none');
+      p2Parts = p2SplitIntoParts(temp);
+      p2Index = 0;
+      if (phase2SendPartsCheckbox && phase2SendPartsCheckbox.checked) {
+        phase2PartsContainer.style.display = 'block';
+        p2RenderParts();
+      } else {
+        phase2PartsContainer.style.display = 'none';
+      }
+    }
+
+    phase2PreviewBtn && phase2PreviewBtn.addEventListener('click', () => {
+      editedPhase2Text = null;
+      phase2EditArea.classList.add('d-none');
+      phase2ResetEditBtn.classList.add('d-none');
+      phase2EditBtn.classList.remove('d-none');
+      renderPhase2Preview();
+    });
+
+    phase2SendPartsCheckbox && phase2SendPartsCheckbox.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        // Igual que Fase 1: al activar, mostramos la previsualización y las partes
+        renderPhase2Preview();
+      } else {
+        phase2PartsContainer.style.display = 'none';
+      }
+    });
+
+    phase2SendNextPartBtn && phase2SendNextPartBtn.addEventListener('click', async () => {
+      if (p2Index >= p2Parts.length) return;
+      phase2SendNextPartBtn.disabled = true;
+      const text = p2Parts[p2Index];
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase2/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overrideText: text, sendMessage: true }) });
+        const data = await res.json();
+        phase2SendNextPartBtn.disabled = false;
+        if (data.ok) {
+          p2Index = Math.min(p2Parts.length, p2Index + 1);
+          p2RenderParts();
+          if (data.status) currentFunnelStatus = data.status;
+          showToast('Parte enviada');
+        } else showToast('Error: ' + (data.error || 'No se pudo enviar'));
+      } catch (e) {
+        phase2SendNextPartBtn.disabled = false;
+        showToast('Error: ' + e.message);
+      }
+    });
+
+    phase2SendAllPartsBtn && phase2SendAllPartsBtn.addEventListener('click', async () => {
+      if (!p2Parts.length) return;
+      phase2SendAllPartsBtn.disabled = true;
+      const originalText = phase2SendAllPartsBtn.innerHTML;
+      phase2SendAllPartsBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Enviando...</span></span>Enviando...';
+      try {
+        for (let i = 0; i < p2Parts.length; i++) {
+          const text = p2Parts[i];
+          const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase2/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overrideText: text, sendMessage: true }) });
+          const data = await res.json();
+          if (!data.ok) { showToast('Error enviando parte ' + (i+1)); break; }
+          p2Index = i + 1;
+          p2RenderParts();
+        }
+        showToast('Todas las partes enviadas');
+        const refreshed = await (await fetch(`${base}/leads/${currentFunnelLead.id}/funnel`)).json();
+        if (refreshed && refreshed.status) { currentFunnelStatus = refreshed.status; updateFunnelUI(); }
+      } catch (e) { showToast('Error: ' + e.message); }
+      finally {
+        phase2SendAllPartsBtn.disabled = false;
+        phase2SendAllPartsBtn.innerHTML = originalText;
+      }
+    });
+
+    phase2EditBtn && phase2EditBtn.addEventListener('click', () => {
+      phase2EditTextarea.value = phase2PreviewText.textContent || '';
+      phase2EditArea.classList.remove('d-none');
+      phase2EditBtn.classList.add('d-none');
+      phase2ResetEditBtn.classList.remove('d-none');
+    });
+
+    phase2ResetEditBtn && phase2ResetEditBtn.addEventListener('click', () => {
+      editedPhase2Text = null;
+      phase2EditArea.classList.add('d-none');
+      phase2EditBtn.classList.remove('d-none');
+      phase2ResetEditBtn.classList.add('d-none');
+      renderPhase2Preview();
+    });
+
+    phase2SaveEditBtn && phase2SaveEditBtn.addEventListener('click', () => {
+      editedPhase2Text = phase2EditTextarea.value || '';
+      phase2EditArea.classList.add('d-none');
+      phase2EditBtn.classList.remove('d-none');
+      phase2ResetEditBtn.classList.remove('d-none');
+      renderPhase2Preview();
+    });
+
+    phase2CancelEditBtn && phase2CancelEditBtn.addEventListener('click', () => {
+      phase2EditArea.classList.add('d-none');
+      phase2EditBtn.classList.remove('d-none');
+    });
+
+    // Send collection message (Phase 2) without saving table data
+    sendCollectBtn.onclick = async () => {
+      if (!confirm('¿Enviar el mensaje de recopilación de información a este lead?')) return;
+      sendCollectBtn.disabled = true;
+      const originalText = sendCollectBtn.innerHTML;
+      sendCollectBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Enviando...</span></span>Enviando...';
+      try {
+        const payload = {};
+        if (editedPhase2Text && editedPhase2Text.trim()) payload.overrideText = editedPhase2Text;
+        if (phase2SendPartsCheckbox && phase2SendPartsCheckbox.checked) payload.sendParts = true;
+
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase2/update`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({}, payload, { sendMessage: !payload.sendParts && !payload.overrideText }))
+        });
+        const data = await res.json();
+        sendCollectBtn.disabled = false;
+        sendCollectBtn.innerHTML = originalText;
+        if (data.ok) {
+          showToast('Mensaje de recopilación enviado');
+          currentFunnelStatus = data.status;
+          updateFunnelUI();
+        } else showToast('Error: ' + (data.error || 'No se pudo enviar'));
+      } catch (e) {
+        sendCollectBtn.disabled = false;
+        sendCollectBtn.innerHTML = originalText;
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    // Parse inbound replies using OpenAI and auto-fill table
+    parseBtn.onclick = async () => {
+      if (!confirm('¿Parsear las respuestas recibidas para rellenar automáticamente los campos?')) return;
+      parseBtn.disabled = true; parseBtn.textContent = 'Parseando...';
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase2/parse`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const data = await res.json();
+        parseBtn.disabled = false; parseBtn.textContent = 'Parsear respuestas';
+        if (data.ok) {
+          const parsed = data.parsed || {};
+          Object.keys(parsed).forEach(k => {
+            const input = table.querySelector(`[name="${k}"]`);
+            if (input) input.value = parsed[k] || '';
+          });
+          currentFunnelStatus = data.status || currentFunnelStatus;
+          updateFunnelUI();
+          showToast('Campos rellenados automáticamente');
+        } else showToast('Error: ' + (data.error || 'No se pudo parsear'));
+      } catch (e) { parseBtn.disabled = false; parseBtn.textContent = 'Parsear respuestas'; showToast('Error: ' + e.message); }
+    };
+
+    // Save table data and continue to next phase
+    saveBtn.onclick = async () => {
+      const inputs = Array.from(table.querySelectorAll('[name]'));
+      const payload = {};
+      inputs.forEach(i => { payload[i.getAttribute('name')] = i.value; });
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase2/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (data.ok) {
+          showToast('Datos de Fase 2 guardados');
+          currentFunnelStatus = data.status; updateFunnelUI();
+        } else showToast('Error: ' + (data.error || 'No se pudo guardar'));
+      } catch (e) { showToast('Error: ' + e.message); }
+    };
+
+    cancelBtn.onclick = () => { updateFunnelUI(); };
+  }
+
+  // Phase 3 Setup
+  function setupPhase3() {
+    // Always show parsed lead data for easy copy
+    showParsedLeadData(currentFunnelStatus.data || {});
+
+    if (currentFunnelStatus.lastPrompt) {
+      // Show stored designer brief (from previous generation)
+      showPhase3Prompt(currentFunnelStatus.lastPrompt.prompt_content);
+      document.getElementById('phase3RegenerateBtn').style.display = 'block';
+    }
+
+    document.getElementById('phase3GenerateBtn').onclick = async () => {
+      const spinner = document.getElementById('phase3LoadingSpinner');
+      spinner.style.display = 'block';
+
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase3/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'template' })
+        });
+        const data = await res.json();
+
+        spinner.style.display = 'none';
+
+        if (data.ok) {
+          if (data.prompt && typeof data.prompt === 'object') {
+            showPhase3Prompt(data.prompt.designer || data.prompt.builder || data.prompt);
+          } else {
+            showPhase3Prompt(data.prompt);
+          }
+
+          currentFunnelStatus = data.status;
+          document.getElementById('phase3RegenerateBtn').style.display = 'block';
+        } else {
+          showToast('Error: ' + data.error);
+        }
+      } catch (e) {
+        spinner.style.display = 'none';
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('phase3CopyBtn').onclick = () => {
+      const text = document.getElementById('phase3PromptContent').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Plantilla copiada al portapapeles');
+      }).catch(e => showToast('Error al copiar: ' + e.message));
+    };
+
+    document.getElementById('phase3CopyDataBtn').onclick = () => {
+      const text = document.getElementById('phase3DataContent').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Datos copiados al portapapeles');
+      }).catch(e => showToast('Error al copiar: ' + e.message));
+    };
+
+    document.getElementById('phase3RegenerateBtn').onclick = async () => {
+      if (!confirm('¿Regenerar la plantilla? Esto creará una nueva versión.') ) return;
+      const spinner = document.getElementById('phase3LoadingSpinner');
+      spinner.style.display = 'block';
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase3/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'template' })
+        });
+        const data = await res.json();
+        spinner.style.display = 'none';
+        if (data.ok) {
+          if (data.prompt && typeof data.prompt === 'object') {
+            showPhase3Prompt(data.prompt.designer || data.prompt.builder);
+          } else {
+            showPhase3Prompt(data.prompt);
+          }
+          currentFunnelStatus = data.status;
+          showToast('Plantilla regenerada');
+        } else {
+          showToast('Error: ' + data.error);
+        }
+      } catch (e) {
+        spinner.style.display = 'none';
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    // Phase 3 edit / send wiring
+    const phase3EditBtn = document.getElementById('phase3EditBtn');
+    const phase3ResetEditBtn = document.getElementById('phase3ResetEditBtn');
+    const phase3EditArea = document.getElementById('phase3EditArea');
+    const phase3EditTextarea = document.getElementById('phase3EditTextarea');
+    const phase3SaveEditBtn = document.getElementById('phase3SaveEditBtn');
+    const phase3CancelEditBtn = document.getElementById('phase3CancelEditBtn');
+    const phase3SendBtn = document.getElementById('phase3SendBtn');
+    const phase3SendPartsCheckbox = document.getElementById('phase3SendParts');
+
+    let editedPhase3Text = null;
+
+    phase3EditBtn && phase3EditBtn.addEventListener('click', () => {
+      const content = document.getElementById('phase3PromptContent').textContent || '';
+      phase3EditTextarea.value = content;
+      phase3EditArea.classList.remove('d-none');
+      phase3EditBtn.classList.add('d-none');
+      phase3ResetEditBtn.classList.remove('d-none');
+    });
+
+    phase3ResetEditBtn && phase3ResetEditBtn.addEventListener('click', () => {
+      editedPhase3Text = null;
+      phase3EditArea.classList.add('d-none');
+      phase3EditBtn.classList.remove('d-none');
+      phase3ResetEditBtn.classList.add('d-none');
+      // re-show original prompt content
+      showPhase3Prompt(currentFunnelStatus.lastPrompt ? currentFunnelStatus.lastPrompt.prompt_content : '');
+    });
+
+    phase3SaveEditBtn && phase3SaveEditBtn.addEventListener('click', () => {
+      editedPhase3Text = phase3EditTextarea.value || '';
+      phase3EditArea.classList.add('d-none');
+      phase3EditBtn.classList.remove('d-none');
+      phase3ResetEditBtn.classList.remove('d-none');
+      document.getElementById('phase3PromptContent').textContent = editedPhase3Text;
+    });
+
+    phase3CancelEditBtn && phase3CancelEditBtn.addEventListener('click', () => {
+      phase3EditArea.classList.add('d-none');
+      phase3EditBtn.classList.remove('d-none');
+    });
+
+    phase3SendBtn && phase3SendBtn.addEventListener('click', async () => {
+      if (!confirm('¿Enviar la plantilla generada al lead?')) return;
+      phase3SendBtn.disabled = true;
+      const originalText = phase3SendBtn.innerHTML;
+      phase3SendBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Enviando...';
+      const payload = {};
+      if (editedPhase3Text && editedPhase3Text.trim()) payload.overrideText = editedPhase3Text;
+      if (phase3SendPartsCheckbox && phase3SendPartsCheckbox.checked) payload.sendParts = true;
+
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase3/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        phase3SendBtn.disabled = false;
+        phase3SendBtn.innerHTML = originalText;
+        if (data.ok) { showToast('Plantilla enviada'); currentFunnelStatus = data.status; updateFunnelUI(); }
+        else showToast('Error: ' + (data.error || 'No se pudo enviar'));
+      } catch (e) {
+        phase3SendBtn.disabled = false;
+        phase3SendBtn.innerHTML = originalText;
+        showToast('Error: ' + e.message);
+      }
+    });
+
+    document.getElementById('phase3NextBtn').onclick = () => {
+      currentFunnelStatus.phase.current_phase = 4;
+      updateFunnelUI();
+    };
+  }
+
+  function showPhase3Prompt(prompt) {
+    // Accept either a string or an object { designer, builder }
+    let text = '';
+    if (!prompt) text = '';
+    else if (typeof prompt === 'string') text = prompt;
+    else if (typeof prompt === 'object') text = prompt.builder || prompt.designer || '';
+
+    document.getElementById('phase3PromptContent').textContent = text;
+    document.getElementById('phase3PromptContainer').style.display = 'block';
+    document.getElementById('phase3GenerateBtn').style.display = 'none';
+  }
+
+  function showParsedLeadData(data) {
+    const d = data || {};
+    const out = [];
+    const nombre = (currentFunnelLead && currentFunnelLead.full_name) || d.nombre || d.full_name || '';
+    out.push(`Nombre: ${nombre}`);
+    out.push(`Sector: ${d.sector || ''}`);
+    out.push(`Descripción: ${d.descripcion || ''}`);
+    out.push(`Servicios: ${d.servicios || ''}`);
+    out.push(`Estilo/referencias visuales: ${d.estilo_web || d.referencias_visuales || ''}`);
+    out.push(`Imágenes representativas: ${d.fotos_representativas || ''}`);
+    out.push(`Dirección: ${d.direccion || ''}`);
+    out.push(`Teléfono: ${d.telefofo_contacto || d.telefono || ''}`);
+    document.getElementById('phase3DataContent').textContent = out.join('\n');
+  }
+
+  // Phase 4 Setup
+  function setupPhase4() {
+    const previewUrl = currentFunnelStatus.phase.phase_4_preview_url;
+    if (previewUrl) {
+      document.getElementById('phase4PreviewUrl').value = previewUrl;
+    }
+
+    // Setup assigned date input
+    try {
+      const assignedDateInput = document.getElementById('phase4AssignDate');
+      const assignBtn = document.getElementById('phase4AssignDateBtn');
+      const currentDate = currentFunnelLead && currentFunnelLead.preview_delivery_date ? new Date(currentFunnelLead.preview_delivery_date) : null;
+      if (assignedDateInput) {
+        assignedDateInput.value = currentDate ? new Date(currentDate.getTime() - currentDate.getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
+      }
+      if (assignBtn) {
+        assignBtn.addEventListener('click', async () => {
+          if (!currentFunnelLead || !currentFunnelLead.id) { showToast('Abre el funnel primero'); return; }
+          const val = assignedDateInput.value;
+          const payload = { preview_delivery_date: val ? new Date(val).toISOString() : null };
+          assignBtn.disabled = true;
+          try {
+            const res = await fetch(`${base}/api/calendar/leads/${currentFunnelLead.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Error');
+            currentFunnelLead = data.lead || currentFunnelLead;
+            showToast('Fecha asignada en el calendario');
+            updateFunnelUI();
+          } catch (e) {
+            showToast('Error al asignar fecha: ' + e.message);
+          } finally { assignBtn.disabled = false; }
+        });
+      }
+    } catch (e) { console.warn('setupPhase4 assign date wiring error', e); }
+
+    // Client-side Phase 4 message templates
+    const PHASE4_MESSAGES = {
+      ENTREGA_PREVIEW: `Aquí os dejo el enlace a la previsualización de vuestra web: {{url_demo}}\n\nSe trata de una web completamente escalable: se pueden añadir más secciones (servicios, galería, menú, etc.), funcionalidades como reservas, formularios de contacto, integración con redes sociales e implementar estrategias de marketing como posicionamiento SEO, según vuestras necesidades.\n\nSi simplemente buscáis algo sencillo y visual, se puede mantener esta misma estructura y ajustar textos, fotos o colores para dejarla lista y optimizada.\n\nEn cualquiera de los casos, estamos encantados de reunirnos o hablar cuando os venga bien para analizar ideas, adaptar la propuesta y ver cómo ajustarla a vuestro presupuesto sin compromiso.`,
+
+      PREVISUALIZACION: `Buenas,\nYa tenemos lista la previsualización de vuestra web😄\nSi queréis, puedo enviárosla por aquí para que la veáis tranquilos, o si preferís, puedo pasarme un momento y enseñárosla en persona, así os explico cómo funcionaría (sin ningún compromiso).\n¿Qué os viene mejor?\n`,
+
+      CLIENTE_BASICO: `Propuesta: Web básica personalizada\n\n“Si buscas algo sencillo, podemos dejar esta misma base adaptándola con vuestros textos, colores y fotos reales.y en menos de una semana estaría publicada.\n\n“Incluiríamos además vuestro dominio, hosting, email profesional y la optimización para que aparezcáis bien en Google Maps.”\n\nIncluye:\n- landing page con tus secciones principales (inicio, servicios, contacto).\n- Adaptación visual con tu identidad.\n- Optimización SEO local básica.\n- Hosting + dominio + email\n\nPrecio orientativo: 250–400 € / mantenimiento mensual 15–25 €/mes`,
+
+      CLIENTE_INTERESADO: `Propuesta: Web personalizada + optimizada\n\nPodemos partir de esta base y adaptarla por completo a vuestro negocio: colores, fotos, secciones, textos, todo ajustado a vuestra imagen.\nTambién podemos añadir secciones nuevas (Carta, Servicios, Galería, Reservas, Blog…) y dejarla lista para posicionar en Google.\n\nIncluye:\n- Hasta 4–6 páginas personalizadas.\n- Diseño ajustado al branding real.\n- Formularios, reservas o integración de redes.\n- Optimización SEO on-page.\n- Hosting + dominio + mail + mantenimiento\n\nPrecio orientativo: 600–900 €.`,
+
+      CLIENTE_AMBICIOSO: `Propuesta: Web profesional y escalable\n\nPodemos desarrollar una web completa, partiendo de esta base visual, pero estructurada para crecer: con panel de gestión, posicionamiento SEO, posibilidad de multilenguaje o integración de sistemas externos (reservas, CRM, catálogo…).\nBase sólida para crecer online y atraer clientes de forma profesional.\n\nIncluye:\n- 6–10 páginas profesionales.\n- Panel de edición o CMS básico (para cambiar contenidos).\n- SEO avanzado + analítica.\n- Integraciones (reserva, formulario avanzado, etc.).\n- Diseño a medida.\n\nPrecio orientativo: 1.000–1.800 €.`,
+    };
+
+    // State
+    let selectedPhase4Type = null;
+    let editedPhase4Text = null; // holds user-edited override text
+    let phase4Parts = [];
+    let phase4CurrentPartIndex = 0;
+
+    function p4SplitIntoParts(text) {
+      if (!text) return [];
+      const byParagraphs = text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+      if (byParagraphs.length > 1) return byParagraphs;
+      const byLines = text.split(/\n/).map(s => s.trim()).filter(Boolean);
+      if (byLines.length > 1) return byLines;
+      return [text.trim()];
+    }
+
+    function renderPhase4Parts() {
+      const list = document.getElementById('phase4PartsList');
+      list.innerHTML = phase4Parts.map((p, i) => `<div style="padding:6px;border-radius:4px;margin-bottom:6px;background:${i<phase4CurrentPartIndex?"#e9f7ef":"#f8f9fa"};border:1px solid #eee;"><small style="font-weight:600">Parte ${i+1}</small><div style="white-space:pre-wrap;margin-top:6px;font-size:0.9rem;">${p}</div></div>`).join('');
+      document.getElementById('phase4SendNextPartBtn').disabled = phase4CurrentPartIndex >= phase4Parts.length;
+    }
+
+    function renderPhase4Preview(type) {
+      const url = document.getElementById('phase4PreviewUrl').value || previewUrl || '{{url_demo}}';
+      const raw = PHASE4_MESSAGES[type] || PHASE4_MESSAGES.PREVISUALIZACION;
+      const text = raw.replace(/\{url_demo\}/g, url);
+      const box = document.getElementById('phase4MessagePreviewBox');
+      const p = document.getElementById('phase4MessagePreviewText');
+      const displayText = editedPhase4Text && type === selectedPhase4Type ? editedPhase4Text : text;
+      p.textContent = displayText;
+      box.classList.remove('d-none');
+
+      // Update parts if "Enviar por partes" is checked
+      if (document.getElementById('phase4SendPartsCheck').checked) {
+        phase4Parts = p4SplitIntoParts(displayText);
+        phase4CurrentPartIndex = 0;
+        document.getElementById('phase4PartsContainer').style.display = 'block';
+        renderPhase4Parts();
+      } else {
+        document.getElementById('phase4PartsContainer').style.display = 'none';
+      }
+    }
+
+    // Toggle parts container visibility
+    document.getElementById('phase4SendPartsCheck').addEventListener('change', (ev) => {
+      if (selectedPhase4Type && ev.target.checked) {
+        renderPhase4Preview(selectedPhase4Type);
+      } else {
+        document.getElementById('phase4PartsContainer').style.display = 'none';
+      }
+    });
+
+    // Send next part button
+    document.getElementById('phase4SendNextPartBtn').onclick = async () => {
+      if (!phase4Parts.length) return;
+      const phase4SendNextPartBtn = document.getElementById('phase4SendNextPartBtn');
+      phase4SendNextPartBtn.disabled = true;
+      const idx = phase4CurrentPartIndex;
+      const text = phase4Parts[idx];
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase4/send`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageType: selectedPhase4Type, overrideText: text, isLastPart: idx === phase4Parts.length - 1 })
+        });
+        const data = await res.json();
+        phase4SendNextPartBtn.disabled = false;
+        if (data.ok) {
+          phase4CurrentPartIndex = Math.min(phase4Parts.length, phase4CurrentPartIndex + 1);
+          renderPhase4Parts();
+          if (data.status) currentFunnelStatus = data.status;
+          showToast('Parte enviada');
+          if (idx === phase4Parts.length - 1) updateFunnelUI();
+        } else {
+          showToast('Error: ' + (data.error || 'No se pudo enviar la parte'));
+        }
+      } catch (e) {
+        phase4SendNextPartBtn.disabled = false;
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    // Send all parts button
+    document.getElementById('phase4SendAllPartsBtn').onclick = async () => {
+      if (!phase4Parts.length) return;
+      const phase4SendAllPartsBtn = document.getElementById('phase4SendAllPartsBtn');
+      phase4SendAllPartsBtn.disabled = true;
+      const originalText = phase4SendAllPartsBtn.innerHTML;
+      phase4SendAllPartsBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Enviando...</span></span>Enviando...';
+      try {
+        for (let i = 0; i < phase4Parts.length; i++) {
+          const isLast = i === phase4Parts.length - 1;
+          const text = phase4Parts[i];
+          const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase4/send`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messageType: selectedPhase4Type, overrideText: text, isLastPart: isLast, sendAll: isLast })
+          });
+          const data = await res.json();
+          if (!data.ok) { showToast('Error enviando parte ' + (i+1)); break; }
+          phase4CurrentPartIndex = i + 1;
+          renderPhase4Parts();
+        }
+        showToast('Todas las partes enviadas');
+        currentFunnelStatus = (await (await fetch(`${base}/leads/${currentFunnelLead.id}/funnel`)).json()).status;
+        updateFunnelUI();
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      } finally {
+        phase4SendAllPartsBtn.disabled = false;
+        phase4SendAllPartsBtn.innerHTML = originalText;
+      }
+    };
+
+    // Wire message type buttons
+    const btns = document.querySelectorAll('#phase4MessageButtons button');
+    btns.forEach(b => {
+      b.addEventListener('click', (ev) => {
+        selectedPhase4Type = b.getAttribute('data-message-type');
+        // active styling
+        btns.forEach(x => x.classList.remove('btn-primary'));
+        btns.forEach(x => x.classList.add('btn-outline-primary'));
+        b.classList.remove('btn-outline-primary');
+        b.classList.add('btn-primary');
+
+        // clear any edit area
+        editedPhase4Text = null;
+        document.getElementById('phase4EditArea').classList.add('d-none');
+        document.getElementById('phase4ResetEditBtn').classList.add('d-none');
+        document.getElementById('phase4EditBtn').classList.remove('d-none');
+
+        renderPhase4Preview(selectedPhase4Type);
+        document.getElementById('phase4SendBtn').disabled = false;
+      });
+    });
+
+    // Edit controls
+    const editBtn = document.getElementById('phase4EditBtn');
+    const resetEditBtn = document.getElementById('phase4ResetEditBtn');
+    const editArea = document.getElementById('phase4EditArea');
+    const editTextarea = document.getElementById('phase4EditTextarea');
+    const saveEditBtn = document.getElementById('phase4SaveEditBtn');
+    const cancelEditBtn = document.getElementById('phase4CancelEditBtn');
+
+    editBtn && editBtn.addEventListener('click', () => {
+      const p = document.getElementById('phase4MessagePreviewText');
+      editTextarea.value = p.textContent || '';
+      editArea.classList.remove('d-none');
+      editBtn.classList.add('d-none');
+      resetEditBtn.classList.remove('d-none');
+    });
+
+    resetEditBtn && resetEditBtn.addEventListener('click', () => {
+      // discard edits and re-render template
+      editedPhase4Text = null;
+      document.getElementById('phase4EditArea').classList.add('d-none');
+      document.getElementById('phase4EditBtn').classList.remove('d-none');
+      resetEditBtn.classList.add('d-none');
+      renderPhase4Preview(selectedPhase4Type);
+    });
+
+    saveEditBtn && saveEditBtn.addEventListener('click', () => {
+      editedPhase4Text = editTextarea.value || '';
+      document.getElementById('phase4EditArea').classList.add('d-none');
+      document.getElementById('phase4EditBtn').classList.remove('d-none');
+      document.getElementById('phase4ResetEditBtn').classList.remove('d-none');
+      renderPhase4Preview(selectedPhase4Type);
+      document.getElementById('phase4SendBtn').disabled = false;
+    });
+
+    cancelEditBtn && cancelEditBtn.addEventListener('click', () => {
+      // don't save, just hide edit area
+      document.getElementById('phase4EditArea').classList.add('d-none');
+      document.getElementById('phase4EditBtn').classList.remove('d-none');
+    });
+
+    // Update preview URL
+    document.getElementById('phase4UpdateUrlBtn').onclick = async () => {
+      const url = document.getElementById('phase4PreviewUrl').value;
+      if (!url) { showToast('Por favor ingresa una URL'); return; }
+      try {
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase4/preview`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ previewUrl: url }) });
+        const data = await res.json();
+        if (data.ok) { showToast('URL guardada'); currentFunnelStatus = data.status; if (selectedPhase4Type) renderPhase4Preview(selectedPhase4Type); }
+        else showToast('Error: ' + (data.error || 'No se pudo guardar'));
+      } catch (e) { showToast('Error: ' + e.message); }
+    };
+
+    // Send selected message (include edited override text if available)
+    document.getElementById('phase4SendBtn').onclick = async () => {
+      if (!selectedPhase4Type) selectedPhase4Type = 'PREVISUALIZACION';
+      if (!confirm('¿Enviar el mensaje seleccionado?')) return;
+
+      const leadPhone = currentFunnelLead?.phone || '';
+      if (!leadPhone || (!leadPhone.startsWith('+') && !leadPhone.startsWith('00'))) { showToast('El número del lead no incluye prefijo internacional. Añade el prefijo (ej: +34) al teléfono del lead antes de enviar.'); return; }
+
+      const phase4SendBtn = document.getElementById('phase4SendBtn');
+      phase4SendBtn.disabled = true;
+      const originalText = phase4SendBtn.innerHTML;
+      phase4SendBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Enviando...';
+
+      try {
+        const payload = { messageType: selectedPhase4Type };
+        if (editedPhase4Text && String(editedPhase4Text).trim()) payload.overrideText = editedPhase4Text;
+        const sendInParts = document.getElementById('phase4SendPartsCheck').checked;
+        if (sendInParts) payload.sendParts = true;
+
+        const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase4/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        phase4SendBtn.disabled = false;
+        phase4SendBtn.innerHTML = originalText;
+        if (data.ok) { showToast('Mensaje enviado'); currentFunnelStatus = data.status; updateFunnelUI(); }
+        else showToast('Error: ' + (data.error || 'No se pudo enviar'));
+      } catch (e) {
+        phase4SendBtn.disabled = false;
+        phase4SendBtn.innerHTML = originalText;
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    // If there's an existing preview url, pre-select preview type
+    if (previewUrl) {
+      const previewBtn = document.querySelector('#phase4MessageButtons button[data-message-type="PREVISUALIZACION"]');
+      if (previewBtn) { previewBtn.click(); }
+    }
+  }
+
+  // Prev / Next navigation handlers
+  document.getElementById('funnelPrevBtn').onclick = () => {
+    let phase = currentFunnelStatus.phase.current_phase;
+    if (phase > 1) {
+      phase = phase - 1;
+      // Para comercial_pro, saltar fase 3
+      if (userRole === 'comercial_pro' && phase === 3) {
+        phase = 2;
+      }
+      currentFunnelStatus.phase.current_phase = phase;
+      updateFunnelUI();
+    }
+  };
+
+  document.getElementById('funnelNextBtn').onclick = () => {
+    let phase = currentFunnelStatus.phase.current_phase;
+    if (phase < 4) {
+      phase = phase + 1;
+      // Para comercial_pro, saltar fase 3
+      if (userRole === 'comercial_pro' && phase === 3) {
+        phase = 4;
+      }
+      currentFunnelStatus.phase.current_phase = phase;
+      updateFunnelUI();
+    }
+  };
+
+  // Attach checkbox handlers for manual phase marking (executed once)
+  if (!window.funnelCheckboxHandlersAttached) {
+    window.funnelCheckboxHandlersAttached = true;
+
+    const attachToggle = (phase) => {
+      document.addEventListener('change', async (ev) => {
+        if (!ev.target) return;
+        const id = ev.target.id;
+        if (id !== `phase${phase}Check`) return;
+
+        const completed = ev.target.checked;
+        if (!currentFunnelLead) { showToast('Abre un funnel primero'); return; }
+
+        try {
+          const res = await fetch(`${base}/leads/${currentFunnelLead.id}/funnel/phase/${phase}/toggle`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ completed })
+          });
+          const data = await res.json();
+          if (data.ok) { currentFunnelStatus = data.status; updateFunnelUI(); }
+          else showToast('Error: ' + data.error);
+        } catch (err) { showToast('Error: ' + err.message); }
+      });
+    };
+
+    [1,2,3,4].forEach(p => attachToggle(p));
+  }
+
+  function updatePhase4MessagePreview() {
+    const url = document.getElementById('phase4PreviewUrl').value || '{{url_demo}}';
+    const phase4Message = `Buenas,
+Ya tenemos lista la previsualización de vuestra web!
+Si queréis, puedo enviárosla por aquí para que la veáis tranquilos, o si preferís, puedo pasarme un momento y enseñárosla en persona, así os explico cómo funcionaría (sin ningún compromiso).
+¿Qué os viene mejor?
+`;
+    
+    document.getElementById('phase4MessagePreview').textContent = phase4Message;
+  }
+</script>

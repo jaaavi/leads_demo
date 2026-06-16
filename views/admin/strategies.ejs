@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estrategias de Mensajes - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body { background: #f7f9fc; }
+    .page-container { max-width: 1200px; margin: 28px auto; padding: 0 15px; }
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    .strategy-card { transition: all 0.3s ease; border: 2px solid #e0e0e0; }
+    .strategy-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .strategy-card.active { border-color: #1976d2; background: #f5f9ff; }
+    .btn-icon-small { padding: 5px 8px; font-size: 12px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+    .message-list { max-height: 300px; overflow-y: auto; }
+    .message-item { padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 8px; background: #f9f9f9; }
+    .badge-phase { font-size: 11px; padding: 3px 8px; }
+    .form-section { border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: white; }
+
+    @media (max-width: 768px) {
+      .page-container { padding: 0 10px; margin: 15px auto; }
+      h1 { font-size: 1.3rem; }
+      .card { margin-bottom: 0.75rem; }
+    }
+
+    @media (max-width: 576px) {
+      .page-container { padding: 0 8px; margin: 10px auto; }
+      h1 { font-size: 1.1rem; }
+      .strategy-card { padding: 1rem 0.75rem !important; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../navbar') %>
+
+  <div class="page-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h4 mb-0"><i class="fa-solid fa-chess me-2"></i>Estrategias de Mensajes</h1>
+        <% if (typeof userRole !== 'undefined' && userRole === 'comercial_pro') { %>
+        <small class="text-muted" style="display: block; margin-top: 6px;">
+          <i class="fa-solid fa-info-circle me-1"></i>Estrategias personales - Solo visible para ti
+        </small>
+        <% } %>
+      </div>
+      <button id="createStrategyBtn" class="btn btn-success">
+        <i class="fa-solid fa-plus me-1"></i> Nueva Estrategia
+      </button>
+    </div>
+
+    <!-- Active Strategy Alert -->
+    <div id="activeStrategyAlert" class="alert alert-info mb-4" style="display: none;">
+      <i class="fa-solid fa-circle-info me-2"></i>
+      <strong>Estrategia Activa:</strong> <span id="activeStrategyName"></span>
+      <br>
+      <small>Esta es la estrategia que se utilizará en los funnels de los leads.</small>
+    </div>
+
+    <!-- Strategies List -->
+    <div id="strategiesContainer" class="row">
+      <div class="col-12">
+        <div class="alert alert-info">
+          <i class="fa-solid fa-info-circle me-2"></i>Cargando estrategias...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Strategy Modal -->
+  <div class="modal fade" id="strategyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="strategyModalTitle">Nueva Estrategia</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="strategyForm">
+            <input type="hidden" id="strategyId" />
+            
+            <div class="form-section">
+              <h6 class="mb-3"><i class="fa-solid fa-info-circle me-2" style="color: #1976d2;"></i>Información de la Estrategia</h6>
+              
+              <div class="mb-3">
+                <label class="form-label">Nombre <span style="color: red;">*</span></label>
+                <input type="text" id="strategyName" class="form-control" placeholder="Ej: Estrategia Premium" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea id="strategyDescription" class="form-control" rows="3" placeholder="Describe esta estrategia..."></textarea>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h6 class="mb-3"><i class="fa-brands fa-whatsapp me-2" style="color: #25d366;"></i>Mensajes de la Estrategia</h6>
+              
+              <div id="messagesContainer" style="margin-bottom: 15px;"></div>
+              
+              <button type="button" id="addMessageBtn" class="btn btn-outline-primary btn-sm">
+                <i class="fa-solid fa-plus me-1"></i> Agregar Mensaje
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="saveStrategyBtn" class="btn btn-primary">Guardar Estrategia</button>
+          <button type="button" id="deleteStrategyBtn" class="btn btn-danger" style="display: none;">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+    <div id="toastEl" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastBody">Mensaje</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const base = '';
+    const apiJson = async (p, opt = {}) => fetch(p, Object.assign({ headers: { Accept: 'application/json' } }, opt)).then(r=>r.json());
+    const toast = new bootstrap.Toast(document.getElementById('toastEl'));
+    const strategyModal = new bootstrap.Modal(document.getElementById('strategyModal'));
+
+    let allStrategies = [];
+    let currentStrategyId = null;
+
+    function showToast(msg) {
+      document.getElementById('toastBody').textContent = msg;
+      toast.show();
+    }
+
+    async function loadStrategies() {
+      try {
+        const response = await apiJson(`${base}/api/admin/strategies`);
+        if (!response.ok) {
+          showToast('Error cargando estrategias');
+          return;
+        }
+
+        allStrategies = response.data || [];
+        renderStrategies();
+      } catch (error) {
+        console.error('Error loading strategies:', error);
+        showToast('Error: ' + error.message);
+      }
+    }
+
+    function renderStrategies() {
+      const container = document.getElementById('strategiesContainer');
+      const activeStrategy = allStrategies.find(s => s.isActive);
+
+      // Update active strategy alert
+      const alertEl = document.getElementById('activeStrategyAlert');
+      if (activeStrategy) {
+        alertEl.style.display = 'block';
+        document.getElementById('activeStrategyName').textContent = activeStrategy.name;
+      } else {
+        alertEl.style.display = 'none';
+      }
+
+      if (allStrategies.length === 0) {
+        container.innerHTML = '<div class="col-12"><div class="alert alert-warning"><i class="fa-solid fa-exclamation-triangle me-2"></i>No hay estrategias creadas. Crea una nueva para comenzar.</div></div>';
+        return;
+      }
+
+      container.innerHTML = allStrategies.map(strategy => `
+        <div class="col-md-6 mb-4">
+          <div class="card strategy-card ${strategy.isActive ? 'active' : ''}" style="position: relative;">
+            ${strategy.isActive ? `
+              <div style="position: absolute; top: 0; right: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #28a745, #20c997);"></div>
+            ` : ''}
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h5 class="card-title mb-0">${strategy.name}</h5>
+                  ${strategy.isActive ? '<small class="text-success fw-bold"><i class="fa-solid fa-check-circle me-1"></i>Estrategia Activa</small>' : ''}
+                </div>
+              </div>
+
+              <p class="card-text text-muted small mb-3">${strategy.description || 'Sin descripción'}</p>
+
+              <div class="mb-3">
+                <small class="fw-bold d-block mb-2" style="color: #1976d2;"><i class="fa-solid fa-message me-1"></i>Mensajes (${strategy.messages.length}):</small>
+                <div class="message-list">
+                  ${strategy.messages.length === 0 ?
+                    '<small class="text-muted">Sin mensajes configurados</small>' :
+                    strategy.messages.map(msg => {
+                      let phaseLabel = 'Fase 1';
+                      if (msg.message_type === 'RECOPILACION') phaseLabel = 'Fase 2';
+                      else if (['PREVISUALIZACION', 'CLIENTE_BASICO', 'CLIENTE_INTERESADO', 'CLIENTE_AMBICIOSO'].includes(msg.message_type)) phaseLabel = 'Fase 4';
+
+                      return `
+                        <div class="message-item">
+                          <div style="font-size: 12px;">
+                            <strong>${msg.message_type}</strong>
+                            <span class="badge badge-phase bg-info" style="font-size: 10px;">${phaseLabel}</span>
+                          </div>
+                          <div style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.4; max-height: 40px; overflow: hidden;">${msg.content.substring(0, 80)}...</div>
+                        </div>
+                      `;
+                    }).join('')
+                  }
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm flex-grow-1" onclick="editStrategy(${strategy.id})">
+                  <i class="fa-solid fa-pen me-1"></i> Editar
+                </button>
+                ${!strategy.isActive ? `
+                  <button class="btn btn-outline-success btn-sm" onclick="activateStrategy(${strategy.id})" title="Usar esta estrategia en el funnel">
+                    <i class="fa-solid fa-star me-1"></i> Activar
+                  </button>
+                ` : `
+                  <span class="btn btn-success btn-sm disabled">
+                    <i class="fa-solid fa-check me-1"></i> Activa
+                  </span>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function editStrategy(id) {
+      const strategy = allStrategies.find(s => s.id === id);
+      if (!strategy) return;
+
+      currentStrategyId = id;
+      document.getElementById('strategyModalTitle').textContent = 'Editar Estrategia';
+      document.getElementById('strategyId').value = id;
+      document.getElementById('strategyName').value = strategy.name;
+      document.getElementById('strategyDescription').value = strategy.description || '';
+      document.getElementById('deleteStrategyBtn').style.display = 'block';
+
+      renderMessageInputs(strategy.messages);
+      strategyModal.show();
+    }
+
+    function renderMessageInputs(messages = []) {
+      const container = document.getElementById('messagesContainer');
+      const messageTypes = {
+        'Fase 1 - Mensajes de Apertura': ['NATURAL', 'CORTA', 'AGENCIA', 'PERSONAL'],
+        'Fase 2 - Recopilación': ['RECOPILACION'],
+        'Fase 4 - Previsualización y Propuestas': ['PREVISUALIZACION', 'CLIENTE_BASICO', 'CLIENTE_INTERESADO', 'CLIENTE_AMBICIOSO']
+      };
+
+      let html = '';
+      for (const [phaseLabel, types] of Object.entries(messageTypes)) {
+        html += `<div class="mb-4">
+          <h6 class="mb-3" style="color: #1976d2; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px;">
+            <i class="fa-solid fa-layer-group me-2"></i>${phaseLabel}
+          </h6>
+          <div class="row">`;
+
+        types.forEach(type => {
+          const existing = messages.find(m => m.message_type === type);
+          html += `
+            <div class="col-md-6 mb-3">
+              <div class="p-2 border rounded" style="background: #fafafa; height: 100%;">
+                <label class="form-label fw-600" style="margin-bottom: 8px; display: block;">
+                  <i class="fa-solid fa-comment-dots me-1" style="color: #25d366;"></i>${type}
+                </label>
+                <textarea class="form-control form-control-sm message-content"
+                  data-type="${type}"
+                  rows="4"
+                  placeholder="Ingresa el mensaje para ${type}...">${existing ? existing.content : ''}</textarea>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    async function activateStrategy(id) {
+      if (!confirm('¿Activar esta estrategia?')) return;
+
+      try {
+        const response = await apiJson(`${base}/api/admin/strategies/${id}/activate`, { method: 'POST' });
+        if (response.ok) {
+          showToast('Estrategia activada');
+          await loadStrategies();
+        } else {
+          showToast('Error: ' + (response.error || 'No se pudo activar'));
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message);
+      }
+    }
+
+    document.getElementById('createStrategyBtn').onclick = () => {
+      currentStrategyId = null;
+      document.getElementById('strategyId').value = '';
+      document.getElementById('strategyModalTitle').textContent = 'Nueva Estrategia';
+      document.getElementById('strategyName').value = '';
+      document.getElementById('strategyDescription').value = '';
+      document.getElementById('deleteStrategyBtn').style.display = 'none';
+      renderMessageInputs([]);
+      strategyModal.show();
+    };
+
+    document.getElementById('saveStrategyBtn').onclick = async () => {
+      const name = document.getElementById('strategyName').value.trim();
+      const description = document.getElementById('strategyDescription').value.trim();
+
+      if (!name) {
+        showToast('Por favor ingresa un nombre para la estrategia');
+        return;
+      }
+
+      const messages = {};
+      document.querySelectorAll('.message-content').forEach(textarea => {
+        const type = textarea.getAttribute('data-type');
+        const content = textarea.value.trim();
+        if (content) {
+          messages[type] = { content, phase: 1 };
+        }
+      });
+
+      const payload = { name, description };
+      if (Object.keys(messages).length > 0) {
+        payload.messages = messages;
+      }
+
+      try {
+        const method = currentStrategyId ? 'PUT' : 'POST';
+        const url = currentStrategyId ? 
+          `${base}/api/admin/strategies/${currentStrategyId}` :
+          `${base}/api/admin/strategies`;
+
+        const response = await apiJson(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          showToast(currentStrategyId ? 'Estrategia actualizada' : 'Estrategia creada');
+          strategyModal.hide();
+          await loadStrategies();
+        } else {
+          showToast('Error: ' + (response.error || 'No se pudo guardar'));
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message);
+      }
+    };
+
+    document.getElementById('deleteStrategyBtn').onclick = async () => {
+      if (!confirm('¿Eliminar esta estrategia? No se puede deshacer.')) return;
+
+      try {
+        const response = await apiJson(`${base}/api/admin/strategies/${currentStrategyId}`, { method: 'DELETE' });
+        if (response.ok) {
+          showToast('Estrategia eliminada');
+          strategyModal.hide();
+          await loadStrategies();
+        } else {
+          showToast('Error: ' + (response.error || 'No se pudo eliminar'));
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message);
+      }
+    };
+
+    loadStrategies();
+  </script>
+</body>
+</html>

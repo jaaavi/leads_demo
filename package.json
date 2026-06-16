@@ -1,0 +1,19 @@
+{
+  "name": "leads-demo-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo publica del dashboard de leads con mock data y sin base de datos.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.17.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

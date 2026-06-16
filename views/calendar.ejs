@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body { background: #f7f9fc; }
+    .page { max-width: 1200px; margin: 28px auto; padding: 0 15px; }
+    .calendar-card { padding: 16px; }
+    .lead-list { max-height: 420px; overflow-y: auto; }
+    .lead-item { display:flex; align-items:center; justify-content:space-between; padding:8px; border-bottom:1px solid #eef2f7; }
+    .lead-name { font-weight:600; }
+    .assign-input { max-width: 220px; }
+
+    /* Responsive rules kept consistent with other pages */
+    @media (max-width: 768px) {
+      .page { padding: 0 10px; margin: 15px auto; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="page container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4 mb-0">Calendario</h1>
+      <div>
+        <button id="refreshBtn" class="btn btn-outline-secondary"><i class="fa-solid fa-arrows-rotate"></i></button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8 mb-3">
+        <div class="card card-shadow calendar-card">
+          <div id="calendar"></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card card-shadow p-3">
+          <h5 class="mb-3">Crear recordatorio</h5>
+          <form id="reminderForm" class="mb-4">
+            <div class="mb-3">
+              <label class="form-label">Buscar lead</label>
+              <input type="text" id="leadSearch" class="form-control" placeholder="Nombre o teléfono..." autocomplete="off">
+              <div id="leadSearchResults" class="list-group mt-2" style="max-height: 200px; overflow-y: auto; display: none;"></div>
+              <input type="hidden" id="selectedLeadId">
+              <small id="selectedLeadInfo" class="text-muted"></small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tipo de recordatorio</label>
+              <select id="reminderSubject" class="form-select" required>
+                <option value="">-- Seleccionar --</option>
+                <option value="previsualización">Previsualización</option>
+                <option value="visita_en_persona">Visita en persona</option>
+                <option value="contactar_de_nuevo">Contactar de nuevo</option>
+                <option value="insistir">Insistir</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha y hora</label>
+              <input type="datetime-local" id="reminderDateTime" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-calendar-plus me-2"></i>Crear recordatorio</button>
+          </form>
+
+          <hr class="my-4">
+
+          <h6 class="mb-3">Recordatorios creados</h6>
+          <div class="lead-list" id="leadList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+  <script>
+    const apiGetLeads = '/api/calendar/leads';
+    const apiSearch = '/api/calendar/leads/search';
+    const apiUpdate = (id) => `/api/calendar/leads/${id}`;
+
+    let calendar;
+    let leads = [];
+    let searchTimeout;
+
+    function showToast(msg) {
+      const toastDiv = document.createElement('div');
+      toastDiv.className = 'toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3';
+      toastDiv.setAttribute('role', 'alert');
+      toastDiv.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div></div>`;
+      document.body.appendChild(toastDiv);
+      const toast = new bootstrap.Toast(toastDiv);
+      toast.show();
+      setTimeout(() => toastDiv.remove(), 3000);
+    }
+
+    function formatReminderSubject(subject) {
+      const map = {
+        'previsualización': 'Previsualización',
+        'visita_en_persona': 'Visita en persona',
+        'contactar_de_nuevo': 'Contactar de nuevo',
+        'insistir': 'Insistir'
+      };
+      return map[subject] || subject;
+    }
+
+    function renderLeadsList() {
+      const container = document.getElementById('leadList');
+      if (leads.length === 0) {
+        container.innerHTML = '<p class="text-muted small">No hay recordatorios creados</p>';
+        return;
+      }
+
+      const leadsWithDates = leads.filter(l => l.preview_delivery_date);
+      if (leadsWithDates.length === 0) {
+        container.innerHTML = '<p class="text-muted small">No hay recordatorios con fecha</p>';
+        return;
+      }
+
+      container.innerHTML = '';
+      leadsWithDates.forEach(lead => {
+        const div = document.createElement('div');
+        div.className = 'lead-item';
+
+        const dateObj = new Date(lead.preview_delivery_date);
+        const formattedDate = dateObj.toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const reminderBadge = lead.reminder_subject ? `<span class="badge bg-info">${formatReminderSubject(lead.reminder_subject)}</span>` : '';
+
+        div.innerHTML = `
+          <div style="flex: 1;">
+            <div class="lead-name">${lead.full_name}</div>
+            <div class="text-muted small">${lead.phone || 'Sin teléfono'}</div>
+            <div class="mt-2">${reminderBadge} <small class="text-secondary">${formattedDate}</small></div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Lead search functionality
+    document.getElementById('leadSearch').addEventListener('input', async (e) => {
+      const query = e.target.value.trim();
+      const resultsDiv = document.getElementById('leadSearchResults');
+
+      if (query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`${apiSearch}?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          const leads_found = data.leads || [];
+
+          if (leads_found.length === 0) {
+            resultsDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron leads</div>';
+            resultsDiv.style.display = 'block';
+            return;
+          }
+
+          resultsDiv.innerHTML = leads_found.map(l => `
+            <button type="button" class="list-group-item list-group-item-action" data-lead-id="${l.id}" data-lead-name="${l.full_name}" data-lead-phone="${l.phone || ''}">
+              <div class="fw-bold">${l.full_name}</div>
+              <small class="text-muted">${l.phone || 'Sin teléfono'}</small>
+            </button>
+          `).join('');
+
+          resultsDiv.style.display = 'block';
+
+          resultsDiv.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const leadId = btn.getAttribute('data-lead-id');
+              const leadName = btn.getAttribute('data-lead-name');
+              const leadPhone = btn.getAttribute('data-lead-phone');
+
+              document.getElementById('selectedLeadId').value = leadId;
+              document.getElementById('leadSearch').value = '';
+              document.getElementById('selectedLeadInfo').innerHTML = `<strong>${leadName}</strong> - ${leadPhone}`;
+              resultsDiv.style.display = 'none';
+            });
+          });
+        } catch (error) {
+          console.error('Search error:', error);
+        }
+      }, 300);
+    });
+
+    // Form submission
+    document.getElementById('reminderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const leadId = document.getElementById('selectedLeadId').value;
+      const reminderSubject = document.getElementById('reminderSubject').value;
+      const reminderDateTime = document.getElementById('reminderDateTime').value;
+
+      if (!leadId) {
+        alert('Selecciona un lead');
+        return;
+      }
+
+      if (!reminderSubject) {
+        alert('Selecciona un tipo de recordatorio');
+        return;
+      }
+
+      if (!reminderDateTime) {
+        alert('Selecciona una fecha y hora');
+        return;
+      }
+
+      try {
+        const res = await fetch(apiUpdate(leadId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            preview_delivery_date: new Date(reminderDateTime).toISOString(),
+            reminder_subject: reminderSubject
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error');
+
+        showToast('Recordatorio creado correctamente');
+        document.getElementById('reminderForm').reset();
+        document.getElementById('selectedLeadId').value = '';
+        document.getElementById('selectedLeadInfo').innerHTML = '';
+
+        await loadLeads();
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    });
+
+    async function loadLeads() {
+      try {
+        const res = await fetch(apiGetLeads);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al obtener leads');
+        leads = data.leads || [];
+        renderLeadsList();
+        renderCalendarEvents();
+      } catch (e) {
+        console.error(e);
+        alert('No se pudieron cargar los leads: ' + e.message);
+      }
+    }
+
+    function renderCalendarEvents() {
+      const events = leads.filter(l => l.preview_delivery_date).map(l => {
+        const reminderLabel = l.reminder_subject ? ` (${formatReminderSubject(l.reminder_subject)})` : '';
+        return {
+          id: String(l.id),
+          title: l.full_name + reminderLabel,
+          start: l.preview_delivery_date,
+          allDay: false
+        };
+      });
+      calendar.removeAllEvents();
+      events.forEach(ev => calendar.addEvent(ev));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        selectable: true,
+        editable: true,
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+        eventClick: function(info) {
+          const leadId = info.event.id;
+          const current = info.event.start;
+          const newDate = prompt('Introduce la nueva fecha y hora (ej: 2025-02-14T15:30) o deja vacío para eliminar:', current ? current.toISOString().slice(0,16) : '');
+          if (newDate === null) return;
+          const payload = newDate ? new Date(newDate).toISOString() : null;
+          fetch(apiUpdate(leadId), { method: 'PUT', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ preview_delivery_date: payload }) })
+            .then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); loadLeads(); }).catch(e => alert('Error: ' + e.message));
+        },
+        eventDrop: function(info) {
+          const leadId = info.event.id;
+          const dt = info.event.start;
+          const payload = dt ? new Date(dt).toISOString() : null;
+          fetch(apiUpdate(leadId), { method: 'PUT', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ preview_delivery_date: payload }) })
+            .then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); loadLeads(); }).catch(e => { alert('Error: ' + e.message); info.revert(); });
+        }
+      });
+      calendar.render();
+
+      document.getElementById('refreshBtn').addEventListener('click', loadLeads);
+
+      loadLeads();
+    });
+  </script>
+</body>
+</html>

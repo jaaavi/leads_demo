@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leads - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body { background: #f7f9fc; }
+    .page { max-width: 1400px; margin: 28px auto; padding: 0 15px; }
+    .table-wrapper { overflow-x: auto; }
+    .btn-icon { padding: 8px 12px; min-width: 40px; min-height: 40px; display: inline-flex !important; align-items: center; justify-content: center; }
+    .btn-icon i { font-size: 16px; line-height: 1; display: inline; }
+    .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+    .status-new { background: #e3f2fd; color: #1565c0; }
+    .status-contacted { background: #fff3e0; color: #e65100; }
+    .status-interested { background: #f3e5f5; color: #6a1b9a; }
+    .status-negotiation { background: #fce4ec; color: #c2185b; }
+    .status-closed { background: #e8f5e9; color: #2e7d32; }
+    .status-discarded { background: #ffebee; color: #c62828; }
+    .status-funnel { background: #e8f4ff; color: #0b63d6; }
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    .control-input { max-width: 300px; }
+    .control-select { max-width: 200px; }
+    .table td { vertical-align: middle; }
+    .table th { font-weight: 600; background: #f8f9fa; }
+    .avatar-init { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: white; }
+    .avatar-init-1 { background: #1976d2; }
+    .avatar-init-2 { background: #d32f2f; }
+    .avatar-init-3 { background: #388e3c; }
+    .avatar-init-4 { background: #f57c00; }
+    .avatar-init-5 { background: #7b1fa2; }
+    .lead-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .lead-tag { background: #e0e0e0; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+    .reply-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#e0e0e0; margin-right:8px; vertical-align:middle; }
+    .reply-dot.replied { background: #28a745; }
+    .bulk-actions-container { display: none; padding: 12px; background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; margin-bottom: 12px; }
+    .bulk-actions-container.visible { display: flex; }
+    .bulk-actions-container > * { display: flex; align-items: center; }
+    .bulk-actions-info { gap: 12px; width: 100%; }
+    .bulk-actions-buttons { gap: 8px; margin-left: auto; }
+    .bulk-actions-buttons button { padding: 6px 12px; font-size: 13px; }
+    .row-checkbox { cursor: pointer; }
+    .modal-tabs .nav-tabs { border-bottom: 2px solid #dee2e6; }
+    .modal-tabs .nav-link { color: #666; border: none; border-bottom: 3px solid transparent; }
+    .modal-tabs .nav-link.active { border-bottom: 3px solid #1976d2; color: #1976d2; }
+    .history-item { padding: 12px; border-left: 3px solid #1976d2; background: #f5f5f5; margin-bottom: 8px; border-radius: 4px; }
+    .history-item .timestamp { font-size: 12px; color: #999; }
+    .history-item .user-name { font-weight: 600; color: #333; }
+    .message-box { background: #f0f0f0; padding: 12px; border-radius: 8px; margin-top: 12px; }
+    .message-item { padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 13px; }
+    .message-sent { background: #e3f2fd; border-left: 3px solid #1976d2; }
+    .message-received { background: #f5f5f5; border-left: 3px solid #999; }
+    .form-control.is-invalid, .form-select.is-invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .required-indicator {
+      color: #dc3545;
+      font-weight: bold;
+    }
+    @media (max-width: 768px) {
+      .page { padding: 0 10px; margin: 15px auto; }
+      .controls { flex-direction: column; gap:8px; }
+      .controls .form-control { width:100%; }
+      .control-input, .control-select { max-width: 100%; }
+      .table { font-size: 12px; }
+      .table thead { font-size: 11px; }
+      .table th, .table td { padding: 0.5rem 0.25rem; }
+      .btn-icon { padding: 6px 8px; min-width: 36px; min-height: 36px; }
+      .btn-icon i { font-size: 14px; }
+      h1 { font-size: 1.3rem; }
+      .avatar-init { width: 32px; height: 32px; font-size: 11px; }
+      .status-badge { padding: 4px 8px; font-size: 11px; }
+      .modal-lg { max-width: 95vw !important; }
+      .modal-body { padding: 1rem 0.75rem; }
+      .form-label { font-size: 13px; }
+      .nav-tabs { flex-wrap: wrap; gap: 0.5rem; }
+      .nav-link { padding: 0.5rem 0.75rem; font-size: 13px; }
+    }
+
+    @media (max-width: 576px) {
+      .page { padding: 0 8px; margin: 10px auto; }
+      .controls { gap: 6px; }
+      .control-input, .control-select { max-width: 100%; }
+      .card { margin-bottom: 0.75rem; }
+      .card-shadow { box-shadow: 0 2px 8px rgba(13,38,76,0.04); }
+      .table-wrapper { overflow-x: auto; }
+      .table { font-size: 11px; }
+      .table th { font-size: 10px; }
+      .table th, .table td { padding: 0.35rem 0.15rem; }
+      .btn { padding: 0.35rem 0.5rem; font-size: 12px; }
+      .btn-sm { padding: 0.25rem 0.4rem; font-size: 11px; }
+      .btn-icon { padding: 5px 6px; min-width: 32px; min-height: 32px; }
+      .btn-icon i { font-size: 13px; }
+      h1 { font-size: 1.1rem; }
+      h5 { font-size: 1rem; }
+      h6 { font-size: 0.9rem; }
+      .avatar-init { width: 28px; height: 28px; font-size: 10px; }
+      .status-badge { padding: 3px 6px; font-size: 10px; }
+      .form-label { font-size: 12px; }
+      .form-control, .form-select { font-size: 13px; padding: 0.35rem 0.5rem; }
+      .nav-link { padding: 0.4rem 0.5rem; font-size: 12px; }
+      .lead-tag { font-size: 10px; padding: 1px 6px; }
+      .modal-header { padding: 0.75rem; }
+      .modal-body { padding: 0.75rem; }
+      .modal-footer { padding: 0.75rem; flex-wrap: wrap; }
+      .row { --bs-gutter-x: 0.5rem; }
+      .col-md-6 { padding: 0.25rem; }
+      .col-md-12 { padding: 0.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="page container-fluid">
+    <script>
+      // Store user role for client-side role-based logic
+      const userRole = '<%= typeof session !== 'undefined' && session.userRole ? session.userRole : 'admin' %>';
+      const isComercial = userRole === 'comercial';
+    </script>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4 mb-0">Leads</h1>
+      <div>
+        <button id="newLead" class="btn btn-success me-2"><i class="fa-solid fa-plus me-1"></i> Nuevo lead</button>
+        <button id="refreshBtn" class="btn btn-outline-secondary"><i class="fa-solid fa-arrows-rotate"></i></button>
+      </div>
+    </div>
+
+    <div class="card card-shadow p-3 mb-4">
+      <div class="d-flex controls gap-2 align-items-center flex-wrap">
+        <input id="q" class="form-control control-input" placeholder="Buscar por nombre, email..." />
+        <select id="status" class="form-select control-select">
+          <option value="">Todos los estados</option>
+          <option value="new">Pendiente</option>
+          <option value="funnel">En funnel</option>
+          <option value="discarded">Descartado</option>
+          <option value="closed">Cerrado</option>
+        </select>
+        <select id="funnelPhase" class="form-select control-select">
+          <option value="">Funnel: Todas las fases</option>
+          <option value="1">Funnel: Fase 1</option>
+          <option value="2">Funnel: Fase 2</option>
+          <option value="3">Funnel: Fase 3</option>
+          <option value="4">Funnel: Fase 4</option>
+        </select>
+        <select id="city" class="form-select control-select"><option value="">Todas las ciudades</option></select>
+        <select id="barrio" class="form-select control-select"><option value="">Todos los barrios</option></select>
+        <select id="phoneType" class="form-select control-select">
+          <option value="">Todos los teléfonos</option>
+          <option value="mobile">Móvil</option>
+          <option value="fixed">Fijo</option>
+        </select>
+        <select id="source" class="form-select control-select">
+          <option value="">Todas las fuentes</option>
+        </select>
+        <select id="assigned" class="form-select control-select">
+          <option value="">Todos los asignados</option>
+          <option value="unassigned">Sin asignar</option>
+        </select>
+        <select id="job" class="form-select control-select"><option value="">Todos los jobs</option></select>
+        <select id="hasWeb" class="form-select control-select">
+          <option value="">Todos</option>
+          <option value="1">Con web</option>
+          <option value="0">Sin web</option>
+        </select>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="pendingReplyFilter">
+          <label class="form-check-label" for="pendingReplyFilter">Pendiente de contestar</label>
+        </div>
+        <button id="clearBtn" class="btn btn-outline-secondary btn-sm">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="bulk-actions-container" id="bulkActionsBar">
+      <div class="bulk-actions-info">
+        <span id="selectedCount" style="font-weight: bold;">0 leads seleccionados</span>
+      </div>
+      <div class="bulk-actions-buttons">
+        <select id="assignUserSelect" class="form-select" style="max-width: 200px; margin: 0;">
+          <option value="">Seleccionar usuario...</option>
+        </select>
+        <button id="bulkAssignBtn" class="btn btn-sm btn-primary">
+          <i class="fa-solid fa-user-check me-1"></i> Asignar
+        </button>
+        <button id="bulkDeleteBtn" class="btn btn-sm btn-danger">
+          <i class="fa-solid fa-trash me-1"></i> Eliminar
+        </button>
+        <button id="bulkClearSelectionBtn" class="btn btn-sm btn-secondary">
+          Deseleccionar todo
+        </button>
+      </div>
+    </div>
+
+    <div class="card card-shadow">
+      <div class="table-wrapper">
+        <table class="table table-striped table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 40px;">
+                <input type="checkbox" id="selectAll" class="form-check-input" title="Seleccionar todo" />
+              </th>
+              <th style="width: 140px">Nombre</th>
+              <th style="width: 100px">Teléfono</th>
+              <th style="width: 110px">Estado</th>
+              <th style="width: 90px">Asignado</th>
+              <th style="width: 100px">Fuente</th>
+              <th style="width: 120px">Web</th>
+              <th style="width: 80px">Valor Est.</th>
+              <th style="width: 80px">Beneficio</th>
+              <th style="width: 100px">Últim contacto</th>
+              <th style="width: 140px; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 flex-wrap gap-2">
+        <div>
+          <small id="countInfo" style="color: #666; font-size: 13px;"></small>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="pageSizeSelect" class="form-select" style="max-width: 120px;">
+            <option value="10">10 por página</option>
+            <option value="20">20 por página</option>
+            <option value="50" selected>50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+          <button id="leadsPrev" class="btn btn-outline-primary btn-sm">Anterior</button>
+          <div style="font-size: 13px; color: #666; min-width: 120px; text-align: center;" id="leadsPage">Página 1</div>
+          <button id="leadsNext" class="btn btn-outline-primary btn-sm">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="leadModalTitle">Nuevo lead</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body modal-tabs">
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-general" data-bs-toggle="tab" data-bs-target="#content-general" type="button" role="tab">Datos generales</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-history" data-bs-toggle="tab" data-bs-target="#content-history" type="button" role="tab">Historial</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-notes" data-bs-toggle="tab" data-bs-target="#content-notes" type="button" role="tab">Notas</button>
+            </li>
+            <li class="nav-item" role="presentation" id="tab-messages-wrapper" style="display: none;">
+              <button class="nav-link" id="tab-messages" data-bs-toggle="tab" data-bs-target="#content-messages" type="button" role="tab"><i class="fa-brands fa-whatsapp me-1" style="color: #25d366;"></i>Mensajes</button>
+            </li>
+          </ul>
+          <script>
+            if (!isComercial) {
+              document.getElementById('tab-messages-wrapper').style.display = '';
+            }
+          </script>
+          
+          <div class="tab-content">
+            <div id="content-general" class="tab-pane fade show active" role="tabpanel">
+              <form id="leadForm" novalidate>
+                <input type="hidden" id="leadId" />
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre <span class="required-indicator">*</span></label>
+                    <input id="f_full_name" class="form-control" required>
+                    <div class="invalid-feedback" id="error_full_name"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Estado</label>
+                    <select id="f_status" class="form-select">
+                      <option value="new">Nuevo</option>
+                      <option value="contacted">Contactado</option>
+                      <option value="interested">Interesado</option>
+                      <option value="negotiation">En negociación</option>
+                      <option value="closed">Cerrado</option>
+                      <option value="discarded">Descartado</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input id="f_email" class="form-control" type="email">
+                    <div class="invalid-feedback" id="error_email"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Teléfono</label>
+                    <input id="f_phone" class="form-control">
+                    <div class="invalid-feedback" id="error_phone"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Ciudad</label>
+                    <input id="f_city" class="form-control">
+                    <div class="invalid-feedback" id="error_city"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Tipo de teléfono</label>
+                    <select id="f_phone_type" class="form-select">
+                      <option value="">Sin especificar</option>
+                      <option value="mobile">Móvil</option>
+                      <option value="fixed">Fijo</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Fuente</label>
+                    <input id="f_source" class="form-control" placeholder="Google Maps, Instagram...">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Método de contacto</label>
+                    <input id="f_contact_method" class="form-control" placeholder="Teléfono, Email...">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Web</label>
+                    <input id="f_web" class="form-control" placeholder="https://ejemplo.com">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Valor estimado (€)</label>
+                    <input id="f_estimated_value" class="form-control" type="number" step="0.01">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Beneficio estimado (€)</label>
+                    <input id="f_estimated_benefit" class="form-control" type="number" step="0.01">
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label">Etiquetas (separadas por coma)</label>
+                    <input id="f_tags" class="form-control" placeholder="SEO, Tienda online, Web corporativa">
+                  </div>
+                </div>
+              </form>
+            </div>
+            
+            <div id="content-history" class="tab-pane fade" role="tabpanel">
+              <div id="historyContainer" style="max-height: 400px; overflow-y: auto;">
+                <div class="text-muted" style="padding: 20px; text-align: center;">Cargando historial...</div>
+              </div>
+            </div>
+            
+            <div id="content-notes" class="tab-pane fade" role="tabpanel">
+              <div class="mb-3">
+                <label class="form-label">Notas</label>
+                <textarea id="f_notes" class="form-control" rows="6" placeholder="Añade notas sobre este lead..."></textarea>
+              </div>
+              <button type="button" id="addNoteBtn" class="btn btn-sm btn-outline-primary">
+                <i class="fa-solid fa-plus me-1"></i> Agregar nota rápida
+              </button>
+              <div id="notesHistory" style="margin-top: 16px;"></div>
+            </div>
+
+            <div id="content-messages" class="tab-pane fade" role="tabpanel">
+              <div class="message-box">
+                <div id="messagesContainer" style="max-height: 300px; overflow-y: auto; margin-bottom: 12px;">
+                  <div class="text-muted text-center" style="padding: 20px;">Sin mensajes</div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Enviar mensaje por WhatsApp</label>
+                  <textarea id="f_whatsapp_message" class="form-control" rows="4" placeholder="Escribe tu mensaje personalizado..."></textarea>
+                  <small class="text-muted">Variables disponibles: {nombre}, {phone}, {email}</small>
+                </div>
+                <button type="button" id="sendWhatsappBtn" class="btn btn-success">
+                  <i class="fa-brands fa-whatsapp me-1"></i> Enviar por WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="sendToPlacesBtn" type="button" class="btn btn-info">Enviar a places</button>
+          <button id="saveLeadBtn" type="button" class="btn btn-primary">Guardar</button>
+          <button id="deleteLeadBtn" type="button" class="btn btn-danger">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+    <div id="toastEl" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastBody">Mensaje</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <%- include('funnel-panel') %>
+
+  <script>
+    const base = '';
+    const apiJson = async (p, opt = {}) => fetch(p, Object.assign({ headers: { Accept: 'application/json' } }, opt)).then(r=>r.json());
+    const toast = new bootstrap.Toast(document.getElementById('toastEl'));
+    const leadModal = new bootstrap.Modal(document.getElementById('leadModal'));
+
+    // Clear validation errors when modal closes
+    document.getElementById('leadModal').addEventListener('hidden.bs.modal', () => {
+      showLeadValidationErrors({});
+    });
+
+    let page = 1, pageSize = 50, totalCount = 0, totalPages = 0;
+    let metaData = { sources: [], contactMethods: [], statuses: [] };
+    let users = [];
+    const selectedLeads = new Set();
+
+    function showToast(msg){ document.getElementById('toastBody').textContent = msg; toast.show(); }
+
+    function updateSelectedCount() {
+      const count = selectedLeads.size;
+      document.getElementById('bulkActionsBar').classList.toggle('visible', count > 0);
+      document.getElementById('selectedCount').textContent = `${count} lead${count !== 1 ? 's' : ''} seleccionado${count !== 1 ? 's' : ''}`;
+    }
+
+    function getStatusBadge(status, funnelPhase){
+      // If lead is closed or discarded, that should take precedence over funnel display
+      if (status === 'closed') {
+        return `<span class="status-badge status-closed">Cerrado</span>`;
+      }
+      if (status === 'discarded') {
+        return `<span class="status-badge status-discarded">Descartado</span>`;
+      }
+
+      // If there is a funnel phase and the lead is not closed/discarded, show funnel label with phase
+      if (funnelPhase) {
+        return `<span class="status-badge status-funnel">En funnel: Fase ${funnelPhase}</span>`;
+      }
+
+      const mapping = {
+        new: { label: 'Pendiente', cls: 'status-new' },
+        contacted: { label: 'Pendiente', cls: 'status-contacted' },
+        interested: { label: 'Pendiente', cls: 'status-interested' },
+        negotiation: { label: 'Pendiente', cls: 'status-negotiation' }
+      };
+
+      const info = mapping[status] || mapping.new;
+      return `<span class="status-badge ${info.cls}">${info.label}</span>`;
+    }
+
+    function getAvatarInit(username) {
+      if (!username) return '<span style="font-size:11px">Sin asignar</span>';
+      const initials = username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      const colorClass = `avatar-init-${(username.charCodeAt(0) % 5) + 1}`;
+      return `<div class="avatar-init ${colorClass}" title="${username}">${initials}</div>`;
+    }
+
+    function getReplyDot(hasReplied) {
+      if (!hasReplied) return '<span class="reply-dot" title="No contestado"></span>';
+      return '<span class="reply-dot replied" title="Ha contestado"></span>';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('es-ES');
+    }
+
+    function formatMoney(value) {
+      if (!value || value === 0) return '-';
+      return `${parseFloat(value).toFixed(2)}€`;
+    }
+
+    function makeActionsHtml(id){
+      const funnelBtn = isComercial ? '' : `<button class="btn btn-sm btn-success btn-icon funnel-btn" data-id="${id}" title="Funnel"><i class="fa-solid fa-funnel"></i></button>`;
+      return `
+        <button class="btn btn-sm btn-outline-primary btn-icon edit-btn" data-id="${id}" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-info btn-icon view-history-btn" data-id="${id}" title="Historial"><i class="fa-solid fa-clock"></i></button>
+        ${funnelBtn}
+      `;
+    }
+
+    async function loadMeta(){
+      try{
+        const meta = await apiJson(`${base}/leads/meta`);
+        if (!meta) return;
+        metaData = meta;
+
+        const jobSelect = document.getElementById('job');
+        if (meta.jobs && Array.isArray(meta.jobs)) {
+          meta.jobs.forEach(j => {
+            try {
+              const o = document.createElement('option');
+              o.value = j.id;
+              o.textContent = `${j.lugar} (ID: ${j.id})`;
+              jobSelect.appendChild(o);
+            } catch(e) {}
+          });
+        }
+
+        const citySelect = document.getElementById('city');
+        if (meta.cities && Array.isArray(meta.cities)) {
+          meta.cities.forEach(c => {
+            try { const o = document.createElement('option'); o.value = c; o.textContent = c; citySelect.appendChild(o); } catch(e){}
+          });
+        }
+
+        const barrioSelect = document.getElementById('barrio');
+        if (meta.barrios && Array.isArray(meta.barrios)) {
+          meta.barrios.forEach(b => {
+            try { const o = document.createElement('option'); o.value = b; o.textContent = b; barrioSelect.appendChild(o); } catch(e){}
+          });
+        }
+
+        const phoneTypeSelect = document.getElementById('phoneType');
+        if (meta.phoneTypes && Array.isArray(meta.phoneTypes)) {
+          meta.phoneTypes.forEach(pt => {
+            try { const o = document.createElement('option'); o.value = pt; o.textContent = pt; phoneTypeSelect.appendChild(o); } catch(e){}
+          });
+        }
+
+        const sourceSelect = document.getElementById('source');
+        if (meta.sources && Array.isArray(meta.sources)) {
+          meta.sources.forEach(s => {
+            try {
+              const o = document.createElement('option');
+              o.value = s;
+              o.textContent = s;
+              sourceSelect.appendChild(o);
+            } catch(e) {}
+          });
+        }
+
+        const resp = await apiJson(`${base}/users`);
+        if (resp && resp.data && Array.isArray(resp.data)) {
+          users = resp.data;
+          const assignedSelect = document.getElementById('assigned');
+          const assignUserSelect = document.getElementById('assignUserSelect');
+          resp.data.forEach(u => {
+            try {
+              const o = document.createElement('option');
+              o.value = u.id;
+              o.textContent = u.username;
+              assignedSelect.appendChild(o);
+
+              const o2 = document.createElement('option');
+              o2.value = u.id;
+              o2.textContent = u.username;
+              assignUserSelect.appendChild(o2);
+            } catch(e) {}
+          });
+        }
+      }catch(e){ console.warn('Error loading meta:', e); }
+    }
+
+    async function load(reset=false){
+      if(reset){ page = 1; document.getElementById('tbody').innerHTML = ''; }
+      const q = encodeURIComponent(document.getElementById('q').value||'');
+      const status = encodeURIComponent(document.getElementById('status').value||'');
+      const city = encodeURIComponent(document.getElementById('city').value||'');
+      const barrio = encodeURIComponent(document.getElementById('barrio').value||'');
+      const phoneType = encodeURIComponent(document.getElementById('phoneType').value||'');
+      const source = encodeURIComponent(document.getElementById('source').value||'');
+      const jobId = encodeURIComponent(document.getElementById('job').value||'');
+      let assigned = document.getElementById('assigned').value||'';
+      const hasWeb = encodeURIComponent(document.getElementById('hasWeb').value||'');
+      const pending = document.getElementById('pendingReplyFilter').checked ? '1' : '';
+
+      let assignedParam = '';
+      if (assigned === 'unassigned') {
+        assignedParam = 'null';
+      } else {
+        assignedParam = encodeURIComponent(assigned);
+      }
+
+      const funnelPhase = encodeURIComponent(document.getElementById('funnelPhase').value||'');
+
+      try {
+        const resp = await apiJson(`${base}/leads?q=${q}&status=${status}&city=${city}&barrio=${barrio}&phone_type=${phoneType}&source=${source}&jobId=${jobId}&assigned_to=${assignedParam}&has_web=${hasWeb}&pending_reply=${pending}&funnel_phase=${funnelPhase}&page=${page}&pageSize=${pageSize}`);
+
+        if (!resp || !resp.data) {
+          showToast('Error al cargar leads');
+          return;
+        }
+
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+
+        const leadsData = Array.isArray(resp.data) ? resp.data : [];
+        leadsData.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-id', l.id);
+        tr.setAttribute('data-phone', l.phone || '');
+        const isSelected = selectedLeads.has(l.id);
+        tr.innerHTML = `
+          <td>
+            <input type="checkbox" class="row-checkbox form-check-input" data-id="${l.id}" ${isSelected ? 'checked' : ''} />
+          </td>
+          <td><strong>${getReplyDot(l.has_replied)} ${l.full_name||''}</strong></td>
+          <td>${l.phone||''}</td>
+          <td>${getStatusBadge(l.status, l.funnel_phase)}</td>
+          <td>${getAvatarInit(l.assigned_username)}</td>
+          <td><small>${l.source||'N/A'}</small></td>
+          <td><small>${l.web ? `<a href="https://${l.web}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${l.web.substring(0, 30)}${l.web.length > 30 ? '...' : ''}</a>` : '-'}</small></td>
+          <td><small>${formatMoney(l.estimated_value)}</small></td>
+          <td><small>${formatMoney(l.estimated_benefit)}</small></td>
+          <td><small style="color:#999">${formatDate(l.last_contact_date)}</small></td>
+          <td>${makeActionsHtml(l.id)}</td>
+        `;
+          tbody.appendChild(tr);
+        });
+
+        totalCount = resp.total || 0;
+        totalPages = Math.ceil(totalCount / pageSize);
+        document.getElementById('countInfo').textContent = `${leadsData.length} registros cargados • total: ${totalCount}`;
+        document.getElementById('leadsPage').textContent = `Página ${page} de ${totalPages || 1}`;
+
+        document.getElementById('leadsPrev').disabled = page <= 1;
+        document.getElementById('leadsNext').disabled = page >= totalPages;
+
+        tbody.querySelectorAll('.row-checkbox').forEach(checkbox => {
+          checkbox.onchange = onCheckboxChange;
+        });
+        tbody.querySelectorAll('.edit-btn').forEach(btn => btn.onclick = onEdit);
+        tbody.querySelectorAll('.view-history-btn').forEach(btn => btn.onclick = onViewHistory);
+        tbody.querySelectorAll('.funnel-btn').forEach(btn => btn.onclick = onOpenFunnel);
+      } catch (e) {
+        console.error('Error loading leads:', e);
+        showToast('Error al cargar leads: ' + e.message);
+      }
+    }
+
+    function onCheckboxChange(e) {
+      const id = Number(e.target.getAttribute('data-id'));
+      if (e.target.checked) {
+        selectedLeads.add(id);
+      } else {
+        selectedLeads.delete(id);
+      }
+      updateSelectedCount();
+      updateSelectAllCheckbox();
+    }
+
+    function updateSelectAllCheckbox() {
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
+      selectAllCheckbox.checked = allChecked;
+    }
+
+    document.getElementById('selectAll').onchange = function(e) {
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      allCheckboxes.forEach(checkbox => {
+        checkbox.checked = e.target.checked;
+        const id = Number(checkbox.getAttribute('data-id'));
+        if (e.target.checked) {
+          selectedLeads.add(id);
+        } else {
+          selectedLeads.delete(id);
+        }
+      });
+      updateSelectedCount();
+    };
+
+    document.getElementById('bulkClearSelectionBtn').onclick = function() {
+      selectedLeads.clear();
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('selectAll').checked = false;
+      updateSelectedCount();
+    };
+
+    document.getElementById('bulkAssignBtn').onclick = async function() {
+      if (selectedLeads.size === 0) {
+        showToast('Selecciona al menos un lead');
+        return;
+      }
+
+      const assignedTo = document.getElementById('assignUserSelect').value;
+      if (!assignedTo) {
+        showToast('Selecciona un usuario');
+        return;
+      }
+
+      const leadIds = Array.from(selectedLeads);
+      try {
+        const res = await apiJson(`${base}/leads/bulk/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_ids: leadIds, assigned_to: Number(assignedTo) })
+        });
+
+        if (res && res.ok) {
+          showToast(`${res.assigned} lead${res.assigned !== 1 ? 's' : ''} asignado${res.assigned !== 1 ? 's' : ''} correctamente`);
+          selectedLeads.clear();
+          updateSelectedCount();
+          load(false);
+        } else {
+          showToast('Error al asignar leads');
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('bulkDeleteBtn').onclick = async function() {
+      if (selectedLeads.size === 0) {
+        showToast('Selecciona al menos un lead');
+        return;
+      }
+      if (!confirm('¿Eliminar los leads seleccionados?')) return;
+
+      const leadIds = Array.from(selectedLeads);
+      try {
+        const res = await apiJson(`${base}/leads/bulk/delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_ids: leadIds })
+        });
+        if (res && res.ok) {
+          showToast(`${res.deleted} lead${res.deleted !== 1 ? 's' : ''} eliminado${res.deleted !== 1 ? 's' : ''}`);
+          selectedLeads.clear();
+          updateSelectedCount();
+          load(false);
+        } else {
+          showToast('Error al eliminar leads');
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    async function loadLeadHistory(leadId) {
+      try {
+        const resp = await apiJson(`${base}/leads/${leadId}/actions`);
+        const container = document.getElementById('historyContainer');
+        
+        if (!resp.actions || resp.actions.length === 0) {
+          container.innerHTML = '<div class="text-muted" style="padding: 20px; text-align: center;">Sin historial de acciones</div>';
+          return;
+        }
+
+        container.innerHTML = resp.actions.map(action => `
+          <div class="history-item">
+            <div class="timestamp">${new Date(action.created_at).toLocaleString('es-ES')}</div>
+            <div class="user-name">${action.username || 'Sistema'}</div>
+            <div style="margin-top: 4px; color: #555;">${action.action_description || action.action_type}</div>
+            ${action.old_value || action.new_value ? `<div style="margin-top: 6px; font-size: 11px; color: #999;">Cambio: "${action.old_value || '-'}" → "${action.new_value || '-'}"</div>` : ''}
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('historyContainer').innerHTML = '<div class="text-danger">Error cargando historial</div>';
+      }
+    }
+
+    async function onEdit(e){
+      const id = e.target.closest('[data-id]').getAttribute('data-id');
+      // Ensure modal is reset before loading new data
+      document.getElementById('leadForm').reset();
+      document.getElementById('historyContainer').innerHTML = '';
+
+      const lead = await apiJson(`${base}/leads/${id}`);
+      document.getElementById('leadModalTitle').textContent = 'Editar lead';
+      document.getElementById('leadId').value = id;
+      document.getElementById('f_full_name').value = lead.full_name || '';
+      document.getElementById('f_email').value = lead.email || '';
+      document.getElementById('f_phone').value = lead.phone || '';
+      document.getElementById('f_city').value = lead.city || '';
+      document.getElementById('f_phone_type').value = lead.phone_type || '';
+      document.getElementById('f_status').value = lead.status || 'new';
+      document.getElementById('f_source').value = lead.source || '';
+      document.getElementById('f_contact_method').value = lead.contact_method || '';
+      document.getElementById('f_estimated_value').value = lead.estimated_value || '';
+      document.getElementById('f_estimated_benefit').value = lead.estimated_benefit || '';
+      document.getElementById('f_tags').value = lead.tags || '';
+      document.getElementById('f_notes').value = lead.notes || '';
+      document.getElementById('f_web').value = lead.web || '';
+      document.getElementById('deleteLeadBtn').style.display = 'block';
+      document.getElementById('sendToPlacesBtn').style.display = 'block';
+
+      await loadLeadHistory(id);
+
+      leadModal.show();
+    }
+
+    async function onViewHistory(e){
+      const id = e.target.closest('[data-id]').getAttribute('data-id');
+      // Reset modal state
+      document.getElementById('leadForm').reset();
+      document.getElementById('historyContainer').innerHTML = '';
+
+      const lead = await apiJson(`${base}/leads/${id}`);
+      document.getElementById('leadModalTitle').textContent = `Historial - ${lead.full_name}`;
+      document.getElementById('leadId').value = id;
+      document.getElementById('deleteLeadBtn').style.display = 'none';
+      document.getElementById('sendToPlacesBtn').style.display = 'none';
+
+      await loadLeadHistory(id);
+
+      const historyTab = document.getElementById('tab-history');
+      const historyTabContent = new bootstrap.Tab(historyTab);
+      historyTabContent.show();
+
+      document.getElementById('content-general').style.pointerEvents = 'none';
+      document.getElementById('content-general').style.opacity = '0.5';
+
+      leadModal.show();
+    }
+
+    document.getElementById('newLead').onclick = ()=>{
+      document.getElementById('leadModalTitle').textContent = 'Nuevo lead';
+      document.getElementById('leadId').value = '';
+      document.getElementById('leadForm').reset();
+      document.getElementById('f_status').value = 'new';
+      document.getElementById('deleteLeadBtn').style.display = 'none';
+      document.getElementById('sendToPlacesBtn').style.display = 'none';
+      document.getElementById('content-general').style.pointerEvents = 'auto';
+      document.getElementById('content-general').style.opacity = '1';
+      document.getElementById('historyContainer').innerHTML = '';
+      const generalTab = document.getElementById('tab-general');
+      const generalTabContent = new bootstrap.Tab(generalTab);
+      generalTabContent.show();
+      leadModal.show();
+    };
+
+    function validateLeadForm() {
+      const errors = {};
+      const fullName = document.getElementById('f_full_name').value.trim();
+      const email = document.getElementById('f_email').value.trim();
+
+      if (!fullName) {
+        errors.full_name = 'El nombre es requerido';
+      }
+
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.email = 'Email inválido';
+      }
+
+      return errors;
+    }
+
+    function showLeadValidationErrors(errors) {
+      const fields = ['full_name', 'email', 'phone', 'city'];
+      fields.forEach(field => {
+        const input = document.getElementById(`f_${field}`);
+        const errorDiv = document.getElementById(`error_${field}`);
+        if (input) {
+          if (errors[field]) {
+            input.classList.add('is-invalid');
+            if (errorDiv) errorDiv.textContent = errors[field];
+          } else {
+            input.classList.remove('is-invalid');
+            if (errorDiv) errorDiv.textContent = '';
+          }
+        }
+      });
+    }
+
+    document.getElementById('saveLeadBtn').onclick = async ()=>{
+      const errors = validateLeadForm();
+      showLeadValidationErrors(errors);
+
+      if (Object.keys(errors).length > 0) {
+        showToast('Por favor, completa los campos requeridos');
+        return;
+      }
+
+      const id = document.getElementById('leadId').value;
+      const payload = {
+        full_name: document.getElementById('f_full_name').value,
+        email: document.getElementById('f_email').value,
+        phone: document.getElementById('f_phone').value,
+        city: document.getElementById('f_city').value,
+        phone_type: document.getElementById('f_phone_type').value,
+        status: document.getElementById('f_status').value,
+        source: document.getElementById('f_source').value,
+        contact_method: document.getElementById('f_contact_method').value,
+        estimated_value: parseFloat(document.getElementById('f_estimated_value').value) || 0,
+        estimated_benefit: parseFloat(document.getElementById('f_estimated_benefit').value) || 0,
+        tags: document.getElementById('f_tags').value,
+        notes: document.getElementById('f_notes').value,
+        web: document.getElementById('f_web').value,
+      };
+
+      try {
+        if (id) {
+          const resp = await fetch(`${base}/leads/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!resp.ok) throw new Error('Error al actualizar');
+          showToast('Lead actualizado');
+          leadModal.hide();
+          // Preserve filters/page; refresh data for the updated lead
+          load(false);
+          return;
+        } else {
+          const resp = await fetch(`${base}/leads`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const json = await resp.json();
+          if (!resp.ok) throw new Error('Error al crear');
+          showToast('Lead creado');
+          leadModal.hide();
+          // Created new lead: refresh current page without modifying filters
+          load(false);
+          return;
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('deleteLeadBtn').onclick = async ()=>{
+      if(!confirm('¿Eliminar este lead?')) return;
+      const id = document.getElementById('leadId').value;
+      await fetch(`${base}/leads/${id}`, { method: 'DELETE' });
+      leadModal.hide();
+      showToast('Lead eliminado');
+      // Remove row locally and refresh current page
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) row.remove();
+      load(false);
+    };
+
+    document.getElementById('sendToPlacesBtn').onclick = async ()=>{
+      const id = document.getElementById('leadId').value;
+      if (!id) {
+        showToast('No hay lead cargado');
+        return;
+      }
+
+      if(!confirm('¿Convertir este lead en un lugar (place)?')) return;
+
+      try {
+        const res = await apiJson(`${base}/leads/${id}/send-to-places`, { method: 'POST' });
+        if (res && res.ok) {
+          showToast('Lead enviado a places correctamente');
+          leadModal.hide();
+          load(false);
+        } else {
+          showToast('Error: ' + (res.error || 'No se pudo enviar a places'));
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('sendWhatsappBtn').onclick = async ()=>{
+      const leadId = document.getElementById('leadId').value;
+      const message = document.getElementById('f_whatsapp_message').value;
+      const phone = document.getElementById('f_phone').value;
+      
+      if (!message.trim()) {
+        showToast('Escribe un mensaje');
+        return;
+      }
+      if (!phone) {
+        showToast('El lead no tiene número de teléfono');
+        return;
+      }
+
+      try {
+        const res = await apiJson(`${base}/whatsapp/send-message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: parseInt(leadId), message, phone })
+        });
+
+        if (res.ok) {
+          showToast('Mensaje enviado correctamente');
+          document.getElementById('f_whatsapp_message').value = '';
+        } else {
+          showToast('Error: ' + (res.error || 'No se pudo enviar el mensaje'));
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    // Server-side handles the 'pendingReply' filter; we avoid client-side hiding to keep behavior consistent with filters.
+
+    document.getElementById('q').oninput = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('status').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('city').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('barrio').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('phoneType').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('source').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('assigned').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('job').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('hasWeb').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('funnelPhase').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('pendingReplyFilter').onchange = () => { selectedLeads.clear(); updateSelectedCount(); load(true); };
+    document.getElementById('pageSizeSelect').onchange = () => { selectedLeads.clear(); updateSelectedCount(); page = 1; pageSize = Number(document.getElementById('pageSizeSelect').value); load(false); };
+    document.getElementById('clearBtn').onclick = ()=>{
+      document.getElementById('q').value='';
+      document.getElementById('status').value='';
+      document.getElementById('city').value='';
+      document.getElementById('barrio').value='';
+      document.getElementById('phoneType').value='';
+      document.getElementById('source').value='';
+      document.getElementById('assigned').value='';
+      document.getElementById('job').value='';
+      document.getElementById('hasWeb').value='';
+      document.getElementById('funnelPhase').value='';
+      document.getElementById('pendingReplyFilter').checked = false;
+      selectedLeads.clear();
+      updateSelectedCount();
+      load(true);
+    };
+    document.getElementById('leadsPrev').onclick = ()=> { if (page > 1) { page--; load(false); } };
+    document.getElementById('leadsNext').onclick = ()=> { if (page < totalPages) { page++; load(false); } };
+    document.getElementById('refreshBtn').onclick = ()=> load(true);
+
+    // Funnel handler
+    function onOpenFunnel(e) {
+      const id = e.target.closest('[data-id]').getAttribute('data-id');
+      openFunnelPanel(id);
+    }
+
+    loadMeta(); load(true);
+
+    // Realtime updates via Server-Sent Events
+    (function(){
+      try {
+        const es = new EventSource(`${base}/events`);
+        es.addEventListener('message.inbound', (e) => {
+          try {
+            const p = JSON.parse(e.data);
+            if (p.leadId) {
+              // Refresh data preserving filters/page
+              load(false);
+            } else if (p.phone) {
+              const last8 = p.phone.slice(-8);
+              document.querySelectorAll('tr[data-phone]').forEach(tr => {
+                const ph = (tr.getAttribute('data-phone')||'').replace(/\D/g,'');
+                if (ph.endsWith(last8)) {
+                  const dot = tr.querySelector('.reply-dot'); if (dot) dot.classList.add('replied');
+                }
+              });
+            }
+          } catch (err) { console.warn('SSE inbound error', err); }
+        });
+
+        es.addEventListener('funnel.update', (e) => {
+          try {
+            const p = JSON.parse(e.data);
+            if (p.leadId) {
+              // Funnel updates affect the row; refresh current data
+              load(false);
+            }
+          } catch (err) { console.warn('SSE funnel.update', err); }
+        });
+
+        es.onerror = (err) => { console.warn('SSE error', err); };
+      } catch (e) { console.warn('Could not init SSE', e.message); }
+    })();
+  </script>
+</body>
+</html>

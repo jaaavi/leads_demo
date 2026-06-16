@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Places - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body { background: #f7f9fc; }
+    .page { max-width: 1200px; margin: 28px auto; }
+    .table-wrapper { overflow:auto; }
+    .btn-icon { padding: 8px 12px; min-width: 40px; min-height: 40px; display: inline-flex !important; align-items: center; justify-content: center; }
+    .btn-icon i { font-size: 16px; line-height: 1; display: inline; }
+    .badge-tag { margin-right:6px; }
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    .control-input-max360 { max-width: 360px; }
+    .control-select-max260 { max-width: 260px; }
+    .control-select-max220 { max-width: 220px; }
+    .control-select-web { max-width: 160px; }
+    .bulk-actions-container { display: none; padding: 12px; background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; margin-bottom: 12px; }
+    .bulk-actions-container.visible { display: flex; }
+    .bulk-actions-container > * { display: flex; align-items: center; }
+    .bulk-actions-info { gap: 12px; width: 100%; }
+    .bulk-actions-buttons { gap: 8px; margin-left: auto; }
+    .bulk-actions-buttons button { padding: 6px 12px; font-size: 13px; }
+    .pagination-info { font-size: 13px; color: #666; }
+    .row-checkbox { cursor: pointer; }
+    @media (max-width: 768px) {
+      .page { padding: 0 15px; margin: 15px auto; }
+      .controls { flex-direction: column; gap:8px; }
+      .controls .form-control { width:100%; }
+      .control-input-max360, .control-select-max260, .control-select-max220, .control-select-web { max-width: 100%; }
+      .table { font-size: 12px; }
+      .btn-icon { padding: 6px 8px; min-width: 36px; min-height: 36px; }
+      .bulk-actions-container { flex-direction: column; }
+      .bulk-actions-buttons { margin-left: 0; margin-top: 8px; }
+      h1 { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 576px) {
+      .page { padding: 0 8px; margin: 10px auto; }
+      .controls { gap: 6px; }
+      .control-input-max360, .control-select-max260, .control-select-max220, .control-select-web { max-width: 100%; }
+      .table { font-size: 11px; }
+      .table th { font-size: 10px; }
+      .table th, .table td { padding: 0.35rem 0.15rem; }
+      .btn { padding: 0.35rem 0.5rem; font-size: 12px; }
+      .btn-sm { padding: 0.25rem 0.4rem; font-size: 11px; }
+      .btn-icon { padding: 5px 6px; min-width: 32px; min-height: 32px; }
+      h1 { font-size: 1.1rem; }
+      .badge-tag { margin-right: 3px; font-size: 10px; }
+      .form-control, .form-select { font-size: 13px; padding: 0.35rem 0.5rem; }
+      .card { margin-bottom: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="page container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4">Places</h1>
+      <div>
+        <button id="newPlace" class="btn btn-success me-2"><i class="fa-solid fa-plus me-1"></i> Nuevo lugar</button>
+        <button id="refreshBtn" class="btn btn-outline-secondary"><i class="fa-solid fa-arrows-rotate"></i></button>
+      </div>
+    </div>
+
+    <div class="card card-shadow p-3 mb-4">
+      <div class="d-flex controls gap-2 align-items-center">
+        <input id="q" class="form-control control-input-max360" placeholder="Buscar por nombre, ciudad..." />
+        <select id="job" class="form-select control-select-max260"><option value="">Todos los jobs</option></select>
+        <select id="city" class="form-select control-select-max260"><option value="">Todas las ciudades</option></select>
+        <select id="barrio" class="form-select control-select-max260"><option value="">Todos los barrios</option></select>
+        <select id="category" class="form-select control-select-max260"><option value="">Todas las categorías</option></select>
+        <select id="phoneType" class="form-select control-select-max220">
+          <option value="">Todos los teléfonos</option>
+          <option value="mobile">Móvil</option>
+          <option value="fixed">Fijo</option>
+        </select>
+        <select id="tag" class="form-select control-select-max220"><option value="">Todos los tags</option></select>
+        <select id="hasWeb" class="form-select control-select-web">
+          <option value="">Web: todos</option>
+          <option value="1">Con sitio web</option>
+          <option value="social">Solo redes sociales</option>
+          <option value="0">Sin web</option>
+        </select>
+        <button id="clearBtn" class="btn btn-outline-secondary">Limpiar</button>
+      </div>
+      <div class="text-muted small mt-2" id="metaInfo"></div>
+    </div>
+
+    <div class="bulk-actions-container" id="bulkActionsBar">
+      <div class="bulk-actions-info">
+        <span id="selectedCount" style="font-weight: bold;">0 lugares seleccionados</span>
+      </div>
+      <div class="bulk-actions-buttons">
+        <button id="bulkConvertLeadBtn" class="btn btn-sm btn-warning">
+          <i class="fa-solid fa-user-plus me-1"></i> Convertir en leads
+        </button>
+        <button id="bulkConvertLeadAssignBtn" class="btn btn-sm btn-info">
+          <i class="fa-solid fa-users me-1"></i> Convertir a leads y asignar
+        </button>
+        <button id="bulkDeleteBtn" class="btn btn-sm btn-danger">
+          <i class="fa-solid fa-trash me-1"></i> Eliminar
+        </button>
+        <button id="bulkClearSelectionBtn" class="btn btn-sm btn-secondary">
+          Deseleccionar todo
+        </button>
+      </div>
+    </div>
+
+    <div class="card card-shadow">
+      <div class="table-wrapper p-3">
+        <table class="table table-striped table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 40px;">
+                <input type="checkbox" id="selectAll" class="form-check-input" title="Seleccionar todo" />
+              </th>
+              <th style="width: 22%;">Nombre</th>
+              <th style="width: 15%;">Categoría</th>
+              <th style="width: 12%;">Teléfono</th>
+              <th style="width: 15%;">Web</th>
+              <th style="width: 12%;">Ciudad</th>
+              <th style="width: 14%;">Tags</th>
+              <th style="width: 10%; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 flex-wrap gap-2">
+        <div>
+          <small id="countInfo" class="pagination-info"></small>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="pageSizeSelect" class="form-select" style="max-width: 120px;">
+            <option value="10">10 por página</option>
+            <option value="20">20 por p��gina</option>
+            <option value="50" selected>50 por página</option>
+            <option value="100">100 por página</option>
+          </select>
+          <button id="placesPrev" class="btn btn-outline-primary btn-sm">Anterior</button>
+          <div class="pagination-info" id="placesPage">Página 1</div>
+          <button id="placesNext" class="btn btn-outline-primary btn-sm">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="placeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="placeModalTitle">Nuevo lugar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="placeForm">
+            <input type="hidden" id="placeId" />
+            <div class="row g-3">
+              <div class="col-md-8"><label class="form-label">Nombre</label><input id="f_name" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Categoría</label><input id="f_category" class="form-control"></div>
+              <div class="col-md-4"><label class="form-label">Teléfono</label><input id="f_phone" class="form-control"></div>
+              <div class="col-md-4"><label class="form-label">Tipo de teléfono</label><select id="f_phone_type" class="form-select"><option value="">Sin especificar</option><option value="mobile">Móvil</option><option value="fixed">Fijo</option></select></div>
+              <div class="col-md-4"><label class="form-label">Web</label><input id="f_web" class="form-control"></div>
+              <div class="col-md-4"><label class="form-label">Ciudad</label><input id="f_city" class="form-control"></div>
+              <div class="col-12"><label class="form-label">Tags (separados por coma)</label><input id="f_tags" class="form-control"></div>
+              <div class="col-12"><label class="form-label">Notas</label><textarea id="f_notes" class="form-control" rows="2"></textarea></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="savePlaceBtn" type="button" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="assignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Asignar leads</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Selecciona un usuario para asignar:</label>
+            <select id="assignToUser" class="form-select" required>
+              <option value="">-- Seleccionar usuario --</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="confirmAssignBtn" type="button" class="btn btn-primary">Asignar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+    <div id="toastEl" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastBody">Mensaje</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const base = '';
+    const apiJson = async (p, opt = {}) => fetch(p, Object.assign({ headers: { Accept: 'application/json' } }, opt)).then(r=>r.json());
+    const toast = new bootstrap.Toast(document.getElementById('toastEl'));
+    const placeModal = new bootstrap.Modal(document.getElementById('placeModal'));
+    const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
+
+    let page = 1, pageSize = 50, totalCount = 0, totalPages = 0;
+    const selectedPlaces = new Set();
+    let selectedForAssignment = [];
+
+    function showToast(msg){ document.getElementById('toastBody').textContent = msg; toast.show(); }
+
+    function updateSelectedCount() {
+      const count = selectedPlaces.size;
+      document.getElementById('bulkActionsBar').classList.toggle('visible', count > 0);
+      document.getElementById('selectedCount').textContent = `${count} lugar${count !== 1 ? 'es' : ''} seleccionado${count !== 1 ? 's' : ''}`;
+    }
+
+    function renderTags(tagsCsv){
+      if(!tagsCsv) return '';
+      return String(tagsCsv).split(',').map(t=>t.trim()).filter(Boolean).map(t=>`<span class="badge bg-primary badge-tag">${t}</span>`).join(' ');
+    }
+
+    function isSocialMediaUrl(url) {
+      if (!url) return false;
+      const socialPatterns = [
+        /facebook\.com/i, /fb\.com/i,
+        /instagram\.com/i,
+        /tiktok\.com/i, /vm\.tiktok\.com/i,
+        /twitter\.com/i, /x\.com/i,
+        /linkedin\.com/i,
+        /youtube\.com/i, /youtu\.be/i,
+        /pinterest\.com/i,
+        /snapchat\.com/i,
+        /wa\.me/i, /whatsapp\.com/i,
+        /t\.me/i, /telegram\.me/i,
+        /linktree\.com/i, /linktr\.ee/i,
+        /beacons\.ai/i, /bio\.fm/i, /carrd\.co/i,
+        /google\.com\/maps/i, /maps\.google\.com/i
+      ];
+      return socialPatterns.some(p => p.test(url));
+    }
+
+    function renderWebPresence(url) {
+      if (!url || url.trim() === '') {
+        return '<span class="badge bg-secondary"><i class="fa-solid fa-circle-xmark me-1"></i>Sin web</span>';
+      }
+      if (isSocialMediaUrl(url)) {
+        try {
+          const domain = new URL(`https://${url}`).hostname.replace('www.', '');
+          return `<span class="badge bg-info"><i class="fa-solid fa-share-nodes me-1"></i>${domain}</span>`;
+        } catch(e) {
+          return `<span class="badge bg-info"><i class="fa-solid fa-share-nodes me-1"></i>Red social</span>`;
+        }
+      }
+      return `<a href="https://${url}" target="_blank" class="badge bg-success"><i class="fa-solid fa-globe me-1"></i>${url}</a>`;
+    }
+
+    function makeActionsHtml(id){
+      return `
+        <button class="btn btn-sm btn-outline-primary btn-icon edit-btn" data-id="${id}" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-warning btn-icon create-lead" data-id="${id}" title="Crear lead"><i class="fa-solid fa-user-plus"></i></button>
+        <button class="btn btn-sm btn-danger btn-icon del-btn" data-id="${id}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+      `;
+    }
+
+    async function loadMeta(){
+      try{
+        const meta = await apiJson(`${base}/places/meta`);
+        if (!meta) return;
+
+        const jobSel = document.getElementById('job');
+        if (meta.jobs && Array.isArray(meta.jobs)) {
+          meta.jobs.forEach(j=>{ const o = document.createElement('option'); o.value=j.id; o.textContent=`${j.lugar} (ID: ${j.id})`; jobSel.appendChild(o); });
+        }
+        const citySel = document.getElementById('city');
+        if (meta.cities && Array.isArray(meta.cities)) {
+          meta.cities.forEach(c=>{ const o = document.createElement('option'); o.value=c; o.textContent=c; citySel.appendChild(o); });
+        }
+        const barrioSel = document.getElementById('barrio');
+        if (meta.barrios && Array.isArray(meta.barrios)) {
+          meta.barrios.forEach(b=>{ const o = document.createElement('option'); o.value=b; o.textContent=b; barrioSel.appendChild(o); });
+        }
+        const catSel = document.getElementById('category');
+        if (meta.categories && Array.isArray(meta.categories)) {
+          meta.categories.forEach(c=>{ const o = document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+        }
+        const phoneTypeSel = document.getElementById('phoneType');
+        if (meta.phoneTypes && Array.isArray(meta.phoneTypes)) {
+          meta.phoneTypes.forEach(pt=>{ const o = document.createElement('option'); o.value=pt; o.textContent=pt; phoneTypeSel.appendChild(o); });
+        }
+        const tagSel = document.getElementById('tag');
+        if (meta.tags && Array.isArray(meta.tags)) {
+          meta.tags.forEach(t=>{ const o = document.createElement('option'); o.value=t; o.textContent=t; tagSel.appendChild(o); });
+        }
+        document.getElementById('metaInfo').textContent = `${(meta.categories||[]).length} categorías • ${(meta.tags||[]).length} tags • ${(meta.cities||[]).length} ciudades • ${(meta.barrios||[]).length} barrios`;
+      }catch(e){ console.warn(e); }
+    }
+
+    async function loadUsers(){
+      try {
+        const resp = await apiJson(`${base}/api/admin/users`);
+        const users = Array.isArray(resp) ? resp : (resp?.data || []);
+        const userSelect = document.getElementById('assignToUser');
+
+        userSelect.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
+        users.forEach(u => {
+          if (u.id) {
+            const option = document.createElement('option');
+            option.value = u.id;
+            option.textContent = u.username || u.email || `Usuario ${u.id}`;
+            userSelect.appendChild(option);
+          }
+        });
+      } catch(e) {
+        console.error('Error loading users:', e);
+        showToast('Error al cargar usuarios');
+      }
+    }
+
+    async function load(reset=false){
+      if(reset){ page = 1; selectedPlaces.clear(); updateSelectedCount(); }
+      const q = encodeURIComponent(document.getElementById('q').value||'');
+      const jobId = encodeURIComponent(document.getElementById('job').value||'');
+      const city = encodeURIComponent(document.getElementById('city').value||'');
+      const barrio = encodeURIComponent(document.getElementById('barrio').value||'');
+      const mainCategory = encodeURIComponent(document.getElementById('category').value||'');
+      const phoneType = encodeURIComponent(document.getElementById('phoneType').value||'');
+      const tag = encodeURIComponent(document.getElementById('tag').value||'');
+      const hasWeb = encodeURIComponent(document.getElementById('hasWeb').value||'');
+
+      try {
+        const resp = await apiJson(`${base}/places?q=${q}&jobId=${jobId}&city=${city}&barrio=${barrio}&mainCategory=${mainCategory}&phoneType=${phoneType}&tag=${tag}&hasWeb=${hasWeb}&page=${page}&pageSize=${pageSize}`);
+        if (!resp || !resp.data) {
+          showToast('Error al cargar lugares');
+          return;
+        }
+
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+
+        const placesData = Array.isArray(resp.data) ? resp.data : [];
+        placesData.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-id', p.id);
+        const isSelected = selectedPlaces.has(p.id);
+        tr.innerHTML = `
+          <td>
+            <input type="checkbox" class="row-checkbox form-check-input" data-id="${p.id}" ${isSelected ? 'checked' : ''} />
+          </td>
+          <td><strong>${p.name||''}</strong><div class="small text-muted">${p.street_address || ''}</div></td>
+          <td>${p.main_category||''}</td>
+          <td>${p.phone||''}</td>
+          <td>${renderWebPresence(p.web)}</td>
+          <td>${p.city||''}</td>
+          <td>${renderTags(p.tags)}</td>
+          <td>${makeActionsHtml(p.id)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      totalCount = resp.total || 0;
+      totalPages = Math.ceil(totalCount / pageSize);
+      document.getElementById('countInfo').textContent = `${resp.data.length} registros cargados • total: ${totalCount}`;
+      document.getElementById('placesPage').textContent = `Página ${page} de ${totalPages || 1}`;
+
+      document.getElementById('placesPrev').disabled = page <= 1;
+      document.getElementById('placesNext').disabled = page >= totalPages;
+
+        tbody.querySelectorAll('.row-checkbox').forEach(checkbox => {
+          checkbox.onchange = onCheckboxChange;
+        });
+        tbody.querySelectorAll('.edit-btn').forEach(btn => btn.onclick = onEdit);
+        tbody.querySelectorAll('.del-btn').forEach(btn => btn.onclick = onDelete);
+        tbody.querySelectorAll('.create-lead').forEach(btn => btn.onclick = onCreateLead);
+      } catch (e) {
+        console.error('Error loading places:', e);
+        showToast('Error al cargar lugares: ' + e.message);
+      }
+    }
+
+    function onCheckboxChange(e) {
+      const id = Number(e.target.getAttribute('data-id'));
+      if (e.target.checked) {
+        selectedPlaces.add(id);
+      } else {
+        selectedPlaces.delete(id);
+      }
+      updateSelectedCount();
+      updateSelectAllCheckbox();
+    }
+
+    function updateSelectAllCheckbox() {
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
+      selectAllCheckbox.checked = allChecked;
+    }
+
+    document.getElementById('selectAll').onchange = function(e) {
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      allCheckboxes.forEach(checkbox => {
+        checkbox.checked = e.target.checked;
+        const id = Number(checkbox.getAttribute('data-id'));
+        if (e.target.checked) {
+          selectedPlaces.add(id);
+        } else {
+          selectedPlaces.delete(id);
+        }
+      });
+      updateSelectedCount();
+    };
+
+    document.getElementById('bulkClearSelectionBtn').onclick = function() {
+      selectedPlaces.clear();
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('selectAll').checked = false;
+      updateSelectedCount();
+    };
+
+    document.getElementById('bulkConvertLeadBtn').onclick = async function() {
+      if (selectedPlaces.size === 0) {
+        showToast('Selecciona al menos un lugar');
+        return;
+      }
+
+      const placeIds = Array.from(selectedPlaces);
+      try {
+        const res = await apiJson(`${base}/places/bulk/create-leads`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ place_ids: placeIds })
+        });
+
+        if (res && res.ok) {
+          showToast(`${res.converted} lugar${res.converted !== 1 ? 'es' : ''} convertido${res.converted !== 1 ? 's' : ''} en lead${res.converted !== 1 ? 's' : ''}`);
+          selectedPlaces.clear();
+          load(true);
+        } else {
+          showToast('Error al convertir lugares');
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('bulkConvertLeadAssignBtn').onclick = async function() {
+      if (selectedPlaces.size === 0) {
+        showToast('Selecciona al menos un lugar');
+        return;
+      }
+
+      selectedForAssignment = Array.from(selectedPlaces);
+      await loadUsers();
+      assignModal.show();
+    };
+
+    document.getElementById('confirmAssignBtn').onclick = async function() {
+      const userId = document.getElementById('assignToUser').value;
+      if (!userId) {
+        showToast('Selecciona un usuario');
+        return;
+      }
+
+      try {
+        const res = await apiJson(`${base}/places/bulk/create-leads-assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ place_ids: selectedForAssignment, assign_to: userId })
+        });
+
+        if (res && res.ok) {
+          showToast(`${res.converted} lugar${res.converted !== 1 ? 'es' : ''} convertido${res.converted !== 1 ? 's' : ''} y asignado`);
+          selectedPlaces.clear();
+          selectedForAssignment = [];
+          assignModal.hide();
+          load(true);
+        } else {
+          showToast('Error al convertir y asignar: ' + (res?.error || 'desconocido'));
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    document.getElementById('bulkDeleteBtn').onclick = async function() {
+      if (selectedPlaces.size === 0) {
+        showToast('Selecciona al menos un lugar');
+        return;
+      }
+      if (!confirm('¿Eliminar los lugares seleccionados?')) return;
+
+      const placeIds = Array.from(selectedPlaces);
+      try {
+        const res = await apiJson(`${base}/places/bulk/delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ place_ids: placeIds })
+        });
+        if (res && res.ok) {
+          showToast(`${res.deleted} lugar${res.deleted !== 1 ? 'es' : ''} eliminado${res.deleted !== 1 ? 's' : ''}`);
+          selectedPlaces.clear();
+          updateSelectedCount();
+          load(false);
+        } else {
+          showToast('Error al eliminar lugares');
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message);
+      }
+    };
+
+    async function onEdit(e){
+      const id = e.target.closest('[data-id]').getAttribute('data-id');
+      const place = await apiJson(`${base}/places/${id}`);
+      document.getElementById('placeModalTitle').textContent = 'Editar lugar';
+      document.getElementById('placeId').value = id;
+      document.getElementById('f_name').value = place.name || '';
+      document.getElementById('f_category').value = place.category || '';
+      document.getElementById('f_phone').value = place.phone || '';
+      document.getElementById('f_phone_type').value = place.phone_type || '';
+      document.getElementById('f_web').value = place.web || '';
+      document.getElementById('f_city').value = place.city || '';
+      document.getElementById('f_tags').value = place.tags || '';
+      document.getElementById('f_notes').value = place.notes || '';
+      placeModal.show();
+    }
+
+    async function onDelete(e){
+      if(!confirm('¿Eliminar este lugar?')) return;
+      const id = e.target.closest('[data-id]').getAttribute('data-id');
+      await fetch(`${base}/places/${id}`, { method: 'DELETE' });
+      selectedPlaces.delete(Number(id));
+      e.target.closest('tr').remove();
+      updateSelectedCount();
+      showToast('Lugar eliminado');
+    }
+
+    async function onCreateLead(e){
+      const id = e.target.closest('[data-id]').getAttribute('data-id');
+      try {
+        const res = await apiJson(`${base}/places/${id}/create-lead`, { method: 'POST' });
+        if (res && res.ok) {
+          showToast('Lead creado');
+          selectedPlaces.delete(Number(id));
+          load(false);
+        } else {
+          showToast('Error creando lead: ' + (res?.error || 'desconocido'));
+        }
+      } catch (e) {
+        console.error('Error creating lead:', e);
+        showToast('Error creando lead');
+      }
+    }
+
+    document.getElementById('newPlace').onclick = ()=>{
+      document.getElementById('placeModalTitle').textContent = 'Nuevo lugar';
+      document.getElementById('placeId').value = '';
+      document.getElementById('placeForm').reset();
+      placeModal.show();
+    };
+
+    document.getElementById('savePlaceBtn').onclick = async ()=>{
+      const id = document.getElementById('placeId').value;
+      const payload = {
+        name: document.getElementById('f_name').value,
+        category: document.getElementById('f_category').value,
+        phone: document.getElementById('f_phone').value,
+        phone_type: document.getElementById('f_phone_type').value,
+        web: document.getElementById('f_web').value,
+        city: document.getElementById('f_city').value,
+        tags: document.getElementById('f_tags').value,
+        notes: document.getElementById('f_notes').value,
+      };
+      if (!payload.name) return alert('Nombre es requerido');
+      if (id) {
+        await fetch(`${base}/places/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        showToast('Lugar actualizado');
+      } else {
+        await fetch(`${base}/places`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        showToast('Lugar creado');
+      }
+      placeModal.hide();
+      load(true);
+    };
+
+    document.getElementById('q').oninput = () => load(true);
+    document.getElementById('job').onchange = () => load(true);
+    document.getElementById('city').onchange = () => load(true);
+    document.getElementById('barrio').onchange = () => load(true);
+    document.getElementById('category').onchange = () => load(true);
+    document.getElementById('phoneType').onchange = () => load(true);
+    document.getElementById('tag').onchange = () => load(true);
+    document.getElementById('hasWeb').onchange = () => load(true);
+    document.getElementById('pageSizeSelect').onchange = () => { page = 1; pageSize = Number(document.getElementById('pageSizeSelect').value); load(false); };
+    document.getElementById('clearBtn').onclick = ()=>{ document.getElementById('q').value=''; document.getElementById('job').value=''; document.getElementById('city').value=''; document.getElementById('barrio').value=''; document.getElementById('category').value=''; document.getElementById('phoneType').value=''; document.getElementById('tag').value=''; document.getElementById('hasWeb').value=''; load(true); };
+    document.getElementById('placesPrev').onclick = ()=> { if (page > 1) { page--; load(false); } };
+    document.getElementById('placesNext').onclick = ()=> { if (page < totalPages) { page++; load(false); } };
+    document.getElementById('refreshBtn').onclick = ()=> load(true);
+
+    loadMeta();
+    loadUsers();
+    load(true);
+  </script>
+</body>
+</html>

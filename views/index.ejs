@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - GAPI & Leads</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 16px 32px; }
+    .card-shadow-custom { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .page .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: 600; margin: 0 0 16px; }
+    
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .section-title { font-size: 16px; font-weight: 600; }
+    
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .grid { display: grid; gap: 12px; margin-bottom: 12px; }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    
+    .input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .input:focus { outline: none; border-color: #1976d2; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
+    .input-small { padding: 8px 10px; font-size: 13px; }
+    
+    .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background: #1976d2; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1565c0; }
+    .btn-success { background: #388e3c; color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #2e7d32; }
+    .btn-danger { background: #d32f2f; color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #c62828; }
+    .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+    .btn-secondary:hover:not(:disabled) { background: #eeeeee; }
+    .btn-sm { padding: 8px 12px; font-size: 13px; min-width: auto; }
+    .btn-icon { padding: 8px 12px; min-height: 40px; min-width: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-icon i { font-size: 16px; line-height: 1; }
+
+    .table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .table th { background: #f5f5f5; font-weight: 600; text-align: left; padding: 12px; border-bottom: 2px solid #e0e0e0; font-size: 13px; }
+    .table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: middle; }
+    .table tbody tr:hover { background: #f9f9f9; }
+    .table-actions { display: flex; gap: 8px; align-items: center; flex-wrap: nowrap; }
+    
+    .pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; background: #f0f0f0; font-weight: 500; }
+    .pill-info { background: #e3f2fd; color: #1565c0; }
+    
+    .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 16px; }
+    .pagination .btn { min-width: 80px; }
+    
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-content { background: #fff; border-radius: 8px; padding: 0; max-width: 600px; width: 90%; max-height: 90vh; overflow: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+    .modal-header { padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 18px; font-weight: 600; margin: 0; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 16px 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 8px; justify-content: flex-end; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 13px; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .status-new { background: #e3f2fd; color: #1565c0; }
+    .status-contacted { background: #fff3e0; color: #e65100; }
+    .status-qualified { background: #f3e5f5; color: #6a1b9a; }
+    .status-converted { background: #e8f5e9; color: #2e7d32; }
+    .status-discarded { background: #ffebee; color: #c62828; }
+    
+    .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; }
+    .alert-info { background: #e3f2fd; color: #1565c0; }
+    .alert-success { background: #e8f5e9; color: #2e7d32; }
+    .alert-error { background: #ffebee; color: #c62828; }
+    
+    .text-muted { color: #999; }
+    .text-small { font-size: 12px; }
+    .mb-0 { margin-bottom: 0; }
+    
+    @media (max-width: 768px) {
+      .controls { flex-direction: column; }
+      .controls .input, .controls .btn { width: 100%; }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<%- include('navbar') %>
+
+<div class="page">
+  <% const _role = (typeof session !== 'undefined' && session.userRole) ? String(session.userRole).toLowerCase() : ''; %>
+  <!-- GAPI Search Card -->
+  <div class="card">
+    <div id="gapiCard">
+      <h2 class="card-title">Ejecutar búsqueda (GAPI)</h2>
+      <div class="grid grid-4">
+        <div class="form-group">
+          <label class="form-label">Consulta (ej: restaurantes madrid)</label>
+          <input id="q" class="input" placeholder="Buscar..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Latitud</label>
+          <input id="lat" class="input" placeholder="40.4168" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Longitud</label>
+          <input id="lng" class="input" placeholder="-3.7038" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Radio (metros)</label>
+          <input id="radius" class="input" placeholder="20000" />
+        </div>
+      </div>
+      <div class="controls">
+        <button id="runBtn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Buscar y guardar</button>
+        <span id="runStatus" class="pill"></span>
+      </div>
+
+      <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+        <h3 style="font-size: 16px; margin: 0 0 12px; font-weight: 600;">Variaciones</h3>
+        <div class="controls">
+          <input id="varLugar" class="input" placeholder="Lugar para variaciones (ej: Prosperidad)" style="flex: 1; min-width: 200px;" />
+          <button id="varBtn" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> Ejecutar</button>
+          <span id="varStatus" class="pill"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="comercialProCard" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2 class="card-title" style="margin: 0 0 8px;">Generador de Lugares</h2>
+          <p style="color: #666; font-size: 14px; margin: 0;">Encuentra lugares automáticamente usando variaciones inteligentes</p>
+        </div>
+        <a href="/places" class="btn btn-success" style="text-decoration: none;"><i class="fa-solid fa-location-dot me-1"></i> Ver mis lugares</a>
+      </div>
+
+      <div style="background: #f0f4ff; border: 1px solid #d0e0ff; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h4 style="color: #1565c0; font-size: 14px; font-weight: 600; margin: 0 0 10px;"><i class="fa-solid fa-lightbulb" style="color: #ffa500; margin-right: 8px;"></i>¿Qué son las variaciones?</h4>
+        <p style="margin: 0 0 10px; color: #555; font-size: 13px;">
+          Las variaciones son diferentes búsquedas automáticas que hacemos por ti. En lugar de buscar solo "restaurantes en Madrid", buscamos también "bares cerca de Madrid", "cafés en Madrid", etc. Así encontramos muchos más lugares sin que tengas que hacer múltiples búsquedas.
+        </p>
+        <p style="margin: 0; color: #666; font-size: 13px; font-style: italic;">
+          💡 Solo necesitas ingresar el nombre de un lugar y nosotros hacemos 12 búsquedas diferentes automáticamente.
+        </p>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label" style="font-weight: 600; color: #333;">Ingresa el nombre de un lugar</label>
+        <input id="varLugarPro" class="input" placeholder="Ej: Barcelona, Prosperidad, Plaza Mayor..." style="padding: 12px 14px; font-size: 15px;" />
+      </div>
+
+      <button id="varBtnPro" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;"><i class="fa-solid fa-rocket"></i> Generar Lugares</button>
+
+      <div id="variationsListPro" style="margin-top: 20px; display: none;">
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Búsquedas que haremos:</h4>
+        <div id="variationsItemsPro" style="display: grid; gap: 8px;"></div>
+      </div>
+
+      <div id="jobProgressPro" style="margin-top: 20px; display: none;">
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Progreso</h4>
+        <div style="background: #f5f5f5; border-radius: 8px; padding: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 13px;">Búsquedas completadas</span>
+            <span id="jobProgressText" style="font-size: 13px; font-weight: 600;">0/12</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+            <div id="jobProgressBar" style="height: 100%; background: #4caf50; width: 0%; transition: width 0.3s;"></div>
+          </div>
+        </div>
+        <div id="statusMessagePro" style="margin-top: 12px; padding: 12px; background: #e8f5e9; border-radius: 6px; color: #2e7d32; font-size: 13px; display: none;"></div>
+      </div>
+
+      <div id="finishedJobsProSection" style="margin-top: 30px; display: none;">
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Mis búsquedas completadas</h4>
+        <table class="table" style="margin-top: 12px;">
+          <thead>
+            <tr>
+              <th style="min-width: 60px;">ID</th>
+              <th style="min-width: 120px;">Lugar</th>
+              <th style="width: 80px;">Búsquedas</th>
+              <th style="width: 100px;">Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="finishedJobsProT"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Leads Card -->
+  <div class="card">
+    <h2 class="card-title">Generar leads desde places</h2>
+    <div class="grid grid-3">
+      <div class="form-group">
+        <label class="form-label">Con teléfono</label>
+        <select id="glHasPhone" class="input">
+          <option value="1" selected>Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sin web</label>
+        <select id="glNoWeb" class="input">
+          <option value="1">Sí</option>
+          <option value="0" selected>Indistinto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Límite</label>
+        <input id="glLimit" class="input" placeholder="100" />
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label class="form-label">Categoría (opcional)</label>
+        <input id="glCategory" class="input" placeholder="Restaurante" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ciudad (opcional)</label>
+        <input id="glCity" class="input" placeholder="Madrid" />
+      </div>
+    </div>
+    <div class="controls">
+      <button id="genBtn" class="btn btn-success"><i class="fa-solid fa-users"></i> Generar leads</button>
+      <span id="genStatus" class="pill"></span>
+    </div>
+  </div>
+
+  <!-- Places Card -->
+  <div class="card">
+    <div class="section-header">
+      <h2 class="card-title">Places</h2>
+      <button id="newPlaceBtn" class="btn btn-success"><i class="fa-solid fa-plus"></i> Nuevo lugar</button>
+    </div>
+    
+    <div class="grid grid-4">
+      <div class="form-group mb-0">
+        <input id="pQ" class="input input-small" placeholder="Buscar" />
+      </div>
+      <div class="form-group mb-0">
+        <select id="pMainCategory" class="input input-small">
+          <option value="">Categoría: todas</option>
+        </select>
+      </div>
+      <div class="form-group mb-0">
+        <input id="pCity" class="input input-small" placeholder="Ciudad" />
+      </div>
+      <div class="form-group mb-0">
+        <select id="pHasWeb" class="input input-small">
+          <option value="">Web: todos</option>
+          <option value="1">Con web</option>
+          <option value="0">Sin web</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="controls" style="margin-top: 12px;">
+      <button id="loadPlaces" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrows-rotate"></i> Cargar</button>
+    </div>
+
+    <table class="table" style="margin-top: 12px;">
+      <thead>
+        <tr>
+          <th style="min-width: 160px;">Nombre</th>
+          <th style="min-width: 110px;">Categoría</th>
+          <th style="min-width: 90px;">Teléfono</th>
+          <th style="min-width: 100px;">Web</th>
+          <th style="min-width: 75px;">Ciudad</th>
+          <th style="min-width: 70px;">Tags</th>
+          <th style="min-width: 140px; text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="placesT"></tbody>
+    </table>
+
+    <div class="pagination">
+      <button id="placesPrev" class="btn btn-secondary btn-sm"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+      <div class="pill pill-info" id="placesPageIndex">Página 1</div>
+      <button id="placesNext" class="btn btn-secondary btn-sm">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Leads Card -->
+  <div class="card">
+    <div class="section-header">
+      <h2 class="card-title">Leads</h2>
+      <button id="newLeadBtn" class="btn btn-success"><i class="fa-solid fa-plus"></i> Nuevo lead</button>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="form-group mb-0">
+        <input id="lQ" class="input input-small" placeholder="Buscar" />
+      </div>
+      <div class="form-group mb-0">
+        <select id="lStatus" class="input input-small">
+          <option value="">Todos</option>
+          <option>new</option>
+          <option>contacted</option>
+          <option>qualified</option>
+          <option>converted</option>
+          <option>discarded</option>
+        </select>
+      </div>
+      <div class="form-group mb-0">
+        <button id="loadLeads" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrows-rotate"></i> Cargar</button>
+      </div>
+    </div>
+
+    <table class="table" style="margin-top: 12px;">
+      <thead>
+        <tr>
+          <th style="min-width: 130px;">Nombre</th>
+          <th style="min-width: 150px;">Email</th>
+          <th style="min-width: 100px;">Teléfono</th>
+          <th style="min-width: 90px;">Estado</th>
+          <th style="min-width: 110px;">Notas</th>
+          <th style="min-width: 110px; text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="leadsT"></tbody>
+    </table>
+
+    <div class="pagination">
+      <button id="leadsPrev" class="btn btn-secondary btn-sm"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+      <div class="pill pill-info" id="leadsPage">Página 1</div>
+      <button id="leadsNext" class="btn btn-secondary btn-sm">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Jobs Card -->
+  <div class="card">
+    <h2 class="card-title">Jobs (cola y ejecuciones)</h2>
+    <div class="text-muted text-small">Se actualiza cada 3s. ✅ indica finalizado.</div>
+
+    <table class="table" style="margin-top: 12px;">
+      <thead>
+        <tr>
+          <th style="min-width: 80px;">ID</th>
+          <th style="min-width: 140px;">Lugar</th>
+          <th style="width: 80px;">Total</th>
+          <th style="width: 100px;">Procesado</th>
+          <th style="width: 100px;">Estado</th>
+          <th style="width: 60px;">Hecho</th>
+        </tr>
+      </thead>
+      <tbody id="jobsT"></tbody>
+    </table>
+
+    <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+      <div>
+        <select id="jobsPageSizeSelect" class="form-select" style="max-width: 140px; display: inline-block;">
+          <option value="10">10 por página</option>
+          <option value="20" selected>20 por página</option>
+          <option value="50">50 por página</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button id="jobsPrev" class="btn btn-secondary btn-sm"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+        <div class="pill pill-info" id="jobsPage">Página 1</div>
+        <button id="jobsNext" class="btn btn-secondary btn-sm">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Finished Jobs Card -->
+  <div class="card">
+    <h2 class="card-title">Jobs Finalizados</h2>
+    <div class="text-muted text-small">Tabla de jobs completados.</div>
+
+    <table class="table" style="margin-top: 12px;">
+      <thead>
+        <tr>
+          <th style="min-width: 80px;">ID</th>
+          <th style="min-width: 140px;">Lugar</th>
+          <th style="width: 100px;">Total</th>
+          <th style="width: 100px;">Procesado</th>
+          <th style="width: 120px;">Fecha Finalización</th>
+        </tr>
+      </thead>
+      <tbody id="finishedJobsT"></tbody>
+    </table>
+
+    <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+      <div>
+        <select id="finishedJobsPageSizeSelect" class="form-select" style="max-width: 140px; display: inline-block;">
+          <option value="10">10 por página</option>
+          <option value="20" selected>20 por página</option>
+          <option value="50">50 por página</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button id="finishedJobsPrev" class="btn btn-secondary btn-sm"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+        <div class="pill pill-info" id="finishedJobsPage">Página 1</div>
+        <button id="finishedJobsNext" class="btn btn-secondary btn-sm">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Place Modal -->
+<!-- Variations Preview Modal (for comercial_pro preview) -->
+  <div id="variationsModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Preview de variaciones</h3>
+        <button class="modal-close" onclick="closeVariationsModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="variationsBody">
+        <!-- variations list inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeVariationsModal()">Cancelar</button>
+        <button id="confirmVariationsBtn" class="btn btn-primary">Confirmar y ejecutar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="placeModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title" id="placeModalTitle">Nuevo lugar</h3>
+      <button class="modal-close" onclick="closePlaceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre *</label>
+        <input id="place_name" class="input" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <input id="place_category" class="input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad</label>
+          <input id="place_city" class="input" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input id="place_phone" class="input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Web</label>
+          <input id="place_web" class="input" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags (separados por coma)</label>
+        <input id="place_tags" class="input" placeholder="tag1, tag2, tag3" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas</label>
+        <textarea id="place_notes" class="input" style="min-height: 80px; resize: vertical;"></textarea>
+      </div>
+      <input type="hidden" id="place_id" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closePlaceModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePlaceFromModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lead Modal -->
+<div id="leadModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title" id="leadModalTitle">Nuevo lead</h3>
+      <button class="modal-close" onclick="closeLeadModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre *</label>
+        <input id="lead_name" class="input" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input id="lead_email" class="input" type="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input id="lead_phone" class="input" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="lead_status" class="input">
+          <option>new</option>
+          <option>contacted</option>
+          <option>qualified</option>
+          <option>converted</option>
+          <option>discarded</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas</label>
+        <textarea id="lead_notes" class="input" style="min-height: 100px; resize: vertical;"></textarea>
+      </div>
+      <input type="hidden" id="lead_id" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeLeadModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLeadFromModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Job Modal -->
+<div id="jobModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="jobModalTitle">Detalles del Job</h3>
+      <button class="modal-close" onclick="closeJobModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <pre id="jobDetail" style="max-height: 400px; overflow: auto; background: #f5f5f5; padding: 12px; border-radius: 6px; margin: 0; font-size: 12px;"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeJobModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const api = (p, opt={}) => fetch(p, { headers: { 'Content-Type': 'application/json' }, ...opt }).then(r => r.json());
+
+  // Pagination state
+  let leadsPage = 1, leadsPageSize = 20;
+  let jobsPage = 1, jobsPageSize = 20;
+  let finishedJobsPage = 1, finishedJobsPageSize = 20;
+  let placesPage = 1, placesPageSize = 50;
+
+  // Modal functions
+  function openPlaceModal(placeId = null) {
+    document.getElementById('place_id').value = placeId || '';
+    if (placeId) {
+      document.getElementById('placeModalTitle').textContent = 'Editar lugar';
+      loadPlaceForEdit(placeId);
+    } else {
+      document.getElementById('placeModalTitle').textContent = 'Nuevo lugar';
+      document.getElementById('place_name').value = '';
+      document.getElementById('place_category').value = '';
+      document.getElementById('place_city').value = '';
+      document.getElementById('place_phone').value = '';
+      document.getElementById('place_web').value = '';
+      document.getElementById('place_tags').value = '';
+      document.getElementById('place_notes').value = '';
+    }
+    document.getElementById('placeModal').classList.add('show');
+  }
+
+  function closePlaceModal() {
+    document.getElementById('placeModal').classList.remove('show');
+  }
+
+  window.closeVariationsModal = function() {
+    const modal = document.getElementById('variationsModal');
+    if (modal) {
+      modal.classList.remove('show');
+    }
+  };
+
+  function openLeadModal(leadId = null) {
+    document.getElementById('lead_id').value = leadId || '';
+    if (leadId) {
+      document.getElementById('leadModalTitle').textContent = 'Editar lead';
+      loadLeadForEdit(leadId);
+    } else {
+      document.getElementById('leadModalTitle').textContent = 'Nuevo lead';
+      document.getElementById('lead_name').value = '';
+      document.getElementById('lead_email').value = '';
+      document.getElementById('lead_phone').value = '';
+      document.getElementById('lead_status').value = 'new';
+      document.getElementById('lead_notes').value = '';
+    }
+    document.getElementById('leadModal').classList.add('show');
+  }
+
+  function closeLeadModal() {
+    document.getElementById('leadModal').classList.remove('show');
+  }
+
+  function openJobModal(job) {
+    document.getElementById('jobModalTitle').textContent = `Job ${job.id}`;
+    document.getElementById('jobDetail').textContent = JSON.stringify(job, null, 2);
+    document.getElementById('jobModal').classList.add('show');
+  }
+
+  function closeJobModal() {
+    document.getElementById('jobModal').classList.remove('show');
+  }
+
+  // Load place for editing
+  async function loadPlaceForEdit(id) {
+    try {
+      const data = await api(`/places/${id}`);
+      document.getElementById('place_name').value = data.name || '';
+      document.getElementById('place_category').value = data.category || '';
+      document.getElementById('place_city').value = data.city || '';
+      document.getElementById('place_phone').value = data.phone || '';
+      document.getElementById('place_web').value = data.web || '';
+      document.getElementById('place_tags').value = data.tags || '';
+      document.getElementById('place_notes').value = data.notes || '';
+    } catch (e) {
+      alert('Error cargando lugar: ' + e.message);
+    }
+  }
+
+  // Load lead for editing
+  async function loadLeadForEdit(id) {
+    try {
+      const data = await api(`/leads/${id}`);
+      document.getElementById('lead_name').value = data.full_name || '';
+      document.getElementById('lead_email').value = data.email || '';
+      document.getElementById('lead_phone').value = data.phone || '';
+      document.getElementById('lead_status').value = data.status || 'new';
+      document.getElementById('lead_notes').value = data.notes || '';
+    } catch (e) {
+      alert('Error cargando lead: ' + e.message);
+    }
+  }
+
+  // Save place from modal
+  async function savePlaceFromModal() {
+    const id = document.getElementById('place_id').value;
+    const name = document.getElementById('place_name').value;
+    if (!name) return alert('Nombre es requerido');
+    
+    const payload = {
+      name,
+      category: document.getElementById('place_category').value,
+      city: document.getElementById('place_city').value,
+      phone: document.getElementById('place_phone').value,
+      web: document.getElementById('place_web').value,
+      tags: document.getElementById('place_tags').value,
+      notes: document.getElementById('place_notes').value,
+    };
+
+    try {
+      if (id) {
+        await api(`/places/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+        alert('Lugar actualizado');
+      } else {
+        await api('/places', { method: 'POST', body: JSON.stringify(payload) });
+        alert('Lugar creado');
+      }
+      closePlaceModal();
+      placesPage = 1;
+      loadPlaces();
+    } catch (e) {
+      alert('Error guardando: ' + e.message);
+    }
+  }
+
+  // Save lead from modal
+  async function saveLeadFromModal() {
+    const id = document.getElementById('lead_id').value;
+    const name = document.getElementById('lead_name').value;
+    if (!name) return alert('Nombre es requerido');
+    
+    const payload = {
+      full_name: name,
+      email: document.getElementById('lead_email').value,
+      phone: document.getElementById('lead_phone').value,
+      status: document.getElementById('lead_status').value,
+      notes: document.getElementById('lead_notes').value,
+    };
+
+    try {
+      if (id) {
+        await api(`/leads/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+        alert('Lead actualizado');
+      } else {
+        await api('/leads', { method: 'POST', body: JSON.stringify(payload) });
+        alert('Lead creado');
+      }
+      closeLeadModal();
+      leadsPage = 1;
+      loadLeads();
+    } catch (e) {
+      alert('Error guardando: ' + e.message);
+    }
+  }
+
+  // Delete place
+  async function deletePlace(id) {
+    if (!confirm('¿Eliminar este lugar?')) return;
+    try {
+      await api(`/places/${id}`, { method: 'DELETE' });
+      alert('Lugar eliminado');
+      loadPlaces();
+    } catch (e) {
+      alert('Error eliminando: ' + e.message);
+    }
+  }
+
+  // Delete lead
+  async function deleteLead(id) {
+    if (!confirm('¿Eliminar este lead?')) return;
+    try {
+      await api(`/leads/${id}`, { method: 'DELETE' });
+      alert('Lead eliminado');
+      loadLeads();
+    } catch (e) {
+      alert('Error eliminando: ' + e.message);
+    }
+  }
+
+  // Create lead from place
+  async function createLeadFromPlace(placeId) {
+    try {
+      await api(`/places/${placeId}/create-lead`, { method: 'POST' });
+      alert('Lead creado desde lugar');
+      loadLeads();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  // Load places metadata (categories and tags)
+  async function loadPlacesMeta() {
+    try {
+      const meta = await api('/places/meta');
+      const catSel = document.getElementById('pMainCategory');
+      meta.categories.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c;
+        option.textContent = c;
+        catSel.appendChild(option);
+      });
+    } catch (e) {
+      console.error('Error loading places metadata:', e);
+    }
+  }
+
+  // Load places
+  async function loadPlaces() {
+    const q = document.getElementById('pQ').value;
+    const mainCategory = document.getElementById('pMainCategory').value;
+    const city = document.getElementById('pCity').value;
+    const hasWeb = document.getElementById('pHasWeb').value;
+
+    try {
+      const data = await api(`/places?q=${encodeURIComponent(q)}&mainCategory=${encodeURIComponent(mainCategory)}&city=${encodeURIComponent(city)}&hasWeb=${encodeURIComponent(hasWeb)}&page=${placesPage}&pageSize=${placesPageSize}`);
+      const tbody = document.getElementById('placesT');
+      tbody.innerHTML = '';
+      
+      for (const p of data.data) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${p.name || ''}</strong></td>
+          <td>${p.main_category || ''}</td>
+          <td>${p.phone || ''}</td>
+          <td>${p.web ? `<a href="https://${p.web}" target="_blank" style="color: #1976d2; text-decoration: none;">${p.web}</a>` : ''}</td>
+          <td>${p.city || ''}</td>
+          <td>${p.tags || ''}</td>
+          <td>
+            <div class="table-actions">
+              <button class="btn btn-sm btn-primary btn-icon" onclick="openPlaceModal('${p.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-success btn-icon" onclick="createLeadFromPlace('${p.id}')" title="Crear lead"><i class="fa-solid fa-user-plus"></i></button>
+              <button class="btn btn-sm btn-danger btn-icon" onclick="deletePlace('${p.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      
+      const pill = document.getElementById('placesPageIndex');
+      pill.textContent = `Página ${placesPage} • total: ${data.total || 0}`;
+    } catch (e) {
+      console.error('Error loading places:', e);
+    }
+  }
+
+  // Load leads
+  async function loadLeads() {
+    const q = document.getElementById('lQ').value;
+    const status = document.getElementById('lStatus').value;
+    
+    try {
+      const data = await api(`/leads?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}&page=${leadsPage}&pageSize=${leadsPageSize}`);
+      const tbody = document.getElementById('leadsT');
+      tbody.innerHTML = '';
+      
+      for (const l of data.data) {
+        const statusClass = `status-${l.status || 'new'}`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${l.full_name || ''}</strong></td>
+          <td>${l.email || ''}</td>
+          <td>${l.phone || ''}</td>
+          <td><span class="status-badge ${statusClass}">${l.status || 'new'}</span></td>
+          <td><small class="text-muted">${l.notes || ''}</small></td>
+          <td>
+            <div class="table-actions">
+              <button class="btn btn-sm btn-primary btn-icon" onclick="openLeadModal('${l.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-danger btn-icon" onclick="deleteLead('${l.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      
+      const pill = document.getElementById('leadsPage');
+      pill.textContent = `Página ${leadsPage} • total: ${data.total || 0}`;
+    } catch (e) {
+      console.error('Error loading leads:', e);
+    }
+  }
+
+  // Load jobs
+  async function loadJobs() {
+    try {
+      const res = await api('/gapi/jobs');
+      const tbody = document.getElementById('jobsT');
+      tbody.innerHTML = '';
+      const jobs = res.jobs || [];
+
+      const start = (jobsPage - 1) * jobsPageSize;
+      const end = start + jobsPageSize;
+      const pageJobs = jobs.slice(start, end);
+
+      for (const j of pageJobs) {
+        const statusIcon = j.status === 'done' ? '✅' : (j.status === 'running' ? '⏳' : '🕓');
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `
+          <td>${j.id}</td>
+          <td>${j.lugar || ''}</td>
+          <td>${j.variations_total || 0}</td>
+          <td>${j.processed || 0}</td>
+          <td>${j.status || ''}</td>
+          <td>${statusIcon}</td>
+        `;
+        tr.onclick = () => openJobModal(j);
+        tbody.appendChild(tr);
+      }
+
+      const totalPages = Math.ceil(jobs.length / jobsPageSize);
+      const jp = document.getElementById('jobsPage');
+      jp.textContent = `Página ${jobsPage} de ${totalPages} • total: ${jobs.length}`;
+
+      document.getElementById('jobsPrev').disabled = jobsPage <= 1;
+      document.getElementById('jobsNext').disabled = jobsPage >= totalPages;
+
+      loadFinishedJobs();
+    } catch (e) {
+      console.error('Error loading jobs:', e);
+    }
+  }
+
+  // Load finished jobs
+  async function loadFinishedJobs() {
+    try {
+      const res = await api('/gapi/jobs');
+      const tbody = document.getElementById('finishedJobsT');
+      tbody.innerHTML = '';
+      const jobs = res.jobs || [];
+
+      const finishedJobs = jobs.filter(j => j.status === 'done');
+
+      const start = (finishedJobsPage - 1) * finishedJobsPageSize;
+      const end = start + finishedJobsPageSize;
+      const pageJobs = finishedJobs.slice(start, end);
+
+      for (const j of pageJobs) {
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        const finishedDate = j.finished_at ? new Date(j.finished_at).toLocaleDateString('es-ES') + ' ' + new Date(j.finished_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+        tr.innerHTML = `
+          <td>${j.id}</td>
+          <td>${j.lugar || ''}</td>
+          <td>${j.variations_total || 0}</td>
+          <td>${j.processed || 0}</td>
+          <td>${finishedDate}</td>
+        `;
+        tr.onclick = () => openJobModal(j);
+        tbody.appendChild(tr);
+      }
+
+      const totalPages = Math.ceil(finishedJobs.length / finishedJobsPageSize);
+      const fjp = document.getElementById('finishedJobsPage');
+      fjp.textContent = `Página ${finishedJobsPage} de ${totalPages} • total: ${finishedJobs.length}`;
+
+      document.getElementById('finishedJobsPrev').disabled = finishedJobsPage <= 1;
+      document.getElementById('finishedJobsNext').disabled = finishedJobsPage >= totalPages;
+    } catch (e) {
+      console.error('Error loading finished jobs:', e);
+    }
+  }
+
+  // Load finished jobs for comercial_pro
+  async function loadFinishedJobsPro() {
+    try {
+      const res = await api('/gapi/jobs');
+      const tbody = document.getElementById('finishedJobsProT');
+      if (!tbody) {
+        console.warn('finishedJobsProT element not found');
+        return;
+      }
+
+      tbody.innerHTML = '';
+      const jobs = res.jobs || [];
+      const finishedJobs = jobs.filter(j => j && (j.status === 'done' || j.status === 'completed'));
+
+      if (finishedJobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 20px;">Sin búsquedas completadas aún</td></tr>';
+        console.log('No finished jobs found. Total jobs:', jobs.length, 'Statuses:', jobs.map(j => j.status).join(', '));
+        return;
+      }
+
+      // Sort by date descending
+      finishedJobs.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+      for (const j of finishedJobs.slice(0, 10)) {
+        const tr = document.createElement('tr');
+        const finishedDate = j.finished_at ? new Date(j.finished_at).toLocaleDateString('es-ES') : (j.created_at ? new Date(j.created_at).toLocaleDateString('es-ES') : '-');
+        tr.innerHTML = `
+          <td>${j.id || '-'}</td>
+          <td><strong>${j.lugar || j.query || '-'}</strong></td>
+          <td>${j.variations_total || j.processed || 0}</td>
+          <td>${finishedDate}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+      console.log('Loaded', finishedJobs.length, 'finished jobs');
+    } catch (e) {
+      console.error('Error loading finished jobs for pro:', e);
+      const tbody = document.getElementById('finishedJobsProT');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red; padding: 20px;">Error al cargar búsquedas completadas</td></tr>';
+      }
+    }
+  }
+
+  // Event listeners
+  document.getElementById('loadPlaces').onclick = () => { placesPage = 1; loadPlaces(); };
+  document.getElementById('placesPrev').onclick = () => { if (placesPage > 1) { placesPage--; loadPlaces(); } };
+  document.getElementById('placesNext').onclick = () => { placesPage++; loadPlaces(); };
+  document.getElementById('newPlaceBtn').onclick = () => openPlaceModal();
+
+  document.getElementById('loadLeads').onclick = () => { leadsPage = 1; loadLeads(); };
+  document.getElementById('leadsPrev').onclick = () => { if (leadsPage > 1) { leadsPage--; loadLeads(); } };
+  document.getElementById('leadsNext').onclick = () => { leadsPage++; loadLeads(); };
+  document.getElementById('newLeadBtn').onclick = () => openLeadModal();
+
+  document.getElementById('jobsPrev').onclick = () => { if (jobsPage > 1) { jobsPage--; loadJobs(); } };
+  document.getElementById('jobsNext').onclick = () => { jobsPage++; loadJobs(); };
+  document.getElementById('jobsPageSizeSelect').onchange = () => { jobsPage = 1; jobsPageSize = Number(document.getElementById('jobsPageSizeSelect').value); loadJobs(); };
+  document.getElementById('finishedJobsPrev').onclick = () => { if (finishedJobsPage > 1) { finishedJobsPage--; loadFinishedJobs(); } };
+  document.getElementById('finishedJobsNext').onclick = () => { finishedJobsPage++; loadFinishedJobs(); };
+  document.getElementById('finishedJobsPageSizeSelect').onchange = () => { finishedJobsPage = 1; finishedJobsPageSize = Number(document.getElementById('finishedJobsPageSizeSelect').value); loadFinishedJobs(); };
+
+  // GAPI functions
+  document.getElementById('runBtn').onclick = async () => {
+    const q = document.getElementById('q').value;
+    const lat = parseFloat(document.getElementById('lat').value);
+    const lng = parseFloat(document.getElementById('lng').value);
+    const radius = parseInt(document.getElementById('radius').value || '20000', 10);
+    document.getElementById('runStatus').textContent = 'Ejecutando...';
+    try {
+      const res = await api('/gapi/run', { method: 'POST', body: JSON.stringify({ query: q, lat, lng, radius }) });
+      document.getElementById('runStatus').textContent = res.ok ? 'OK ✓' : 'Error';
+      loadJobs();
+    } catch (e) {
+      document.getElementById('runStatus').textContent = 'Error';
+      alert('Error: ' + e.message);
+    }
+  };
+
+  // Show preview of variations before executing
+  document.getElementById('varBtn').onclick = async () => {
+    const lugar = document.getElementById('varLugar').value;
+    if (!lugar || !lugar.trim()) return alert('Introduce un lugar');
+    const variations = [
+      `negocios cerca de ${'${lugar}'}`,
+      `sitios cerca de ${'${lugar}'}`,
+      `lugares cerca de ${'${lugar}'}`,
+      `servicios cerca de ${'${lugar}'}`,
+      `comercios cerca de ${'${lugar}'}`,
+      `empresas cerca de ${'${lugar}'}`,
+      `actividades cerca de ${'${lugar}'}`,
+      `tiendas cerca de ${'${lugar}'}`,
+      `locales cerca de ${'${lugar}'}`,
+      `servicios locales cerca de ${'${lugar}'}`,
+      `oficinas cerca de ${'${lugar}'}`,
+      `restaurantes cerca de ${'${lugar}'} `
+    ].map(v => v.replace('\${lugar}', lugar));
+
+    // Populate modal
+    const body = document.getElementById('variationsBody');
+    body.innerHTML = `
+      <p class="text-muted">Se ejecutarán las siguientes variaciones para: <strong>${lugar}</strong></p>
+      <ul>
+        ${variations.map(v => `<li>${v}</li>`).join('')}
+      </ul>
+      <p class="text-small text-muted">Pulsa "Confirmar y ejecutar" para iniciar el proceso.</p>
+    `;
+
+    // show modal
+    document.getElementById('variationsModal').classList.add('show');
+
+    // bind confirm
+    const confirmBtn = document.getElementById('confirmVariationsBtn');
+    confirmBtn.onclick = async () => {
+      document.getElementById('varStatus').textContent = 'Encolando...';
+      try {
+        const res = await api('/gapi/variations', { method: 'POST', body: JSON.stringify({ lugar }) });
+        document.getElementById('varStatus').textContent = res.ok ? 'OK ✓' : 'Error';
+        closeVariationsModal();
+        loadJobs();
+      } catch (e) {
+        document.getElementById('varStatus').textContent = 'Error';
+        alert('Error: ' + e.message);
+      }
+    };
+  };
+
+  document.getElementById('genBtn').onclick = async () => {
+    const requireHasPhone = document.getElementById('glHasPhone').value;
+    const requireNoWeb = document.getElementById('glNoWeb').value;
+    const category = document.getElementById('glCategory').value;
+    const city = document.getElementById('glCity').value;
+    const limit = parseInt(document.getElementById('glLimit').value || '100', 10);
+    document.getElementById('genStatus').textContent = 'Generando...';
+    try {
+      const res = await api('/leads/generate', { method: 'POST', body: JSON.stringify({ requireHasPhone, requireNoWeb, category, city, limit }) });
+      document.getElementById('genStatus').textContent = res.ok ? `Creados: ${res.result?.created || 0}` : 'Error';
+    } catch (e) {
+      document.getElementById('genStatus').textContent = 'Error';
+      alert('Error: ' + e.message);
+    }
+  };
+
+  // Load data on page load
+  loadPlacesMeta();
+  loadPlaces();
+  loadLeads();
+  loadJobs();
+  setInterval(loadJobs, 3000);
+
+  // If user role is comercial_pro (flexible match), show premium interface
+  (function(){
+    try {
+      const role = '<%= _role %>' || '';
+      if (role && role.includes('comercial') && role.includes('pro')) {
+        const pageEl = document.querySelector('.page');
+        if (pageEl) {
+          const cards = Array.from(pageEl.querySelectorAll('.card'));
+          cards.forEach((c, idx) => { if (idx !== 0) c.style.display = 'none'; });
+        }
+        // Show comercial_pro card layout
+        const gapiCard = document.getElementById('gapiCard');
+        const comercialCard = document.getElementById('comercialProCard');
+        if (gapiCard) gapiCard.style.display = 'none';
+        if (comercialCard) comercialCard.style.display = 'block';
+
+        // Hide admin navbar items but keep Places
+        const adminNavSelectors = ['a[href="/admin/users"]','a[href="/whatsapp"]'];
+        adminNavSelectors.forEach(s => { const el = document.querySelector(s); if (el) el.closest('li')?.remove(); });
+
+        // Setup comercial_pro event listeners
+        setupComercialProHandlers();
+
+        // Load finished jobs for comercial_pro on page load
+        loadFinishedJobsPro();
+        // Refresh finished jobs every 5 seconds
+        setInterval(loadFinishedJobsPro, 5000);
+      }
+    } catch (e) { console.error('Role-hide script error:', e.message); }
+  })();
+
+  function setupComercialProHandlers() {
+    const varBtnPro = document.getElementById('varBtnPro');
+    const varLugarPro = document.getElementById('varLugarPro');
+
+    if (!varBtnPro) return;
+
+    varBtnPro.onclick = async () => {
+      const lugar = varLugarPro.value.trim();
+      if (!lugar) return alert('Por favor ingresa un nombre de lugar');
+
+      const variations = [
+        `negocios cerca de ${lugar}`,
+        `sitios cerca de ${lugar}`,
+        `lugares cerca de ${lugar}`,
+        `servicios cerca de ${lugar}`,
+        `comercios cerca de ${lugar}`,
+        `empresas cerca de ${lugar}`,
+        `actividades cerca de ${lugar}`,
+        `tiendas cerca de ${lugar}`,
+        `locales cerca de ${lugar}`,
+        `servicios locales cerca de ${lugar}`,
+        `oficinas cerca de ${lugar}`,
+        `restaurantes cerca de ${lugar}`
+      ];
+
+      // Show variations list
+      const listDiv = document.getElementById('variationsListPro');
+      const itemsDiv = document.getElementById('variationsItemsPro');
+      itemsDiv.innerHTML = variations.map((v, idx) => `
+        <div style="padding: 10px 12px; background: #f9f9f9; border-left: 3px solid #1976d2; border-radius: 4px; font-size: 13px;">
+          ${idx + 1}. ${v}
+        </div>
+      `).join('');
+      listDiv.style.display = 'block';
+
+      // Scroll into view
+      listDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Execute after showing
+      await new Promise(r => setTimeout(r, 500));
+
+      // Disable button and show progress
+      varBtnPro.disabled = true;
+      varBtnPro.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+
+      const progressDiv = document.getElementById('jobProgressPro');
+      progressDiv.style.display = 'block';
+
+      try {
+        const res = await api('/gapi/variations', {
+          method: 'POST',
+          body: JSON.stringify({ lugar })
+        });
+
+        if (!res.ok) {
+          alert('Error: ' + (res.error || 'No se pudo procesar'));
+          return;
+        }
+
+        const jobId = res.job?.id;
+        if (jobId) {
+          // Poll job progress
+          let completed = false;
+          let attempts = 0;
+          const maxAttempts = 120; // 2 minutes max
+
+          while (!completed && attempts < maxAttempts) {
+            await new Promise(r => setTimeout(r, 1000));
+            attempts++;
+
+            try {
+              const jobRes = await api('/gapi/jobs');
+              const job = jobRes.jobs?.find(j => j.id === jobId);
+
+              if (job) {
+                const processed = job.processed || 0;
+                const total = job.variations_total || 12;
+                const percent = Math.round((processed / total) * 100);
+
+                document.getElementById('jobProgressBar').style.width = percent + '%';
+                document.getElementById('jobProgressText').textContent = `${processed}/${total}`;
+
+                if (job.status === 'done') {
+                  completed = true;
+                  document.getElementById('jobProgressPro').style.display = 'none';
+                  document.getElementById('statusMessagePro').innerHTML = '<i class=\"fa-solid fa-check-circle\"></i> ¡Completado! Se encontraron lugares. Puedes verlos en la sección \"Ver mis lugares\".';
+                  document.getElementById('statusMessagePro').style.display = 'block';
+                  document.getElementById('finishedJobsProSection').style.display = 'block';
+                  // Wait 500ms before loading to ensure data is synced
+                  await new Promise(r => setTimeout(r, 500));
+                  await loadFinishedJobsPro();
+                }
+              }
+            } catch (e) {
+              console.error('Error polling job:', e);
+            }
+          }
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      } finally {
+        varBtnPro.disabled = false;
+        varBtnPro.innerHTML = '<i class="fa-solid fa-rocket"></i> Generar Lugares';
+      }
+    };
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

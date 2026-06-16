@@ -1,0 +1,376 @@
+<nav class="navbar navbar-expand-xl navbar-light bg-white shadow-sm app-navbar">
+  <div class="container-fluid app-navbar-inner">
+    <a class="navbar-brand fw-bold" href="/">
+      <span class="brand-mark"><i class="fa-solid fa-chart-line"></i></span>
+      <span class="brand-text">Dashboard</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav main-nav me-auto mb-2 mb-xl-0">
+        <% if (typeof session !== 'undefined' && session.userRole === 'admin') { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/" title="Inicio">
+            <i class="fa-solid fa-home me-1"></i>Inicio
+          </a>
+        </li>
+        <% } %>
+        <% if (typeof session !== 'undefined' && (session.userRole === 'admin' || session.userRole === 'comercial_pro')) { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/places" title="Lugares de Google Maps">
+            <i class="fa-solid fa-map-location-dot me-1"></i>Places
+          </a>
+        </li>
+        <% } %>
+        <li class="nav-item">
+          <a class="nav-link" href="/leads" title="Contactos y clientes potenciales">
+            <i class="fa-solid fa-people-group me-1"></i>Leads
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/stats" title="Estadísticas y análisis">
+            <i class="fa-solid fa-chart-bar me-1"></i>Stats
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/calendar" title="Calendario">
+            <i class="fa-solid fa-calendar-days me-1 icon-calendar"></i>Calendario
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/manual" title="Manual de usuario">
+            <i class="fa-solid fa-book me-1"></i>Manual
+          </a>
+        </li>
+        <% if (typeof session !== 'undefined' && (session.userRole === 'admin' || session.userRole === 'comercial_pro')) { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/whatsapp" title="Integración WhatsApp">
+            <i class="fa-brands fa-whatsapp me-1" style="color: #25d366;"></i>WhatsApp
+          </a>
+        </li>
+        <% } %>
+        <% if (typeof session !== 'undefined' && session.userRole === 'admin') { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/users" title="Gestión de usuarios">
+            <i class="fa-solid fa-users-gear me-1" style="color: #f57c00;"></i>Usuarios
+          </a>
+        </li>
+        <% } %>
+        <% if (typeof session !== 'undefined' && session.userRole === 'admin') { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/subdomains" title="Gestión de subdominios">
+            <i class="fa-solid fa-network-wired me-1" style="color: #7b1fa2;"></i>Subdominios
+          </a>
+        </li>
+        <% } %>
+        <% if (typeof session !== 'undefined' && session.userRole === 'admin') { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/documentation" title="Documentación de roles">
+            <i class="fa-solid fa-book-open me-1" style="color: #28a745;"></i>Documentación
+          </a>
+        </li>
+        <% } %>
+        <% if (typeof session !== 'undefined' && (session.userRole === 'admin' || session.userRole === 'comercial_pro')) { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/strategies" title="Estrategias de mensajes">
+            <i class="fa-solid fa-chess me-1" style="color: #7b1fa2;"></i>Estrategias
+          </a>
+        </li>
+        <% } %>
+        <% if (typeof session !== 'undefined' && session.userRole === 'admin') { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/tools" title="Herramientas admin">
+            <i class="fa-solid fa-wrench me-1" style="color: #d32f2f;"></i>Herramientas
+          </a>
+        </li>
+        <% } %>
+      </ul>
+      <div class="navbar-actions">
+        <% if (typeof demoMode !== 'undefined' && demoMode) { %>
+        <span class="demo-badge" title="Demo pública con datos en memoria">
+          <i class="fa-solid fa-database"></i><span>Demo mock data</span>
+        </span>
+        <% } %>
+        <div class="dropdown">
+          <button class="user-menu dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-user-circle"></i><span><%= typeof session !== 'undefined' && session.username ? session.username : 'Usuario' %></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-sign-out-alt me-2"></i>Salir</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .app-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .app-navbar-inner {
+    gap: 10px;
+    min-height: 62px;
+    padding-left: clamp(12px, 2vw, 24px);
+    padding-right: clamp(12px, 2vw, 24px);
+  }
+
+  .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 0;
+    margin-right: 10px;
+    color: #172033;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #eaf3ff;
+    color: #1976d2;
+    flex: 0 0 auto;
+  }
+
+  .brand-text {
+    min-width: 0;
+  }
+
+  .main-nav {
+    align-items: center;
+    gap: 2px;
+  }
+
+  .main-nav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #445066;
+    transition: color 0.2s, background-color 0.2s;
+    padding: 0.55rem 0.65rem;
+    white-space: nowrap;
+  }
+
+  .main-nav .nav-link i {
+    width: 16px;
+    text-align: center;
+    flex: 0 0 auto;
+  }
+
+  .main-nav .nav-link:hover {
+    color: #1976d2;
+    background: #f1f7ff;
+  }
+
+  .main-nav .nav-link.active {
+    color: #1976d2;
+    font-weight: 700;
+    background: #eaf3ff;
+  }
+
+  .icon-calendar { color: #1976d2; }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .demo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #f0c36d;
+    background: #fff8e1;
+    color: #7a4d00;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .demo-badge i {
+    flex: 0 0 auto;
+  }
+
+  .dropdown-menu {
+    z-index: 9999 !important;
+  }
+
+  .user-menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 190px;
+    padding: 7px 10px;
+    border: 1px solid #e5e9f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #172033;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+  }
+
+  .user-menu span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .user-menu i {
+    font-size: 18px;
+    flex: 0 0 auto;
+  }
+
+  .user-menu:hover {
+    color: #1976d2;
+    border-color: #b7d8ff;
+    background: #f8fbff;
+  }
+
+  .navbar-toggler {
+    border: 1px solid #dbe3ee;
+    border-radius: 8px;
+    padding: 6px 8px;
+  }
+
+  .navbar-toggler:focus {
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.16);
+  }
+
+  @media (max-width: 1199.98px) {
+    .app-navbar-inner {
+      min-height: 58px;
+    }
+
+    .navbar-collapse {
+      margin-top: 10px;
+      padding: 10px 0 4px;
+      border-top: 1px solid #edf1f6;
+    }
+
+    .main-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
+      margin-bottom: 10px !important;
+    }
+
+    .main-nav .nav-item {
+      min-width: 0;
+    }
+
+    .main-nav .nav-link {
+      width: 100%;
+      min-height: 42px;
+      justify-content: flex-start;
+      padding: 0.65rem 0.75rem;
+      background: #f8fafc;
+      border: 1px solid #edf1f6;
+    }
+
+    .navbar-actions {
+      justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+      padding-top: 6px;
+    }
+
+    .demo-badge {
+      min-height: 38px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .app-navbar-inner {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .navbar-brand {
+      font-size: 15px;
+      gap: 7px;
+      max-width: calc(100vw - 76px);
+    }
+
+    .brand-mark {
+      width: 31px;
+      height: 31px;
+      border-radius: 7px;
+    }
+
+    .main-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .main-nav .nav-link {
+      min-height: 40px;
+      font-size: 13px;
+      padding: 0.6rem 0.7rem;
+    }
+
+    .navbar-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .demo-badge,
+    .user-menu {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .dropdown-menu { font-size: 12px; }
+    .user-menu { font-size: 12px; max-width: none; }
+    .user-menu i { font-size: 16px; }
+  }
+</style>
+
+<script>
+  (() => {
+    const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+    const links = Array.from(document.querySelectorAll('.app-navbar .nav-link[href]'));
+    let activeLink = links.find((link) => {
+      const href = link.getAttribute('href');
+      return href !== '/' && currentPath.startsWith(href);
+    });
+
+    if (!activeLink) {
+      activeLink = links.find((link) => link.getAttribute('href') === currentPath);
+    }
+
+    if (activeLink) {
+      activeLink.classList.add('active');
+      activeLink.setAttribute('aria-current', 'page');
+    }
+
+    const collapseEl = document.getElementById('navbarNav');
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth >= 1200 || !collapseEl?.classList.contains('show') || !window.bootstrap) return;
+        window.bootstrap.Collapse.getOrCreateInstance(collapseEl).hide();
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body { background: #f7f9fc; }
+    .page { max-width: 1000px; margin: 28px auto; padding: 0 15px; }
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    .qr-container { text-align: center; padding: 40px 20px; }
+    .qr-image { max-width: 300px; width: 100%; height: auto; margin: 20px 0; border: 2px solid #1976d2; border-radius: 8px; }
+    .connection-badge { padding: 12px 20px; border-radius: 8px; font-weight: 600; margin-bottom: 20px; }
+    .connection-connected { background: #e8f5e9; color: #2e7d32; }
+    .connection-disconnected { background: #ffebee; color: #c62828; }
+    .status-info { padding: 20px; background: #f5f5f5; border-radius: 8px; margin: 20px 0; }
+    .info-row { margin-bottom: 12px; }
+    .info-label { font-weight: 600; color: #333; min-width: 150px; }
+    .template-card { padding: 20px; background: #f9f9f9; border-left: 4px solid #1976d2; margin-bottom: 12px; border-radius: 4px; }
+    .template-variables { font-size: 12px; color: #999; margin-top: 8px; font-style: italic; }
+    @media (max-width: 768px) {
+      .page { padding: 0 10px; margin: 15px auto; }
+      .qr-image { max-width: 250px; margin: 15px 0; }
+      .qr-container { padding: 30px 15px; }
+      .card-body { padding: 15px; }
+      .connection-badge { padding: 10px 15px; font-size: 14px; }
+      .status-info { padding: 15px; margin: 15px 0; }
+      .info-row { margin-bottom: 10px; }
+      .info-label { min-width: 120px; font-size: 13px; }
+      .template-card { padding: 15px; margin-bottom: 10px; }
+      h1 { font-size: 1.3rem; }
+      h5 { font-size: 1rem; }
+      .btn { padding: 0.35rem 0.5rem; font-size: 12px; }
+    }
+
+    @media (max-width: 576px) {
+      .page { padding: 0 8px; margin: 10px auto; }
+      .qr-image { max-width: 200px; margin: 10px 0; }
+      .qr-container { padding: 20px 10px; }
+      .card-body { padding: 12px; }
+      .card-shadow { box-shadow: 0 2px 8px rgba(13,38,76,0.04); }
+      .connection-badge { padding: 8px 12px; font-size: 13px; margin-bottom: 15px; }
+      .status-info { padding: 12px; margin: 12px 0; }
+      .info-row { margin-bottom: 8px; display: flex; flex-direction: column; }
+      .info-label { min-width: auto; font-size: 12px; margin-bottom: 2px; }
+      .template-card { padding: 12px; margin-bottom: 8px; font-size: 13px; }
+      .template-variables { font-size: 11px; }
+      h1 { font-size: 1.1rem; }
+      h5 { font-size: 0.95rem; }
+      .btn { padding: 0.3rem 0.4rem; font-size: 11px; }
+      .col-md-6 { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar') %>
+
+  <div class="page container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0"><i class="fa-brands fa-whatsapp me-2" style="color: #25d366;"></i>WhatsApp Integration</h1>
+      <div>
+        <button id="refreshBtn" class="btn btn-outline-secondary"><i class="fa-solid fa-arrows-rotate"></i></button>
+        <% if (session && session.userRole !== 'comercial_pro') { %>
+          <button id="createInstanceBtn" class="btn btn-primary ms-2"><i class="fa-solid fa-plus me-1"></i> Crear instancia personal</button>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card card-shadow mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Connection Status</h5>
+            <div id="connectionBadge" class="connection-badge connection-disconnected">
+              <i class="fa-solid fa-circle-xmark me-2"></i> Disconnected
+            </div>
+            <div class="status-info">
+              <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span id="statusValue">Disconnected</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Phone:</span>
+                <span id="phoneValue">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Bot Name:</span>
+                <span id="botNameValue">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Last Activity:</span>
+                <span id="lastActivityValue">-</span>
+              </div>
+            </div>
+            <button id="disconnectBtn" class="btn btn-danger w-100" style="display:none;">
+              <i class="fa-solid fa-plug-circle-xmark me-1"></i> Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card card-shadow mb-4">
+          <div class="card-body">
+            <h5 class="card-title">QR Code Scanner</h5>
+            <div class="qr-container">
+              <div id="qrLoader" style="display:none;">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Generating QR code...</p>
+              </div>
+              <div id="qrContainer" style="display:none;">
+                <p class="text-muted mb-3">Scan this QR code with your WhatsApp:</p>
+                <img id="qrImage" class="qr-image" alt="QR Code" />
+                <p class="small text-muted mt-3">If the QR code is not displaying, make sure WhatsApp is installed and click refresh.</p>
+              </div>
+              <div id="qrConnected" style="display:none;">
+                <div style="font-size: 60px; margin: 20px 0;">
+                  <i class="fa-solid fa-check-circle" style="color: #4caf50;"></i>
+                </div>
+                <p class="text-success fw-bold">Connected successfully!</p>
+                <p class="text-muted">You can now send messages from the Leads section.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if (session && session.userRole !== 'comercial_pro') { %>
+      <div class="card card-shadow mb-4">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa-solid fa-clock me-2"></i>Daily Preview Messages</h5>
+          <p class="text-muted small mb-3">Send automated preview messages to the "Maquinaciones" group every day at 10:00 AM with the leads scheduled for that day.</p>
+
+          <div class="mb-3">
+            <button id="testDailyPreviewBtn" class="btn btn-info"><i class="fa-solid fa-paper-plane me-1"></i> Send Test Message Now</button>
+          </div>
+
+          <div id="testDailyPreviewResult"></div>
+        </div>
+      </div>
+
+      <div class="card card-shadow">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa-solid fa-message me-2"></i>Message Templates</h5>
+          <p class="text-muted small mb-3">Create message templates that can be used when sending personalized messages to leads.</p>
+
+          <div class="mb-3">
+            <button id="addTemplateBtn" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> New Template</button>
+          </div>
+
+          <div id="templatesList"></div>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="card card-shadow">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fa-solid fa-circle-info me-2" style="color: #1976d2;"></i>Guía de Conexión</h5>
+          <p class="text-muted mb-3">Sigue estos pasos para conectar tu WhatsApp:</p>
+          <ol class="mb-0">
+            <li class="mb-2">Abre WhatsApp en tu teléfono</li>
+            <li class="mb-2">El código QR aparecerá en la sección "QR Code Scanner"</li>
+            <li class="mb-2">Escanea el código QR con tu teléfono</li>
+            <li class="mb-2">Una vez conectado, podrás enviar mensajes desde la sección de Leads</li>
+            <li class="mb-2"><strong>Si el código QR no se carga:</strong> Presiona <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> para refrescar la página</li>
+          </ol>
+          <div class="alert alert-info mt-3 mb-0">
+            <i class="fa-solid fa-lightbulb me-2"></i><strong>Consejo:</strong> Si la conexión se pierde, haz clic en el botón "Refrescar" para volver a generar el código QR.
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="modal fade" id="templateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Message Template</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="templateForm">
+            <div class="mb-3">
+              <label class="form-label">Template Name</label>
+              <input id="f_template_name" type="text" class="form-control" required placeholder="e.g., Welcome Message">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Message Content</label>
+              <textarea id="f_template_content" class="form-control" rows="6" required placeholder="Write your message here..."></textarea>
+              <small class="text-muted d-block mt-2">
+                <strong>Available variables:</strong><br>
+                {nombre} - Lead name<br>
+                {phone} - Lead phone<br>
+                {email} - Lead email<br>
+                {city} - Lead city
+              </small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="saveTemplateBtn" type="button" class="btn btn-primary">Save Template</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+    <div id="toastEl" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastBody">Message</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const base = '';
+    const apiJson = async (p, opt = {}) => fetch(p, Object.assign({ headers: { Accept: 'application/json' } }, opt)).then(r=>r.json());
+    const toast = new bootstrap.Toast(document.getElementById('toastEl'));
+    const templateModal = new bootstrap.Modal(document.getElementById('templateModal'));
+
+    let pollInterval = null;
+
+    function showToast(msg) { document.getElementById('toastBody').textContent = msg; toast.show(); }
+
+    async function loadStatus() {
+      try {
+        const res = await apiJson(`${base}/whatsapp/status`);
+        
+        if (res.ok) {
+          const badge = document.getElementById('connectionBadge');
+          const statusValue = document.getElementById('statusValue');
+          const phoneValue = document.getElementById('phoneValue');
+          const botNameValue = document.getElementById('botNameValue');
+          const qrContainer = document.getElementById('qrContainer');
+          const qrConnected = document.getElementById('qrConnected');
+          const qrLoader = document.getElementById('qrLoader');
+          const disconnectBtn = document.getElementById('disconnectBtn');
+
+          if (res.connected) {
+            badge.className = 'connection-badge connection-connected';
+            badge.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Connected';
+            statusValue.textContent = 'Connected';
+            phoneValue.textContent = res.phone_number || '-';
+            botNameValue.textContent = res.bot_name || '-';
+            qrContainer.style.display = 'none';
+            qrConnected.style.display = 'block';
+            qrLoader.style.display = 'none';
+            disconnectBtn.style.display = 'block';
+            if (pollInterval) clearInterval(pollInterval);
+          } else {
+            badge.className = 'connection-badge connection-disconnected';
+            badge.innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i> Disconnected';
+            statusValue.textContent = 'Disconnected';
+            phoneValue.textContent = '-';
+            botNameValue.textContent = '-';
+            qrConnected.style.display = 'none';
+            disconnectBtn.style.display = 'none';
+            loadQRCode();
+          }
+        }
+      } catch (e) {
+        console.error('Error loading status:', e);
+      }
+    }
+
+    async function loadQRCode() {
+      try {
+        const qrContainer = document.getElementById('qrContainer');
+        const qrLoader = document.getElementById('qrLoader');
+        const qrImage = document.getElementById('qrImage');
+        
+        qrLoader.style.display = 'block';
+        qrContainer.style.display = 'none';
+
+        const res = await apiJson(`${base}/whatsapp/qr`);
+        
+        if (res.ok && res.qr_code) {
+          qrImage.src = res.qr_code;
+          qrContainer.style.display = 'block';
+          qrLoader.style.display = 'none';
+        } else if (res.connected) {
+          loadStatus();
+        } else {
+          qrLoader.style.display = 'none';
+          qrContainer.style.display = 'block';
+          qrImage.style.display = 'none';
+        }
+      } catch (e) {
+        console.error('Error loading QR code:', e);
+        document.getElementById('qrLoader').style.display = 'none';
+      }
+    }
+
+    async function loadTemplates() {
+      try {
+        const res = await apiJson(`${base}/whatsapp/templates`);
+        const templatesList = document.getElementById('templatesList');
+        
+        if (!res.ok || !res.templates || res.templates.length === 0) {
+          templatesList.innerHTML = '<p class="text-muted text-center py-4">No templates created yet</p>';
+          return;
+        }
+
+        templatesList.innerHTML = res.templates.map(t => `
+          <div class="template-card">
+            <div class="d-flex justify-content-between align-items-start">
+              <div style="flex: 1;">
+                <strong>${t.name || 'Unnamed'}</strong>
+                <div class="template-variables">${t.content.substring(0, 100)}...</div>
+              </div>
+              <button class="btn btn-sm btn-outline-danger delete-template-btn" data-id="${t.id}" title="Delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        document.querySelectorAll('.delete-template-btn').forEach(btn => {
+          btn.onclick = async (e) => {
+            if (!confirm('Delete this template?')) return;
+            const id = e.currentTarget.getAttribute('data-id');
+            try {
+              await fetch(`${base}/whatsapp/templates/${id}`, { method: 'DELETE' });
+              showToast('Template deleted');
+              loadTemplates();
+            } catch (err) {
+              showToast('Error deleting template');
+            }
+          };
+        });
+      } catch (e) {
+        console.error('Error loading templates:', e);
+      }
+    }
+
+    // Determine if user is comercial_pro
+    const isComercialPro = '<%= session && session.userRole === "comercial_pro" ? "true" : "false" %>' === 'true';
+
+    const addTemplateBtn = document.getElementById('addTemplateBtn');
+    if (addTemplateBtn) {
+      addTemplateBtn.onclick = () => {
+        document.getElementById('templateForm').reset();
+        templateModal.show();
+      };
+    }
+
+    const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+    if (saveTemplateBtn) {
+      saveTemplateBtn.onclick = async () => {
+        const name = document.getElementById('f_template_name').value;
+        const content = document.getElementById('f_template_content').value;
+
+        if (!name || !content) {
+          showToast('Name and content are required');
+          return;
+        }
+
+        try {
+          const res = await apiJson(`${base}/whatsapp/templates`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, content })
+          });
+
+          if (res.ok) {
+            showToast('Template created');
+            templateModal.hide();
+            loadTemplates();
+          } else {
+            showToast('Error: ' + (res.error || 'Unknown error'));
+          }
+        } catch (e) {
+          showToast('Error: ' + e.message);
+        }
+      };
+    }
+
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    if (disconnectBtn) {
+      disconnectBtn.onclick = async () => {
+        if (!confirm('Disconnect WhatsApp?')) return;
+        try {
+          const res = await apiJson(`${base}/whatsapp/disconnect`, { method: 'POST' });
+          if (res.ok) {
+            showToast('Disconnected');
+            loadStatus();
+          }
+        } catch (e) {
+          showToast('Error: ' + e.message);
+        }
+      };
+    }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.onclick = () => {
+        loadStatus();
+        if (!isComercialPro) {
+          loadTemplates();
+        }
+      };
+    }
+
+    const testDailyPreviewBtn = document.getElementById('testDailyPreviewBtn');
+    if (testDailyPreviewBtn) {
+      testDailyPreviewBtn.onclick = async () => {
+        const btn = testDailyPreviewBtn;
+        const resultDiv = document.getElementById('testDailyPreviewResult');
+
+        try {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Enviando...';
+          resultDiv.innerHTML = '';
+
+          const res = await apiJson(`${base}/whatsapp/test-daily-preview`, { method: 'POST' });
+
+          if (res.ok) {
+            showToast('Test message sent successfully!');
+            resultDiv.innerHTML = `<div class="alert alert-success mt-3"><i class="fa-solid fa-check-circle me-2"></i><strong>Success!</strong><br>Message sent to "Maquinaciones" group<br>Leads for today: ${res.leadsCount}</div>`;
+          } else {
+            showToast('Error: ' + (res.error || 'Unknown error'));
+            resultDiv.innerHTML = `<div class="alert alert-danger mt-3"><i class="fa-solid fa-exclamation-circle me-2"></i><strong>Error:</strong><br>${res.error}</div>`;
+          }
+        } catch (e) {
+          showToast('Error: ' + e.message);
+          resultDiv.innerHTML = `<div class="alert alert-danger mt-3"><i class="fa-solid fa-exclamation-circle me-2"></i><strong>Error:</strong><br>${e.message}</div>`;
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Send Test Message Now';
+        }
+      };
+    }
+
+    loadStatus();
+
+    // Only load templates if not comercial_pro
+    if (!isComercialPro) {
+      loadTemplates();
+    }
+
+    if (!pollInterval) {
+      pollInterval = setInterval(loadStatus, 8000);
+    }
+
+    // Handler to create personal instance (only visible for comercial_pro via server-side rendering)
+    const createBtn = document.getElementById('createInstanceBtn');
+    if (createBtn) {
+      createBtn.onclick = async () => {
+        if (!confirm('Crear una instancia personal de WhatsApp para este usuario? Se generará un QR y una sesión separada.')) return;
+        try {
+          createBtn.disabled = true;
+          createBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Creando...';
+          const res = await apiJson(`${base}/whatsapp/instances`, { method: 'POST' });
+          if (res && res.ok) {
+            showToast('Instancia creada. Generando QR...');
+            // After creating, load QR/status
+            await loadQRCode();
+            await loadStatus();
+          } else {
+            showToast('Error creando instancia: ' + (res.error || 'unknown'));
+          }
+        } catch (e) {
+          showToast('Error: ' + e.message);
+        } finally {
+          createBtn.disabled = false;
+          createBtn.innerHTML = '<i class="fa-solid fa-plus me-1"></i> Crear instancia personal';
+        }
+      };
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Herramientas - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body { background: #f7f9fc; }
+    
+    .page-container { max-width: 1200px; margin: 28px auto; padding: 0 15px; }
+    
+    .card-shadow { box-shadow: 0 6px 18px rgba(13,38,76,0.06); }
+    
+    .upload-zone {
+      border: 2px dashed #1976d2;
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #f5f9ff;
+    }
+    
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: #1565c0;
+      background: #e3f2fd;
+    }
+    
+    .upload-zone i {
+      font-size: 48px;
+      color: #1976d2;
+      margin-bottom: 15px;
+    }
+    
+    .upload-zone p {
+      margin: 0;
+      color: #666;
+    }
+    
+    .file-input { display: none; }
+    
+    .progress-item {
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background: #f5f5f5;
+      border-left: 4px solid #1976d2;
+    }
+    
+    .progress-item.success {
+      border-left-color: #4caf50;
+      background: #f1f8e9;
+    }
+    
+    .progress-item.error {
+      border-left-color: #f44336;
+      background: #ffebee;
+    }
+    
+    .progress-item.processing {
+      border-left-color: #ff9800;
+      background: #fff3e0;
+    }
+    
+    .progress-bar-container {
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1976d2, #1565c0);
+      width: 0%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .metadata-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+    
+    .metadata-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    
+    .metadata-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1976d2;
+      word-break: break-word;
+      margin-bottom: 8px;
+    }
+    
+    .metadata-card-desc {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    
+    .metadata-card-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    
+    .btn-icon-small {
+      padding: 5px 8px;
+      font-size: 12px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    
+    .stats-box {
+      padding: 15px;
+      border-radius: 8px;
+      background: #f5f5f5;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    
+    .stats-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1976d2;
+    }
+    
+    .stats-label {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    @media (max-width: 768px) {
+      .page-container { padding: 0 10px; margin: 15px auto; }
+      .upload-zone { padding: 30px 15px; }
+      .upload-zone i { font-size: 36px; }
+      .metadata-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 1.3rem; }
+    }
+    
+    @media (max-width: 576px) {
+      .page-container { padding: 0 8px; margin: 10px auto; }
+      h1 { font-size: 1.1rem; }
+      .upload-zone { padding: 20px 10px; }
+      .upload-zone i { font-size: 28px; }
+      .stats-box { font-size: 12px; }
+      .stats-number { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../navbar') %>
+  
+  <div class="page-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0"><i class="fa-solid fa-wrench me-2"></i>Herramientas</h1>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-panel" type="button" role="tab" aria-controls="upload-panel" aria-selected="true">
+          <i class="fa-solid fa-cloud-arrow-up me-2"></i>Analizador de Imágenes
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata-panel" type="button" role="tab" aria-controls="metadata-panel" aria-selected="false">
+          <i class="fa-solid fa-list me-2"></i>Metadatos
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="webp-to-png-tab" data-bs-toggle="tab" data-bs-target="#webp-to-png-panel" type="button" role="tab" aria-controls="webp-to-png-panel" aria-selected="false">
+          <i class="fa-solid fa-image me-2"></i>WEBP → PNG
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="to-webp-tab" data-bs-toggle="tab" data-bs-target="#to-webp-panel" type="button" role="tab" aria-controls="to-webp-panel" aria-selected="false">
+          <i class="fa-solid fa-image me-2"></i>JPG/PNG → WEBP
+        </button>
+      </li>
+    </ul>
+
+    <!-- Upload Tab -->
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="upload-panel" role="tabpanel" aria-labelledby="upload-tab">
+        <div class="card card-shadow mb-4">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-image me-2"></i>Cargar Imágenes</h5>
+            
+            <div class="upload-zone" id="uploadZone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p class="mb-1"><strong>Arrastra imágenes aquí o haz clic para seleccionar</strong></p>
+              <p style="font-size: 12px; color: #999;">Formatos soportados: JPG, JPEG, PNG, WebP (máx. 10MB por imagen)</p>
+            </div>
+            
+            <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+            
+            <div class="action-buttons">
+              <button id="selectFilesBtn" class="btn btn-primary">
+                <i class="fa-solid fa-folder-open me-2"></i>Seleccionar Imágenes
+              </button>
+              <button id="analyzeBtn" class="btn btn-success" disabled>
+                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Analizar Imágenes
+              </button>
+              <button id="clearBtn" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-trash me-2"></i>Limpiar
+              </button>
+            </div>
+            
+            <!-- Progress Section -->
+            <div id="progressSection" style="display: none; margin-top: 30px;">
+              <h6 class="mb-3"><i class="fa-solid fa-spinner me-2"></i>Procesando imágenes...</h6>
+              <div id="progressContainer"></div>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsSection" style="display: none; margin-top: 30px;">
+              <h6 class="mb-3"><i class="fa-solid fa-check-circle me-2"></i>Resultados del análisis</h6>
+              <div id="resultsContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadata Tab -->
+      <div class="tab-pane fade" id="metadata-panel" role="tabpanel" aria-labelledby="metadata-tab">
+        <div class="card card-shadow mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="card-title mb-0"><i class="fa-solid fa-database me-2"></i>Imágenes Analizadas</h5>
+              <div class="btn-group" role="group">
+                <button id="downloadAnalyzedZipBtn" class="btn btn-sm btn-success" title="Descargar todas como ZIP">
+                  <i class="fa-solid fa-download me-1"></i>Descargar ZIP
+                </button>
+                <button id="downloadMetadataBtn" class="btn btn-sm btn-outline-primary" title="Descargar metadatos como JSON">
+                  <i class="fa-solid fa-download me-1"></i>Descargar JSON
+                </button>
+                <button id="deleteAllMetadataBtn" class="btn btn-sm btn-outline-danger" title="Eliminar todas las imágenes analizadas">
+                  <i class="fa-solid fa-trash me-1"></i>Eliminar todas
+                </button>
+              </div>
+            </div>
+
+            <div class="stats-box">
+              <div class="stats-number" id="totalImages">0</div>
+              <div class="stats-label">Imágenes analizadas</div>
+            </div>
+
+            <div id="metadataContainer" class="metadata-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEBP to PNG Tab -->
+      <div class="tab-pane fade" id="webp-to-png-panel" role="tabpanel" aria-labelledby="webp-to-png-tab">
+        <div class="card card-shadow mb-4">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-image me-2"></i>Convertir WEBP a PNG</h5>
+
+            <div class="upload-zone" id="webpToPngZone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p class="mb-1"><strong>Arrastra archivos WEBP aquí o haz clic</strong></p>
+              <p style="font-size: 12px; color: #999;">Solo archivos WEBP (máx. 10MB por imagen)</p>
+            </div>
+
+            <input type="file" id="webpToPngInput" class="file-input" multiple accept=".webp,image/webp">
+
+            <div class="action-buttons">
+              <button id="selectWebpToPngBtn" class="btn btn-primary">
+                <i class="fa-solid fa-folder-open me-2"></i>Seleccionar WEBP
+              </button>
+              <button id="convertWebpToPngBtn" class="btn btn-success" disabled>
+                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Convertir a PNG
+              </button>
+            </div>
+
+            <div id="webpToPngProgress" style="display: none; margin-top: 30px;"></div>
+            <div id="webpToPngResults" style="display: none; margin-top: 30px;"></div>
+            <div id="webpToPngList" style="margin-top: 30px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JPG/PNG to WEBP Tab -->
+      <div class="tab-pane fade" id="to-webp-panel" role="tabpanel" aria-labelledby="to-webp-tab">
+        <div class="card card-shadow mb-4">
+          <div class="card-body">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-image me-2"></i>Convertir JPG/PNG a WEBP</h5>
+
+            <div class="upload-zone" id="toWebpZone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p class="mb-1"><strong>Arrastra imágenes JPG/PNG aquí o haz clic</strong></p>
+              <p style="font-size: 12px; color: #999;">Formatos: JPG, JPEG, PNG (máx. 10MB por imagen)</p>
+            </div>
+
+            <input type="file" id="toWebpInput" class="file-input" multiple accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+
+            <div class="action-buttons">
+              <button id="selectToWebpBtn" class="btn btn-primary">
+                <i class="fa-solid fa-folder-open me-2"></i>Seleccionar Imágenes
+              </button>
+              <button id="convertToWebpBtn" class="btn btn-success" disabled>
+                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Convertir a WEBP
+              </button>
+            </div>
+
+            <div id="toWebpProgress" style="display: none; margin-top: 30px;"></div>
+            <div id="toWebpResults" style="display: none; margin-top: 30px;"></div>
+            <div id="toWebpList" style="margin-top: 30px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadZone = document.getElementById('uploadZone');
+    const selectFilesBtn = document.getElementById('selectFilesBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const progressSection = document.getElementById('progressSection');
+    const progressContainer = document.getElementById('progressContainer');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const metadataContainer = document.getElementById('metadataContainer');
+    const totalImagesSpan = document.getElementById('totalImages');
+    const downloadMetadataBtn = document.getElementById('downloadMetadataBtn');
+
+    let selectedFiles = [];
+
+    // File selection
+    selectFilesBtn.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', (e) => {
+      selectedFiles = Array.from(e.target.files);
+      updateUploadState();
+    });
+
+    // Drag and drop
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      selectedFiles = Array.from(e.dataTransfer.files);
+      fileInput.files = e.dataTransfer.files;
+      updateUploadState();
+    });
+
+    function updateUploadState() {
+      analyzeBtn.disabled = selectedFiles.length === 0;
+      if (selectedFiles.length > 0) {
+        uploadZone.style.borderColor = '#4caf50';
+        uploadZone.style.background = '#f1f8e9';
+      } else {
+        uploadZone.style.borderColor = '#1976d2';
+        uploadZone.style.background = '#f5f9ff';
+      }
+    }
+
+    clearBtn.addEventListener('click', () => {
+      selectedFiles = [];
+      fileInput.value = '';
+      updateUploadState();
+      progressSection.style.display = 'none';
+      resultsSection.style.display = 'none';
+    });
+
+    analyzeBtn.addEventListener('click', async () => {
+      if (selectedFiles.length === 0) return;
+
+      progressSection.style.display = 'block';
+      resultsSection.style.display = 'none';
+      progressContainer.innerHTML = '';
+      analyzeBtn.disabled = true;
+
+      const formData = new FormData();
+      selectedFiles.forEach(file => formData.append('images', file));
+
+      // Show progress for each file
+      selectedFiles.forEach((file, index) => {
+        const progressItem = document.createElement('div');
+        progressItem.className = 'progress-item processing';
+        progressItem.id = `progress-${index}`;
+        progressItem.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+              <div style="font-weight: 600; font-size: 13px;">${file.name}</div>
+              <div style="font-size: 12px; color: #999; margin-top: 3px;">Analizando...</div>
+            </div>
+            <div class="spinner-border spinner-border-sm" role="status" style="width: 20px; height: 20px;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill"></div>
+          </div>
+        `;
+        progressContainer.appendChild(progressItem);
+      });
+
+      try {
+        const response = await fetch('/api/admin/tools/analyze', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        progressSection.style.display = 'none';
+        resultsSection.style.display = 'block';
+        resultsContainer.innerHTML = '';
+
+        data.results.forEach((result, index) => {
+          const resultItem = document.createElement('div');
+          
+          if (result.success) {
+            resultItem.className = 'progress-item success';
+            resultItem.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: #2e7d32;">${result.originalName}</div>
+                  <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    <strong>Título SEO:</strong> ${result.title}<br>
+                    <strong>Descripción:</strong> ${result.description}
+                  </div>
+                  <div style="font-size: 11px; color: #999; margin-top: 5px;">Nuevo nombre: ${result.newName}</div>
+                </div>
+                <i class="fa-solid fa-check-circle" style="color: #4caf50; font-size: 20px;"></i>
+              </div>
+            `;
+          } else {
+            resultItem.className = 'progress-item error';
+            resultItem.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: #c62828;">${result.originalName}</div>
+                  <div style="font-size: 12px; color: #d32f2f; margin-top: 5px;">Error: ${result.error}</div>
+                </div>
+                <i class="fa-solid fa-circle-xmark" style="color: #f44336; font-size: 20px;"></i>
+              </div>
+            `;
+          }
+          
+          resultsContainer.appendChild(resultItem);
+        });
+
+        // Reload metadata after successful upload
+        setTimeout(() => {
+          loadMetadata();
+        }, 500);
+
+        selectedFiles = [];
+        fileInput.value = '';
+        updateUploadState();
+        analyzeBtn.disabled = false;
+      } catch (error) {
+        resultsSection.style.display = 'block';
+        resultsContainer.innerHTML = `
+          <div class="progress-item error">
+            <i class="fa-solid fa-circle-xmark me-2" style="color: #f44336;"></i>
+            Error: ${error.message}
+          </div>
+        `;
+        analyzeBtn.disabled = false;
+      }
+    });
+
+    // Load metadata
+    async function loadMetadata() {
+      try {
+        const response = await fetch('/api/admin/tools/metadata');
+        const metadata = await response.json();
+        
+        totalImagesSpan.textContent = metadata.length;
+        metadataContainer.innerHTML = '';
+
+        if (metadata.length === 0) {
+          metadataContainer.innerHTML = '<p style="grid-column: 1/-1; color: #999; text-align: center;">No hay imágenes analizadas aún</p>';
+          return;
+        }
+
+        metadata.reverse().forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'metadata-card';
+          card.innerHTML = `
+            <div class="metadata-card-title">${item.title}</div>
+            <div class="metadata-card-desc">${item.description}</div>
+            <div style="font-size: 11px; color: #999; margin-bottom: 10px;">
+              📄 ${item.name}<br>
+              📅 ${new Date(item.uploadedAt).toLocaleDateString('es-ES')}
+            </div>
+            <div class="metadata-card-actions">
+              <a href="${item.url}" target="_blank" class="btn btn-icon-small btn-outline-primary" title="Ver imagen">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+              <a href="/api/admin/tools/image/${encodeURIComponent(item.name)}/download" class="btn btn-icon-small btn-outline-success" title="Descargar imagen">
+                <i class="fa-solid fa-download"></i>
+              </a>
+              <button class="btn btn-icon-small btn-outline-danger" onclick="deleteImage(${item.id})" title="Eliminar">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          `;
+          metadataContainer.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error loading metadata:', error);
+      }
+    }
+
+    async function deleteImage(id) {
+      if (!confirm('¿Está seguro de que desea eliminar esta imagen?')) return;
+
+      try {
+        const response = await fetch(`/api/admin/tools/image/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          loadMetadata();
+        } else {
+          alert('Error al eliminar la imagen');
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+        alert('Error al eliminar la imagen');
+      }
+    }
+
+    async function deleteAllMetadata() {
+      const count = totalImagesSpan.textContent;
+      if (!confirm(`¿Está seguro de que desea eliminar todas las ${count} imágenes analizadas? Esta acción no se puede deshacer.`)) return;
+
+      try {
+        // Get all metadata first to get their IDs
+        const response = await fetch('/api/admin/tools/metadata');
+        const metadata = await response.json();
+
+        if (metadata.length === 0) {
+          alert('No hay imágenes para eliminar');
+          return;
+        }
+
+        // Delete each image
+        for (const item of metadata) {
+          await fetch(`/api/admin/tools/image/${item.id}`, {
+            method: 'DELETE'
+          });
+        }
+
+        loadMetadata();
+        alert(`Se eliminaron ${metadata.length} imagen(s) correctamente`);
+      } catch (error) {
+        console.error('Error deleting all metadata:', error);
+        alert('Error al eliminar las imágenes');
+      }
+    }
+
+    downloadMetadataBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/admin/tools/metadata/download');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'imagenes.json';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Error downloading metadata:', error);
+        alert('Error al descargar los metadatos');
+      }
+    });
+
+    document.getElementById('downloadAnalyzedZipBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/admin/tools/images/download-zip');
+
+        if (!response.ok) {
+          alert('Error al descargar el archivo ZIP');
+          return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().toISOString().split('T')[0];
+        a.download = `imagenes-analizadas-${timestamp}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Error downloading ZIP:', error);
+        alert('Error al descargar el archivo ZIP');
+      }
+    });
+
+    document.getElementById('deleteAllMetadataBtn').addEventListener('click', deleteAllMetadata);
+
+    // Load metadata on page load
+    loadMetadata();
+
+    // ==================== IMAGE CONVERSION TOOLS ====================
+
+    // WEBP to PNG conversion
+    const webpToPngInput = document.getElementById('webpToPngInput');
+    const webpToPngZone = document.getElementById('webpToPngZone');
+    const selectWebpToPngBtn = document.getElementById('selectWebpToPngBtn');
+    const convertWebpToPngBtn = document.getElementById('convertWebpToPngBtn');
+    const webpToPngProgress = document.getElementById('webpToPngProgress');
+    const webpToPngResults = document.getElementById('webpToPngResults');
+    const webpToPngList = document.getElementById('webpToPngList');
+
+    let webpToPngFiles = [];
+
+    selectWebpToPngBtn.addEventListener('click', () => webpToPngInput.click());
+
+    webpToPngInput.addEventListener('change', (e) => {
+      webpToPngFiles = Array.from(e.target.files);
+      convertWebpToPngBtn.disabled = webpToPngFiles.length === 0;
+      updateZoneStyle(webpToPngZone, webpToPngFiles.length > 0);
+    });
+
+    webpToPngZone.addEventListener('click', () => webpToPngInput.click());
+    webpToPngZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      webpToPngZone.classList.add('dragover');
+    });
+    webpToPngZone.addEventListener('dragleave', () => {
+      webpToPngZone.classList.remove('dragover');
+    });
+    webpToPngZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      webpToPngZone.classList.remove('dragover');
+      webpToPngFiles = Array.from(e.dataTransfer.files);
+      webpToPngInput.files = e.dataTransfer.files;
+      convertWebpToPngBtn.disabled = webpToPngFiles.length === 0;
+      updateZoneStyle(webpToPngZone, webpToPngFiles.length > 0);
+    });
+
+    convertWebpToPngBtn.addEventListener('click', async () => {
+      await convertImages('webp-to-png', webpToPngFiles, webpToPngProgress, webpToPngResults);
+      loadConvertedImages('webp-to-png', webpToPngList);
+    });
+
+    // JPG/PNG to WEBP conversion
+    const toWebpInput = document.getElementById('toWebpInput');
+    const toWebpZone = document.getElementById('toWebpZone');
+    const selectToWebpBtn = document.getElementById('selectToWebpBtn');
+    const convertToWebpBtn = document.getElementById('convertToWebpBtn');
+    const toWebpProgress = document.getElementById('toWebpProgress');
+    const toWebpResults = document.getElementById('toWebpResults');
+    const toWebpList = document.getElementById('toWebpList');
+
+    let toWebpFiles = [];
+
+    selectToWebpBtn.addEventListener('click', () => toWebpInput.click());
+
+    toWebpInput.addEventListener('change', (e) => {
+      toWebpFiles = Array.from(e.target.files);
+      convertToWebpBtn.disabled = toWebpFiles.length === 0;
+      updateZoneStyle(toWebpZone, toWebpFiles.length > 0);
+    });
+
+    toWebpZone.addEventListener('click', () => toWebpInput.click());
+    toWebpZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      toWebpZone.classList.add('dragover');
+    });
+    toWebpZone.addEventListener('dragleave', () => {
+      toWebpZone.classList.remove('dragover');
+    });
+    toWebpZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      toWebpZone.classList.remove('dragover');
+      toWebpFiles = Array.from(e.dataTransfer.files);
+      toWebpInput.files = e.dataTransfer.files;
+      convertToWebpBtn.disabled = toWebpFiles.length === 0;
+      updateZoneStyle(toWebpZone, toWebpFiles.length > 0);
+    });
+
+    convertToWebpBtn.addEventListener('click', async () => {
+      await convertImages('to-webp', toWebpFiles, toWebpProgress, toWebpResults);
+      loadConvertedImages('to-webp', toWebpList);
+    });
+
+    function updateZoneStyle(zone, hasFiles) {
+      if (hasFiles) {
+        zone.style.borderColor = '#4caf50';
+        zone.style.background = '#f1f8e9';
+      } else {
+        zone.style.borderColor = '#1976d2';
+        zone.style.background = '#f5f9ff';
+      }
+    }
+
+    async function convertImages(type, files, progressEl, resultsEl) {
+      if (files.length === 0) return;
+
+      progressEl.style.display = 'block';
+      resultsEl.style.display = 'none';
+      progressEl.innerHTML = '';
+
+      const formData = new FormData();
+      files.forEach(file => formData.append('images', file));
+
+      const endpoint = type === 'webp-to-png' ? '/api/admin/tools/convert/webp-to-png' : '/api/admin/tools/convert/to-webp';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        progressEl.style.display = 'none';
+        resultsEl.style.display = 'block';
+        resultsEl.innerHTML = '';
+
+        data.results.forEach(result => {
+          const resultItem = document.createElement('div');
+
+          if (result.success) {
+            resultItem.className = 'progress-item success';
+            resultItem.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: #2e7d32;">${result.originalName}</div>
+                  <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    Nuevo nombre: <strong>${result.newName}</strong>
+                  </div>
+                </div>
+                <div>
+                  <a href="${result.url}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver imagen">
+                    <i class="fa-solid fa-eye me-1"></i>Ver
+                  </a>
+                  <i class="fa-solid fa-check-circle" style="color: #4caf50; font-size: 20px; margin-left: 10px;"></i>
+                </div>
+              </div>
+            `;
+          } else {
+            resultItem.className = 'progress-item error';
+            resultItem.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: #c62828;">${result.originalName}</div>
+                  <div style="font-size: 12px; color: #d32f2f; margin-top: 5px;">Error: ${result.error}</div>
+                </div>
+                <i class="fa-solid fa-circle-xmark" style="color: #f44336; font-size: 20px;"></i>
+              </div>
+            `;
+          }
+
+          resultsEl.appendChild(resultItem);
+        });
+      } catch (error) {
+        resultsEl.style.display = 'block';
+        resultsEl.innerHTML = `
+          <div class="progress-item error">
+            <i class="fa-solid fa-circle-xmark me-2" style="color: #f44336;"></i>
+            Error: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    async function loadConvertedImages(type, container) {
+      try {
+        const response = await fetch(`/api/admin/tools/converted/${type}`);
+        const data = await response.json();
+
+        container.innerHTML = '';
+
+        if (data.count === 0) {
+          container.innerHTML = '<p style="color: #999; text-align: center;">No hay imágenes convertidas aún</p>';
+          return;
+        }
+
+        const headerDiv = document.createElement('div');
+        headerDiv.style.display = 'flex';
+        headerDiv.style.justifyContent = 'space-between';
+        headerDiv.style.alignItems = 'center';
+        headerDiv.style.marginBottom = '20px';
+        headerDiv.innerHTML = `
+          <div style="font-weight: 600; font-size: 14px;">Total: ${data.count} imagen(s)</div>
+          <button onclick="downloadConvertedImagesZip('${type}')" class="btn btn-sm btn-success">
+            <i class="fa-solid fa-download me-2"></i>Descargar ZIP
+          </button>
+        `;
+        container.appendChild(headerDiv);
+
+        const grid = document.createElement('div');
+        grid.className = 'metadata-grid';
+        grid.style.marginTop = '20px';
+
+        data.images.forEach(image => {
+          const card = document.createElement('div');
+          card.className = 'metadata-card';
+          card.innerHTML = `
+            <div class="metadata-card-title">${image.name}</div>
+            <div style="font-size: 11px; color: #999; margin-bottom: 10px;">
+              📄 ${(image.size / 1024).toFixed(2)} KB<br>
+              📅 ${new Date(image.createdAt).toLocaleDateString('es-ES')}
+            </div>
+            <div class="metadata-card-actions">
+              <a href="${image.url}" target="_blank" class="btn btn-icon-small btn-outline-primary" title="Ver imagen">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+              <a href="${image.url}" download="${image.name}" class="btn btn-icon-small btn-outline-success" title="Descargar imagen">
+                <i class="fa-solid fa-download"></i>
+              </a>
+              <button class="btn btn-icon-small btn-outline-danger" onclick="deleteConvertedImage('${type}', '${image.name}')" title="Eliminar">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        container.appendChild(grid);
+      } catch (error) {
+        console.error('Error loading converted images:', error);
+      }
+    }
+
+    async function deleteConvertedImage(type, filename) {
+      if (!confirm('¿Está seguro de que desea eliminar esta imagen?')) return;
+
+      try {
+        const response = await fetch(`/api/admin/tools/converted/${type}/${encodeURIComponent(filename)}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          const listEl = type === 'webp-to-png' ? webpToPngList : toWebpList;
+          loadConvertedImages(type, listEl);
+        } else {
+          alert('Error al eliminar la imagen');
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+        alert('Error al eliminar la imagen');
+      }
+    }
+
+    async function downloadConvertedImagesZip(type) {
+      try {
+        const response = await fetch(`/api/admin/tools/converted/${type}/download-zip`);
+
+        if (!response.ok) {
+          alert('Error al descargar el archivo ZIP');
+          return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().toISOString().split('T')[0];
+        const typeLabel = type === 'webp-to-png' ? 'WEBP-a-PNG' : 'a-WEBP';
+        a.download = `convertidas-${typeLabel}-${timestamp}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Error downloading ZIP:', error);
+        alert('Error al descargar el archivo ZIP');
+      }
+    }
+
+    // Load converted images on page load
+    loadConvertedImages('webp-to-png', webpToPngList);
+    loadConvertedImages('to-webp', toWebpList);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -42,7 +42,7 @@ async function geocodeAddress(street, city, country, state = null) {
     // Add user-agent to comply with Nominatim ToS
     const options = {
       headers: {
-        'User-Agent': 'WebLocalDesigners-Geocoder/1.0 (admin@weblocaldesigners.com)',
+        'User-Agent': 'LeadOps-Geocoder/1.0 (admin@example.com)',
         'Accept-Language': 'es',
       },
     };

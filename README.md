@@ -1,8 +1,18 @@
-# WLD Leads Dashboard Demo
+# LeadOps Leads Dashboard Demo
 
 Demo publica de un dashboard para prospeccion comercial, gestion de leads y seguimiento de oportunidades locales.
 
-Este repositorio esta preparado para GitHub y Vercel. Mantiene la estructura completa de una aplicacion Express/EJS real (`controllers`, `models`, `middleware`, `services`, `scripts`, migraciones y vistas), pero la ejecucion publica esta aislada y funciona solo con mock data en memoria.
+Este repositorio es una demo publica y anonimizada de una aplicacion que tiene una version real en produccion para cliente. La version productiva trabaja con base de datos MySQL, sesiones persistentes e integraciones externas; esta version publica esta preparada para mostrar el producto y su arquitectura sin exponer datos, credenciales ni infraestructura privada.
+
+Mantiene la estructura completa de una aplicacion Express/EJS real (`controllers`, `models`, `middleware`, `services`, `scripts`, migraciones y vistas), pero la ejecucion publica esta aislada y funciona solo con mock data en memoria.
+
+## For reviewers
+
+**What it does:** LeadOps is a production-style CRM/prospecting dashboard for finding local businesses, turning discovered places into leads, assigning follow-ups, tracking funnel stages, and reviewing sales performance.
+
+**My role:** I designed and built the full-stack Express/EJS application structure, including auth/roles, lead and place workflows, admin panels, stats, funnel flows, and a safe public demo layer for Vercel.
+
+**Hardest technical decision:** preserving the real production-like project structure while making the public demo run only on mock data, with disabled DB adapters and no secrets, so reviewers can inspect the architecture without requiring MySQL or exposing client data.
 
 ## Que muestra
 
@@ -27,6 +37,14 @@ La demo no conecta con una base de datos y no necesita credenciales externas.
 - La estructura real se conserva como referencia tecnica, pero no se ejecuta en Vercel.
 
 La implementacion real del producto esta pensada para MySQL, sesiones persistentes, servicios externos y migraciones. En este repo publico esa parte se conserva como arquitectura visible, no como runtime activo.
+
+## Recorrido sugerido
+
+1. Abre `/places` para ver negocios detectados con filtros.
+2. Convierte un place en lead.
+3. Abre `/leads` para gestionar estado, asignacion y acciones.
+4. Abre `/stats` para revisar rendimiento comercial y funnel.
+5. Abre `/admin/strategies` para ver la configuracion de mensajes.
 
 ## Stack
 
@@ -96,6 +114,7 @@ Vercel enviara todas las rutas a `api/index.js` mediante [`vercel.json`](vercel.
 - [API demo](docs/API.md)
 - [Despliegue en Vercel](docs/VERCEL_DEPLOY.md)
 - [Seguridad y publicacion](docs/SECURITY.md)
+- [Nota para reviewers](docs/REVIEWER_NOTE.md)
 
 Tambien se conservan documentos operativos del proyecto original:
 
@@ -113,4 +132,3 @@ Este repositorio no debe contener `.env`, sesiones, claves API, credenciales MyS
 ## Licencia
 
 Demo tecnica para presentacion del producto. Define una licencia antes de permitir reutilizacion publica del codigo.
-# leads_demo

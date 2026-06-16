@@ -162,7 +162,7 @@ Object.entries(pageViews).forEach(([route, view]) => {
     if (route === '/leads') return next();
     if (route === '/stats') return next();
     if (route === '/admin/subdomains') {
-      return res.render(view, { session: req.session, domain: 'weblocaldesigners.es' });
+      return res.render(view, { session: req.session, domain: 'demo-leads.example' });
     }
     res.render(view, { session: req.session });
   });
@@ -417,11 +417,11 @@ router.delete('/api/admin/users/:userId', (req, res) => {
 });
 
 router.get('/api/admin/subdomains', (_req, res) => res.json({ ok: true, records: [
-  { name: 'demo-clinica.weblocaldesigners.es', content: '192.0.2.10', ttl: 1, proxied: true },
-  { name: 'demo-fitness.weblocaldesigners.es', content: '192.0.2.11', ttl: 1, proxied: true },
+  { name: 'demo-clinica.demo-leads.example', content: '192.0.2.10', ttl: 1, proxied: true },
+  { name: 'demo-fitness.demo-leads.example', content: '192.0.2.11', ttl: 1, proxied: true },
 ] }));
 router.post('/api/admin/subdomains', (req, res) => res.json({ ok: true, record: {
-  name: `${req.body.subdomain}.weblocaldesigners.es`,
+  name: `${req.body.subdomain}.demo-leads.example`,
   content: '192.0.2.99',
   ttl: 1,
   proxied: true,
@@ -552,7 +552,7 @@ router.get('/whatsapp/messages/:lead_id', (req, res) => res.json({
 router.get('/whatsapp/status', (_req, res) => res.json({ ok: true, connected: false, status: 'demo_mock', demo: true }));
 router.post('/whatsapp/disconnect', (_req, res) => res.json({ ok: true, demo: true }));
 router.get('/whatsapp/templates', (_req, res) => res.json({ ok: true, templates: [
-  { id: 1, name: 'Primer contacto demo', content: 'Hola, soy del equipo WLD...' },
+  { id: 1, name: 'Primer contacto demo', content: 'Hola, soy del equipo LeadOps...' },
 ] }));
 router.post('/whatsapp/templates', (_req, res) => res.json({ ok: true, id: 99, demo: true }));
 router.delete('/whatsapp/templates/:id', (_req, res) => res.json({ ok: true, demo: true }));

@@ -2,23 +2,23 @@
 
 ## Paso 1: Copiar archivo .service
 
-Copia el contenido de `wld-dashboard.service` a:
+Copia el contenido de `leads-dashboard.service` a:
 
 ```bash
-sudo nano /etc/systemd/system/wld-dashboard.service
+sudo nano /etc/systemd/system/leads-dashboard.service
 ```
 
 O directamente:
 
 ```bash
-sudo cp /ruta/al/proyecto/dashboard/wld-dashboard.service /etc/systemd/system/
+sudo cp /ruta/al/proyecto/dashboard/leads-dashboard.service /etc/systemd/system/
 ```
 
 ## Paso 2: Editar archivo .service
 
 **IMPORTANTE:** Edita estos valores en el archivo `.service`:
 
-1. **WorkingDirectory**: Cambia `/home/your-user/wld-dashboard/dashboard/server` por la ruta real
+1. **WorkingDirectory**: Cambia `/home/your-user/leads-dashboard/dashboard/server` por la ruta real
    ```
    WorkingDirectory=/home/tu-usuario/ruta-al-proyecto/dashboard/server
    ```
@@ -41,47 +41,47 @@ sudo systemctl daemon-reload
 ## Paso 4: Habilitar el servicio
 
 ```bash
-sudo systemctl enable wld-dashboard.service
+sudo systemctl enable leads-dashboard.service
 ```
 
 ## Paso 5: Iniciar el servicio
 
 ```bash
-sudo systemctl start wld-dashboard.service
+sudo systemctl start leads-dashboard.service
 ```
 
 ## Verificar estado
 
 ```bash
-sudo systemctl status wld-dashboard.service
+sudo systemctl status leads-dashboard.service
 ```
 
 Ver logs en tiempo real:
 
 ```bash
-sudo journalctl -u wld-dashboard.service -f
+sudo journalctl -u leads-dashboard.service -f
 ```
 
 ## Comandos útiles
 
 **Detener servicio:**
 ```bash
-sudo systemctl stop wld-dashboard.service
+sudo systemctl stop leads-dashboard.service
 ```
 
 **Reiniciar servicio:**
 ```bash
-sudo systemctl restart wld-dashboard.service
+sudo systemctl restart leads-dashboard.service
 ```
 
 **Ver últimos 100 logs:**
 ```bash
-sudo journalctl -u wld-dashboard.service -n 100
+sudo journalctl -u leads-dashboard.service -n 100
 ```
 
 **Ver logs de error:**
 ```bash
-sudo journalctl -u wld-dashboard.service -p err
+sudo journalctl -u leads-dashboard.service -p err
 ```
 
 ## Estructura de archivo .service
@@ -110,16 +110,16 @@ NODE_ENV=production          → Modo producción
 PORT=7090                    → Puerto 7090
 MYSQL_USER=tu_usuario_mysql  → Usuario BD (producción)
 MYSQL_PASSWORD=tu_password_mysql → Contraseña BD
-MYSQL_DATABASE=wld_leads     → Nombre base de datos
+MYSQL_DATABASE=leads_demo     → Nombre base de datos
 MYSQL_SOCKET=/var/run/mysqld/mysqld.sock → Socket MySQL
 ```
 
 ## Troubleshooting
 
-### Error: "Failed to start wld-dashboard.service"
+### Error: "Failed to start leads-dashboard.service"
 
 ```bash
-sudo journalctl -u wld-dashboard.service -p err
+sudo journalctl -u leads-dashboard.service -p err
 ```
 
 Revisa si:
@@ -147,7 +147,7 @@ Cambia `PORT=7090` en el archivo `.service` por otro puerto disponible
 
 1. Comprueba el estado del servicio:
    ```bash
-   sudo systemctl status wld-dashboard.service
+   sudo systemctl status leads-dashboard.service
    ```
 
 2. Verifica que escucha en puerto 7090:
@@ -159,5 +159,5 @@ Cambia `PORT=7090` en el archivo `.service` por otro puerto disponible
 
 4. Revisa logs si hay problemas:
    ```bash
-   sudo journalctl -u wld-dashboard.service -f
+   sudo journalctl -u leads-dashboard.service -f
    ```

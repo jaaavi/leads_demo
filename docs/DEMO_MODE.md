@@ -2,6 +2,8 @@
 
 La demo esta disenada para poder publicarse sin base de datos, sin secretos y sin servicios externos.
 
+Es una version publica y anonimizada de una aplicacion que tiene una version real en produccion para cliente. El objetivo de esta carpeta no es simular que Vercel esta conectado a produccion, sino mostrar la interfaz, los flujos y la arquitectura sin exponer datos privados.
+
 ## Datos
 
 Los datos estan en:

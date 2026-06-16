@@ -12,7 +12,7 @@ MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_USER=root
 MYSQL_PASSWORD=
-MYSQL_DATABASE=wld_leads
+MYSQL_DATABASE=leads_demo
 MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
 ```
 
@@ -28,18 +28,18 @@ MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_USER=tu_usuario_mysql
 MYSQL_PASSWORD=tu_password_mysql
-MYSQL_DATABASE=wld_leads
+MYSQL_DATABASE=leads_demo
 MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
 ```
 
 **Opción 2: systemd (recomendado para Linux)**
 
-Todo está en `wld-dashboard.service`. Solo necesitas:
+Todo está en `leads-dashboard.service`. Solo necesitas:
 
 ```bash
-sudo cp wld-dashboard.service /etc/systemd/system/
+sudo cp leads-dashboard.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl start wld-dashboard.service
+sudo systemctl start leads-dashboard.service
 ```
 
 ## Variables Disponibles
@@ -53,7 +53,7 @@ sudo systemctl start wld-dashboard.service
 | `MYSQL_PORT` | 3306 | 3306 | Puerto MySQL |
 | `MYSQL_USER` | root | tu_usuario_mysql | Usuario BD |
 | `MYSQL_PASSWORD` | (vacío) | tu_password_mysql | Contraseña BD |
-| `MYSQL_DATABASE` | wld_leads | wld_leads | Base de datos |
+| `MYSQL_DATABASE` | leads_demo | leads_demo | Base de datos |
 | `MYSQL_SOCKET` | /var/run/mysqld/mysqld.sock | /var/run/mysqld/mysqld.sock | Socket MySQL |
 
 ## Cómo usar
@@ -70,11 +70,11 @@ sudo systemctl start wld-dashboard.service
 
 ### Producción Linux (systemd)
 
-1. Edita `/etc/systemd/system/wld-dashboard.service`
+1. Edita `/etc/systemd/system/leads-dashboard.service`
 2. Actualiza las variables de entorno
 3. Ejecuta:
    ```bash
-   sudo systemctl restart wld-dashboard.service
+   sudo systemctl restart leads-dashboard.service
    ```
 
 ## Socket MySQL en Linux

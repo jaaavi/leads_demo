@@ -1,8 +1,8 @@
 const axios = require('axios');
 
 const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
-const DOMAIN = process.env.CF_DOMAIN || 'weblocaldesigners.es';
-const DEFAULT_A_IP = process.env.CF_DEFAULT_A_IP || '212.107.17.128';
+const DOMAIN = process.env.CF_DOMAIN || 'demo-leads.example';
+const DEFAULT_A_IP = process.env.CF_DEFAULT_A_IP || '192.0.2.10';
 const DEFAULT_PROXIED = false; // DNS only
 const DEFAULT_TTL = 1; // auto
 

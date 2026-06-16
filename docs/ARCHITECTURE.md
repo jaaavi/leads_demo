@@ -2,6 +2,8 @@
 
 Este repositorio conserva la forma de la aplicacion real, pero ejecuta una capa demo aislada.
 
+La aplicacion original tiene una version productiva para cliente. Esta demo publica mantiene su arquitectura para revision tecnica, pero reemplaza el runtime productivo por datos mock y stubs de base de datos.
+
 ## Runtime demo
 
 El runtime activo en local y Vercel es:

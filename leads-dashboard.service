@@ -1,12 +1,12 @@
 [Unit]
-Description=WLD Dashboard Service
+Description=LeadOps Dashboard Service
 After=network.target mysql.service
 Wants=mysql.service
 
 [Service]
 Type=simple
 User=www-data
-WorkingDirectory=/home/your-user/wld-dashboard/dashboard/server
+WorkingDirectory=/home/your-user/leads-dashboard/dashboard/server
 ExecStart=/usr/bin/node app.js
 Restart=always
 RestartSec=10
@@ -20,7 +20,7 @@ Environment="MYSQL_HOST=localhost"
 Environment="MYSQL_PORT=3306"
 Environment="MYSQL_USER=tu_usuario_mysql"
 Environment="MYSQL_PASSWORD=tu_password_mysql"
-Environment="MYSQL_DATABASE=wld_leads"
+Environment="MYSQL_DATABASE=leads_demo"
 Environment="MYSQL_SOCKET=/var/run/mysqld/mysqld.sock"
 Environment="SESSION_SECRET=your-super-secure-random-key-here-min-32-chars"
 

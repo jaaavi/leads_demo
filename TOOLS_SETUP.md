@@ -28,7 +28,7 @@ Para que la herramienta funcione, necesitas configurar tu clave de API de OpenAI
 Configura la variable `OPENAI_API_KEY` en tu archivo `.env`:
 
 ```
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 Opcionalmente, puedes especificar el modelo de OpenAI (por defecto es gpt-4):

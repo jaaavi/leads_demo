@@ -1,43 +1,43 @@
-# Modo Demo
+# Demo Mode
 
-La demo esta disenada para poder publicarse sin base de datos, sin secretos y sin servicios externos.
+The demo is designed to be published without a database, secrets, or external services.
 
-Es una version publica y anonimizada de una aplicacion que tiene una version real en produccion para cliente. El objetivo de esta carpeta no es simular que Vercel esta conectado a produccion, sino mostrar la interfaz, los flujos y la arquitectura sin exponer datos privados.
+It is a public, anonymized version of an application that has a real production deployment for a client. The goal of this folder is not to pretend that Vercel is connected to production. The goal is to show the interface, workflows, and architecture without exposing private data.
 
-## Datos
+## Data
 
-Los datos estan en:
+All demo data lives in:
 
 ```text
 db/demoData.js
 ```
 
-Incluyen:
+It includes:
 
-- Usuarios demo.
+- Demo users.
 - Places.
 - Leads.
 - Jobs.
-- Acciones de leads.
-- Mensajes simulados de WhatsApp.
-- Estado de funnel.
+- Lead actions.
+- Simulated WhatsApp messages.
+- Funnel state.
 
-Los cambios hechos desde la interfaz se guardan en memoria mientras el proceso esta vivo. En Vercel, al tratarse de funciones serverless, esos cambios no deben considerarse persistentes.
+Changes made from the UI are stored in memory while the process is alive. On Vercel, because serverless functions are ephemeral, those changes should not be treated as persistent.
 
-## Sesion
+## Session
 
-La demo crea automaticamente una sesion si no existe:
+The demo automatically creates a session when none exists:
 
-- Usuario por defecto: `demo_admin`
-- Rol por defecto: `admin`
+- Default user: `demo_admin`
+- Default role: `admin`
 
-En el login se puede usar `demo_comercial` para simular un usuario `comercial_pro`.
+The login form can also accept `demo_comercial` to simulate a `comercial_pro` user.
 
-La password no se valida porque no existe una tabla real de usuarios en la demo.
+Passwords are not validated because the demo does not have a real users table.
 
-## Rutas
+## Routes
 
-La demo mantiene endpoints compatibles con la interfaz:
+The demo keeps the main endpoints expected by the UI:
 
 - `/places`
 - `/leads`
@@ -49,17 +49,17 @@ La demo mantiene endpoints compatibles con la interfaz:
 - `/admin/subdomains`
 - `/admin/tools`
 
-Las operaciones de escritura modifican arrays en memoria o devuelven respuestas simuladas.
+Write operations either mutate in-memory arrays or return simulated responses.
 
-## Servicios externos
+## External Services
 
-No se ejecutan:
+The demo does not run:
 
 - MySQL
 - WhatsApp/Baileys
 - OpenAI
 - Cloudflare
-- Scheduler
-- Migraciones
+- Scheduler jobs
+- Migrations
 
-Los archivos de esos servicios se conservan como referencia de arquitectura.
+Files for those services are kept as architecture references only.

@@ -1,6 +1,6 @@
-# API Demo
+# Demo API
 
-La API demo responde los endpoints principales que usa la interfaz. Los datos vienen de `db/demoData.js`.
+The demo API responds to the main endpoints used by the UI. Data comes from `db/demoData.js`.
 
 ## Places
 
@@ -17,7 +17,7 @@ POST /places/bulk/create-leads-assign
 POST /places/bulk/delete
 ```
 
-Filtros soportados en `GET /places`:
+Supported filters in `GET /places`:
 
 - `page`
 - `pageSize`
@@ -48,7 +48,7 @@ POST /leads/generate
 POST /leads/:id/send-to-places
 ```
 
-Filtros soportados en `GET /leads`:
+Supported filters in `GET /leads`:
 
 - `page`
 - `pageSize`
@@ -64,7 +64,7 @@ Filtros soportados en `GET /leads`:
 - `funnel_phase`
 - `jobId`
 
-## Estadisticas
+## Stats
 
 ```http
 GET /stats
@@ -94,7 +94,7 @@ DELETE /api/admin/strategies/:id
 POST /api/admin/strategies/:id/activate
 ```
 
-## WhatsApp simulado
+## Simulated WhatsApp
 
 ```http
 GET /whatsapp/qr
@@ -104,4 +104,4 @@ POST /whatsapp/send-message
 POST /whatsapp/disconnect
 ```
 
-Las respuestas son simuladas y no envian mensajes reales.
+Responses are simulated and do not send real messages.

@@ -1,46 +1,46 @@
-# Despliegue en Vercel
+# Vercel Deployment
 
-## Requisitos
+## Requirements
 
-- Node.js 20 o superior.
-- Repositorio Git con esta carpeta como raiz.
-- Cuenta de Vercel.
+- Node.js 20 or higher.
+- A Git repository with this folder as the project root.
+- A Vercel account.
 
-## Configuracion recomendada
+## Recommended Settings
 
-En Vercel:
+In Vercel:
 
 ```text
 Framework Preset: Other
-Build Command:    vacio
-Output Directory: vacio
+Build Command:    leave empty
+Output Directory: leave empty
 Install Command:  npm install
 ```
 
-No hace falta configurar base de datos.
+No database setup is required.
 
-## Variables de entorno
+## Environment Variables
 
-Opcional:
+Optional:
 
 ```text
-SESSION_SECRET=<cadena-aleatoria-larga>
+SESSION_SECRET=<long-random-string>
 ```
 
-La demo tiene un valor por defecto, pero en un despliegue publico es mejor definir uno propio.
+The demo has a fallback value, but a public deployment should define its own session secret.
 
-No configures:
+Do not configure:
 
 - `MYSQL_*`
 - `OPENAI_API_KEY`
 - `CF_API_TOKEN`
-- Credenciales de WhatsApp
+- WhatsApp credentials
 
-No se usan en el runtime demo.
+They are not used by the demo runtime.
 
-## Rutas
+## Routing
 
-`vercel.json` envia todo a la funcion serverless:
+`vercel.json` sends every request to the serverless function:
 
 ```json
 {
@@ -54,26 +54,26 @@ No se usan en el runtime demo.
 }
 ```
 
-La funcion esta en:
+The function entrypoint is:
 
 ```text
 api/index.js
 ```
 
-## Prueba local antes de publicar
+## Test Locally Before Publishing
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre:
+Open:
 
 ```text
 http://localhost:4080
 ```
 
-Tambien puedes verificar algunos endpoints:
+You can also verify key endpoints:
 
 ```bash
 curl -H "Accept: application/json" http://localhost:4080/places

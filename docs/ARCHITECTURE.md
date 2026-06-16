@@ -1,12 +1,12 @@
-# Arquitectura
+# Architecture
 
-Este repositorio conserva la forma de la aplicacion real, pero ejecuta una capa demo aislada.
+This repository keeps the shape of the real application while running an isolated demo layer.
 
-La aplicacion original tiene una version productiva para cliente. Esta demo publica mantiene su arquitectura para revision tecnica, pero reemplaza el runtime productivo por datos mock y stubs de base de datos.
+The original application has a production version for a client. This public demo preserves the architecture for technical review, but replaces the production runtime with mock data and database stubs.
 
-## Runtime demo
+## Demo Runtime
 
-El runtime activo en local y Vercel es:
+The active runtime for local development and Vercel is:
 
 ```text
 server.js
@@ -15,36 +15,36 @@ server.js
         └── db/demoData.js
 ```
 
-`api/index.js` configura Express, sesiones en memoria, EJS y las vistas. Despues monta `routes/demo.js`, que responde las pantallas y APIs con datos mock.
+`api/index.js` configures Express, in-memory sessions, EJS, static files, and views. It then mounts `routes/demo.js`, which serves both pages and JSON APIs using mock data.
 
-## Runtime real conservado
+## Preserved Production-Style Runtime
 
-La estructura real se mantiene para mostrar como estaria organizada la implementacion productiva:
+The production-style structure is kept to show how the real implementation is organized:
 
-- `routes/index.js`: rutas reales de la aplicacion.
-- `controllers/`: logica HTTP por dominio.
-- `models/`: acceso a datos MySQL.
-- `middleware/`: autenticacion, roles y permisos.
-- `services/`: integraciones externas.
-- `db/migrations/` y `migrations/`: cambios de esquema.
-- `scripts/`: tareas operativas y migraciones auxiliares.
+- `routes/index.js`: real application routes.
+- `controllers/`: HTTP logic grouped by domain.
+- `models/`: MySQL-oriented data access.
+- `middleware/`: authentication, roles, and access control.
+- `services/`: external integrations.
+- `db/migrations/` and `migrations/`: schema changes.
+- `scripts/`: operational scripts and migration helpers.
 
-En esta demo publica esos archivos no son el camino de ejecucion principal.
+Those files are intentionally not the main runtime path for the public Vercel demo.
 
-## Base de datos
+## Database
 
-La demo no usa base de datos.
+The demo does not use a database.
 
-`db/config.js` y `db/localdata.js` exportan stubs que lanzan un error claro si algun modulo intenta abrir MySQL:
+`db/config.js` and `db/localdata.js` export stubs that throw a clear error if any module tries to open a MySQL connection:
 
 ```text
 Demo repository: MySQL is intentionally disabled.
 ```
 
-Esto evita conexiones accidentales en Vercel o en una maquina local.
+This prevents accidental database access in Vercel or local demo runs.
 
-## Vistas
+## Views
 
-Las vistas EJS se mantienen completas en `views/`. La demo reutiliza esas vistas para que la interfaz sea representativa del producto real.
+The full EJS view layer is preserved in `views/`. The demo reuses those views so the UI remains representative of the real product.
 
-El navbar muestra una etiqueta de demo para dejar claro que los datos son mock.
+The navbar includes a demo badge to make it clear that the visible data is mock data.

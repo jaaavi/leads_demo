@@ -1,163 +1,148 @@
-# 🐧 Instalación en Linux con systemd
+# Linux Installation with systemd
 
-## Paso 1: Copiar archivo .service
+This document describes a private production-style Linux deployment. It is not required for the public Vercel demo.
 
-Copia el contenido de `leads-dashboard.service` a:
+The public demo runs through `api/index.js` on Vercel and uses mock data only.
+
+## 1. Copy the Service File
+
+Copy `leads-dashboard.service` to systemd:
+
+```bash
+sudo cp leads-dashboard.service /etc/systemd/system/
+```
+
+Or create it manually:
 
 ```bash
 sudo nano /etc/systemd/system/leads-dashboard.service
 ```
 
-O directamente:
+## 2. Edit the Service File
 
-```bash
-sudo cp /ruta/al/proyecto/dashboard/leads-dashboard.service /etc/systemd/system/
-```
+Update these values:
 
-## Paso 2: Editar archivo .service
+1. `WorkingDirectory`
 
-**IMPORTANTE:** Edita estos valores en el archivo `.service`:
-
-1. **WorkingDirectory**: Cambia `/home/your-user/leads-dashboard/dashboard/server` por la ruta real
-   ```
-   WorkingDirectory=/home/tu-usuario/ruta-al-proyecto/dashboard/server
+   ```ini
+   WorkingDirectory=/home/your-user/path-to-project/server
    ```
 
-2. **SESSION_SECRET**: Cambia el valor por una cadena aleatoria de al menos 32 caracteres
+2. `SESSION_SECRET`
+
+   Generate a secure value:
+
    ```bash
    openssl rand -base64 32
    ```
 
-3. **Verificar rutas:**
-   - La ruta del socket MySQL: `/var/run/mysqld/mysqld.sock` (o la que uses en tu servidor)
-   - Usuario Node.js: `www-data` (o el usuario que uses)
+3. MySQL configuration
 
-## Paso 3: Recargar systemd
+   Make sure the socket path, database, user, and password match your private server.
+
+## 3. Reload systemd
 
 ```bash
 sudo systemctl daemon-reload
 ```
 
-## Paso 4: Habilitar el servicio
+## 4. Enable the Service
 
 ```bash
 sudo systemctl enable leads-dashboard.service
 ```
 
-## Paso 5: Iniciar el servicio
+## 5. Start the Service
 
 ```bash
 sudo systemctl start leads-dashboard.service
 ```
 
-## Verificar estado
+## Check Status
 
 ```bash
 sudo systemctl status leads-dashboard.service
 ```
 
-Ver logs en tiempo real:
+Follow logs:
 
 ```bash
 sudo journalctl -u leads-dashboard.service -f
 ```
 
-## Comandos útiles
+## Useful Commands
 
-**Detener servicio:**
+Stop:
+
 ```bash
 sudo systemctl stop leads-dashboard.service
 ```
 
-**Reiniciar servicio:**
+Restart:
+
 ```bash
 sudo systemctl restart leads-dashboard.service
 ```
 
-**Ver últimos 100 logs:**
+Last 100 logs:
+
 ```bash
 sudo journalctl -u leads-dashboard.service -n 100
 ```
 
-**Ver logs de error:**
+Errors only:
+
 ```bash
 sudo journalctl -u leads-dashboard.service -p err
 ```
 
-## Estructura de archivo .service
+## Service File Notes
 
-El archivo contiene:
+Important fields:
 
-```
-[Unit]           → Información del servicio
-[Service]        → Cómo ejecutar el servicio
-[Install]        → Cómo instalarlo en el sistema
-```
-
-### Componentes importantes:
-
-- **After=network.target mysql.service** → Espera a que MySQL esté activo
-- **User=www-data** → Usuario que ejecuta el servicio
-- **ExecStart=/usr/bin/node app.js** → Comando a ejecutar
-- **Restart=always** → Reinicia automáticamente si falla
-- **RestartSec=10** → Espera 10s antes de reintentar
-- **Environment** → Variables de entorno (credenciales de BD, puerto, etc.)
-
-## Variables de entorno en el .service
-
-```
-NODE_ENV=production          → Modo producción
-PORT=7090                    → Puerto 7090
-MYSQL_USER=tu_usuario_mysql  → Usuario BD (producción)
-MYSQL_PASSWORD=tu_password_mysql → Contraseña BD
-MYSQL_DATABASE=leads_demo     → Nombre base de datos
-MYSQL_SOCKET=/var/run/mysqld/mysqld.sock → Socket MySQL
-```
+- `After=network.target mysql.service`: waits for network and MySQL.
+- `User=www-data`: user running the process.
+- `ExecStart=/usr/bin/node app.js`: command to run.
+- `Restart=always`: restarts automatically after crashes.
+- `Environment`: runtime configuration.
 
 ## Troubleshooting
 
-### Error: "Failed to start leads-dashboard.service"
+### `Failed to start leads-dashboard.service`
+
+Check logs:
 
 ```bash
 sudo journalctl -u leads-dashboard.service -p err
 ```
 
-Revisa si:
-- La ruta en `WorkingDirectory` existe
-- Node.js está instalado en `/usr/bin/node`
-- MySQL está corriendo
-- El usuario `www-data` tiene permisos
+Common causes:
 
-### Error: "Cannot find module"
+- `WorkingDirectory` does not exist.
+- Node.js is not installed at `/usr/bin/node`.
+- MySQL is not running.
+- The service user lacks permissions.
 
-Asegúrate de haber corrido `npm install` en `dashboard/server`
+### `Cannot find module`
 
-### Error de conexión a MySQL
+Run:
 
-Verifica:
-- Usuario y contraseña correctos
-- Base de datos existe
-- Socket path correcto: `ls -la /var/run/mysqld/mysqld.sock`
+```bash
+npm install
+```
 
-### Puerto 7090 ya en uso
+### MySQL connection error
 
-Cambia `PORT=7090` en el archivo `.service` por otro puerto disponible
+Check:
 
-## Verificar que todo funciona
+- MySQL user and password.
+- Database existence.
+- Socket path:
 
-1. Comprueba el estado del servicio:
-   ```bash
-   sudo systemctl status leads-dashboard.service
-   ```
+```bash
+ls -la /var/run/mysqld/mysqld.sock
+```
 
-2. Verifica que escucha en puerto 7090:
-   ```bash
-   sudo netstat -tlnp | grep 7090
-   ```
+### Port already in use
 
-3. Accede a http://your-server:7090/login
-
-4. Revisa logs si hay problemas:
-   ```bash
-   sudo journalctl -u leads-dashboard.service -f
-   ```
+Change `PORT` in the service file.

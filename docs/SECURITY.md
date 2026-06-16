@@ -1,44 +1,44 @@
-# Seguridad
+# Security
 
-Este repositorio esta pensado para publicarse como demo.
+This repository is intended to be published as a public demo.
 
-## Que no debe subirse
+## Do Not Commit
 
 - `.env`
 - `.env.local`
-- Claves API
-- Credenciales MySQL
-- Sesiones de WhatsApp
-- Datos reales de clientes
-- Dumps de base de datos
-- Capturas con informacion sensible
+- API keys
+- MySQL credentials
+- WhatsApp sessions
+- Real client data
+- Database dumps
+- Screenshots containing sensitive information
 
-`.gitignore` ya excluye `.env`, `.env.*`, `.vercel/` y `node_modules/`.
+`.gitignore` already excludes `.env`, `.env.*`, `.vercel/`, and `node_modules/`.
 
-`.env.example` si debe subirse porque es una plantilla saneada.
+`.env.example` should be committed because it is a sanitized template.
 
-## Base de datos desactivada
+## Database Disabled
 
-`db/config.js` y `db/localdata.js` no crean conexiones. Si algun modulo intenta usar MySQL, se lanza un error explicito.
+`db/config.js` and `db/localdata.js` do not create connections. If any module tries to use MySQL, a clear error is thrown.
 
-Esto protege el despliegue publico frente a conexiones accidentales.
+This protects the public deployment from accidental database access.
 
-## Servicios externos
+## External Services
 
-Los archivos de servicios (`services/`) se conservan para mostrar arquitectura, pero el runtime demo no los importa.
+Service files in `services/` are kept to show architecture, but the demo runtime does not import them.
 
-No configures claves de:
+Do not configure keys for:
 
 - OpenAI
 - Cloudflare
 - WhatsApp
 - Google APIs
 
-## Datos mock
+## Mock Data
 
-Los datos mock estan en `db/demoData.js`. Antes de publicar, revisa que no contengan nombres, telefonos, emails o URLs reales de clientes.
+Mock data lives in `db/demoData.js`. Before publishing, make sure it does not contain real client names, phone numbers, emails, or URLs.
 
-## Checklist antes de hacer push
+## Pre-Push Checklist
 
 ```bash
 git status --short
@@ -46,4 +46,4 @@ npm audit --omit=dev
 rg -n "sk-|BEGIN PRIVATE|MYSQL_PASSWORD=|CF_API_TOKEN=|OPENAI_API_KEY=" . -g "!node_modules" -g "!package-lock.json"
 ```
 
-Los resultados deben contener solo placeholders o documentacion saneada.
+The results should contain only sanitized placeholders or documentation.

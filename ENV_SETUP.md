@@ -1,107 +1,72 @@
-# ⚙️ Configuración de Variables de Entorno
+# Environment Setup
 
-## Desarrollo Local
+This repository is a public demo. It does not require MySQL or external API credentials to run the Vercel demo.
 
-**Archivo: `dashboard/.env`**
+The environment variables below describe the production-style application that this demo is based on. Use them only for a private real deployment, not for the public demo.
+
+## Public Demo
+
+For local demo usage:
 
 ```env
 NODE_ENV=development
 PORT=4080
-SESSION_SECRET=desarrollo-secret-key-cambiar-en-produccion
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=
-MYSQL_DATABASE=leads_demo
-MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
+SESSION_SECRET=change-this-local-demo-secret
 ```
 
-## Producción Linux
+Run:
 
-**Opción 1: Archivo `.env`**
+```bash
+npm install
+npm run dev
+```
+
+## Vercel Demo
+
+Optional Vercel variable:
+
+```env
+SESSION_SECRET=your-long-random-session-secret
+```
+
+Do not configure MySQL, OpenAI, Cloudflare, or WhatsApp credentials for the public demo.
+
+## Production-Style Private Deployment
+
+Example `.env` for a private deployment:
 
 ```env
 NODE_ENV=production
 PORT=7090
-SESSION_SECRET=tu-clave-aleatoria-de-32-caracteres-minimo
+SESSION_SECRET=replace-with-a-random-32-plus-character-secret
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
-MYSQL_USER=tu_usuario_mysql
-MYSQL_PASSWORD=tu_password_mysql
+MYSQL_USER=your_mysql_user
+MYSQL_PASSWORD=your_mysql_password
 MYSQL_DATABASE=leads_demo
 MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
 ```
 
-**Opción 2: systemd (recomendado para Linux)**
+## Variables
 
-Todo está en `leads-dashboard.service`. Solo necesitas:
+| Variable | Demo | Private production | Description |
+| --- | --- | --- | --- |
+| `NODE_ENV` | `development` | `production` | Runtime mode |
+| `PORT` | `4080` | `7090` | HTTP port |
+| `SESSION_SECRET` | local secret | 32+ random chars | Session signing secret |
+| `MYSQL_HOST` | not used | host/IP | MySQL host |
+| `MYSQL_PORT` | not used | `3306` | MySQL port |
+| `MYSQL_USER` | not used | private user | MySQL user |
+| `MYSQL_PASSWORD` | not used | private password | MySQL password |
+| `MYSQL_DATABASE` | not used | database name | MySQL database |
+| `MYSQL_SOCKET` | not used | optional socket path | MySQL socket |
 
-```bash
-sudo cp leads-dashboard.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl start leads-dashboard.service
-```
-
-## Variables Disponibles
-
-| Variable | Desarrollo | Producción | Descripción |
-|----------|------------|-----------|-------------|
-| `NODE_ENV` | development | production | Modo de ejecución |
-| `PORT` | 4080 | 7090 | Puerto del servidor |
-| `SESSION_SECRET` | cambiar-esto | 32+ caracteres aleatorios | Clave de sesión |
-| `MYSQL_HOST` | localhost | localhost o IP | Host MySQL |
-| `MYSQL_PORT` | 3306 | 3306 | Puerto MySQL |
-| `MYSQL_USER` | root | tu_usuario_mysql | Usuario BD |
-| `MYSQL_PASSWORD` | (vacío) | tu_password_mysql | Contraseña BD |
-| `MYSQL_DATABASE` | leads_demo | leads_demo | Base de datos |
-| `MYSQL_SOCKET` | /var/run/mysqld/mysqld.sock | /var/run/mysqld/mysqld.sock | Socket MySQL |
-
-## Cómo usar
-
-### Desarrollo (Windows/Mac/Linux local)
-
-1. Crea `dashboard/.env` desde `.env.example`
-2. Configura tus valores locales
-3. Ejecuta:
-   ```bash
-   cd dashboard/server
-   npm start
-   ```
-
-### Producción Linux (systemd)
-
-1. Edita `/etc/systemd/system/leads-dashboard.service`
-2. Actualiza las variables de entorno
-3. Ejecuta:
-   ```bash
-   sudo systemctl restart leads-dashboard.service
-   ```
-
-## Socket MySQL en Linux
-
-La ruta del socket puede variar:
-
-- **Ubuntu/Debian:** `/var/run/mysqld/mysqld.sock`
-- **CentOS/RHEL:** `/var/lib/mysql/mysql.sock`
-- **Otra:** Verifica con: `sudo find / -name mysqld.sock 2>/dev/null`
-
-## Generar SESSION_SECRET seguro
+## Generating a Session Secret
 
 ```bash
 openssl rand -base64 32
 ```
 
-Copia el resultado a `SESSION_SECRET` en tu archivo `.env`
+## Important
 
-## Archivo .env en .gitignore
-
-✅ Ya está configurado en `dashboard/.gitignore`
-
-Nunca commits `.env` a git (contiene contraseñas)
-
-## Verificar configuración
-
-```bash
-# Ver variables que Node.js está usando
-node -e "console.log(process.env)" | grep MYSQL
-```
+Never commit `.env` files. `.env.example` is sanitized and safe to commit.

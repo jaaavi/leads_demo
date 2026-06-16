@@ -1,12 +1,12 @@
 # LeadOps Leads Dashboard Demo
 
-Demo publica de un dashboard para prospeccion comercial, gestion de leads y seguimiento de oportunidades locales.
+Public demo of a lead prospecting dashboard for discovering local business opportunities, converting them into leads, and managing commercial follow-up.
 
-Este repositorio es una demo publica y anonimizada de una aplicacion que tiene una version real en produccion para cliente. La version productiva trabaja con base de datos MySQL, sesiones persistentes e integraciones externas; esta version publica esta preparada para mostrar el producto y su arquitectura sin exponer datos, credenciales ni infraestructura privada.
+This repository is an anonymized public demo of an application that has a real production version for a client. The production version is designed around MySQL, persistent sessions, external integrations, and private operational data. This public version is designed to show the product and its architecture without exposing client data, credentials, or private infrastructure.
 
-Mantiene la estructura completa de una aplicacion Express/EJS real (`controllers`, `models`, `middleware`, `services`, `scripts`, migraciones y vistas), pero la ejecucion publica esta aislada y funciona solo con mock data en memoria.
+The repository keeps the full shape of a real Express/EJS application (`controllers`, `models`, `middleware`, `services`, `scripts`, migrations, and views), while the public runtime is isolated and powered only by in-memory mock data.
 
-## For reviewers
+## For Reviewers
 
 **What it does:** LeadOps is a production-style CRM/prospecting dashboard for finding local businesses, turning discovered places into leads, assigning follow-ups, tracking funnel stages, and reviewing sales performance.
 
@@ -14,37 +14,37 @@ Mantiene la estructura completa de una aplicacion Express/EJS real (`controllers
 
 **Hardest technical decision:** preserving the real production-like project structure while making the public demo run only on mock data, with disabled DB adapters and no secrets, so reviewers can inspect the architecture without requiring MySQL or exposing client data.
 
-## Que muestra
+## What It Shows
 
-- Panel de busqueda y generacion de oportunidades.
-- Listado de places procedentes de busquedas tipo Google Maps.
-- Gestion de leads con filtros, asignacion, estados y acciones.
-- Estadisticas comerciales y funnel.
-- Calendario de seguimiento.
-- Panel de WhatsApp simulado.
-- Estrategias de mensajes.
-- Herramientas y pantallas de administracion.
-- Documentacion interna de roles y flujos.
+- Search and opportunity-generation dashboard.
+- Places discovered through Google Maps-style prospecting.
+- Lead management with filters, assignment, statuses, and action history.
+- Sales statistics and funnel reporting.
+- Follow-up calendar.
+- Simulated WhatsApp panel.
+- Message strategies.
+- Admin tools and administration screens.
+- Internal documentation for roles and workflows.
 
-## Demo segura
+## Safe Public Demo
 
-La demo no conecta con una base de datos y no necesita credenciales externas.
+The demo does not connect to a database and does not require external credentials.
 
-- Los datos salen de [`db/demoData.js`](db/demoData.js).
-- Las rutas que responde la demo estan en [`routes/demo.js`](routes/demo.js).
-- La entrada serverless de Vercel esta en [`api/index.js`](api/index.js).
-- `db/config.js` y `db/localdata.js` estan desactivados a proposito para impedir conexiones MySQL.
-- La estructura real se conserva como referencia tecnica, pero no se ejecuta en Vercel.
+- Mock data lives in [`db/demoData.js`](db/demoData.js).
+- Public demo routes live in [`routes/demo.js`](routes/demo.js).
+- The Vercel serverless entrypoint is [`api/index.js`](api/index.js).
+- `db/config.js` and `db/localdata.js` are intentionally disabled to prevent accidental MySQL connections.
+- The real application structure is preserved for technical review, but it is not the active Vercel runtime.
 
-La implementacion real del producto esta pensada para MySQL, sesiones persistentes, servicios externos y migraciones. En este repo publico esa parte se conserva como arquitectura visible, no como runtime activo.
+The real implementation is designed for MySQL, persistent sessions, external services, and migrations. In this public repository that production-oriented layer is kept as visible architecture, not as active runtime.
 
-## Recorrido sugerido
+## Suggested Walkthrough
 
-1. Abre `/places` para ver negocios detectados con filtros.
-2. Convierte un place en lead.
-3. Abre `/leads` para gestionar estado, asignacion y acciones.
-4. Abre `/stats` para revisar rendimiento comercial y funnel.
-5. Abre `/admin/strategies` para ver la configuracion de mensajes.
+1. Open `/places` to inspect discovered businesses and filters.
+2. Convert a place into a lead.
+3. Open `/leads` to manage status, assignment, and actions.
+4. Open `/stats` to review commercial performance and funnel data.
+5. Open `/admin/strategies` to inspect message strategy configuration.
 
 ## Stack
 
@@ -53,82 +53,82 @@ La implementacion real del producto esta pensada para MySQL, sesiones persistent
 - EJS
 - Bootstrap
 - Vercel Serverless Functions
-- Mock data en memoria
+- In-memory mock data
 
-## Estructura
+## Project Structure
 
 ```text
 .
-├── api/                  # Entrada serverless para Vercel
-├── controllers/          # Controladores de la implementacion real
-├── db/                   # Mock data, stubs de DB y migraciones reales
-├── middleware/           # Middleware de autenticacion/roles
-├── migrations/           # Migraciones SQL historicas
-├── models/               # Modelos de la implementacion real
-├── routes/               # Rutas reales y rutas demo
-├── scripts/              # Scripts operativos/migraciones
-├── server/               # Arranque local compatible con la demo
-├── services/             # Servicios externos de la implementacion real
-├── utils/                # Utilidades compartidas
-├── views/                # Vistas EJS
-├── vercel.json           # Rewrites para desplegar en Vercel
-└── docs/                 # Documentacion del repo demo
+├── api/                  # Vercel serverless entrypoint
+├── controllers/          # Controllers from the production-style implementation
+├── db/                   # Mock data, DB stubs, and real migrations
+├── middleware/           # Auth and role middleware
+├── migrations/           # Historical SQL migrations
+├── models/               # Data models from the production-style implementation
+├── routes/               # Real routes and demo routes
+├── scripts/              # Operational and migration scripts
+├── server/               # Local startup compatible with the demo
+├── services/             # External-service integrations from the real architecture
+├── utils/                # Shared utilities
+├── views/                # EJS views
+├── vercel.json           # Vercel rewrites
+└── docs/                 # Demo documentation
 ```
 
-## Ejecutar localmente
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre:
+Open:
 
 ```text
 http://localhost:4080
 ```
 
-La demo inicia sesion automaticamente como `demo_admin`. Tambien puedes enviar `demo_comercial` en el login para ver el rol comercial pro. La password no se valida porque no hay usuarios reales ni base de datos.
+The demo automatically creates a session as `demo_admin`. You can also submit `demo_comercial` in the login form to simulate a `comercial_pro` user. The password is not validated because there are no real users or database records in the public demo.
 
-## Desplegar en Vercel
+## Deploy to Vercel
 
-1. Sube esta carpeta como repositorio nuevo.
-2. Importa el repositorio en Vercel.
+1. Push this folder as a new repository.
+2. Import the repository in Vercel.
 3. Framework preset: `Other`.
-4. Build command: vacio.
-5. Output directory: vacio.
+4. Build command: leave empty.
+5. Output directory: leave empty.
 6. Install command: `npm install`.
 
-Opcional:
+Optional environment variable:
 
 ```text
-SESSION_SECRET=<cadena-aleatoria-larga>
+SESSION_SECRET=<long-random-string>
 ```
 
-Vercel enviara todas las rutas a `api/index.js` mediante [`vercel.json`](vercel.json).
+Vercel routes all requests to `api/index.js` through [`vercel.json`](vercel.json).
 
-## Documentacion
+## Documentation
 
-- [Arquitectura](docs/ARCHITECTURE.md)
-- [Modo demo y mock data](docs/DEMO_MODE.md)
-- [API demo](docs/API.md)
-- [Despliegue en Vercel](docs/VERCEL_DEPLOY.md)
-- [Seguridad y publicacion](docs/SECURITY.md)
-- [Nota para reviewers](docs/REVIEWER_NOTE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Demo mode and mock data](docs/DEMO_MODE.md)
+- [Demo API](docs/API.md)
+- [Vercel deployment](docs/VERCEL_DEPLOY.md)
+- [Security and publication checklist](docs/SECURITY.md)
+- [Reviewer note](docs/REVIEWER_NOTE.md)
 
-Tambien se conservan documentos operativos del proyecto original:
+Operational documents from the production-style project are also included:
 
-- [Autenticacion y roles](AUTH_README.md)
-- [Variables de entorno](ENV_SETUP.md)
-- [Instalacion Linux](INSTALL_LINUX.md)
-- [Herramientas](TOOLS_SETUP.md)
+- [Authentication and roles](AUTH_README.md)
+- [Environment setup](ENV_SETUP.md)
+- [Linux installation](INSTALL_LINUX.md)
+- [Tools setup](TOOLS_SETUP.md)
 
-## Notas para repositorio publico
+## Public Repository Notes
 
-Este repositorio no debe contener `.env`, sesiones, claves API, credenciales MySQL ni datos reales. El archivo `.env.example` es solo una plantilla saneada.
+This repository must not contain `.env` files, sessions, API keys, MySQL credentials, or real client data. `.env.example` is a sanitized template.
 
-`node_modules/` y `.vercel/` estan ignorados por Git.
+`node_modules/` and `.vercel/` are ignored by Git.
 
-## Licencia
+## License
 
-Demo tecnica para presentacion del producto. Define una licencia antes de permitir reutilizacion publica del codigo.
+Technical demo for product presentation. Define a license before allowing public reuse of the code.
